@@ -142,8 +142,46 @@ function deepClone(obj) {
    verbunden und freigegeben (`projektAktiv`), ist dessen Stand maßgeblich —
    dann wird gar nicht erst gefragt, sondern der Projektordner geladen (siehe
    Aufrufer); die Browser-Kopie wird erst verworfen, wenn das gelungen ist. */
-function recoveryBannerNoetig(fromLocalStorage, state, projektAktiv) {
-  return !!(fromLocalStorage && state && !projektAktiv);
+function recoveryBannerNoetig(fromLocalStorage, state, projektAktiv, freigabeFehlt) {
+  /* F-3101/#1175: Ordner bekannt, Freigabe offen (`isPermissionNeeded`, auch
+     „hängend“): `isActive()` ist false, aber das ist KEIN Standalone-Modus —
+     „Laden“ setzte die alte Kopie in den State des Projekt-Boards (ADR-0106).
+     Dann zeigt allein der Freigabe-Banner; die Kopie bleibt unangetastet. */
+  return !!(fromLocalStorage && state && !projektAktiv && !freigabeFehlt);
+}
+
+/* Karte #1170 / Verify V-2 (#1175): Ladeweg im Projekt-Modus, als Funktion
+   herausgelöst und damit testbar. Liefert der Ordner ein Board (Fold vor
+   Projektion), gilt es und die Browser-Kopie geht still weg; sonst Hinweis,
+   State unverändert, Kopie bleibt. */
+async function uebernehmeOrdnerStand(state) {
+  let ausOrdner = null;
+  try {
+    /* Kritik 20.11. K-2: dieselbe Quellenreihenfolge wie im Pfad
+       `!state && isActive` (F-795/#449) — auf einem migrierten Board ist
+       `fold(base + inbox)` die Wahrheit, die Projektion nur Abschrift.
+       Sonst wäre der Diff-Bezug (`markAdopted`) eine veraltete Projektion. */
+    if (await Sync.isMigrated()) {
+      const gefaltet = await Sync.projectorReconcile();
+      if (gefaltet?.board) ausOrdner = Storage.checkVersion(gefaltet);
+    }
+    if (!ausOrdner) {
+      const raw = await Sync.read();
+      if (raw && raw !== Sync.READ_ERROR) {
+        const syncData = StoragePlugin.getActivePlugin().parseAndMigrate(raw);
+        if (syncData?.board) ausOrdner = syncData;
+      }
+    }
+  } catch { ausOrdner = null; }
+  if (ausOrdner) {
+    State.set(ausOrdner);
+    State.markClean();
+    Sync.markAdopted(State.get());
+    if (state.board?.id) Storage.discardAutosave(state.board.id);
+  } else {
+    showRecoveryBanner(state);
+    State.markClean();
+  }
 }
 
 function showRecoveryBanner(autosaveState) {
@@ -2127,7 +2165,12 @@ EventBus.on('board:reset', async () => {
 
   if (!stateResolved) {
     const projektAktiv = Profile.has('feature.polling') && Sync.isActive();
-    if (recoveryBannerNoetig(fromLocalStorage, state, projektAktiv)) {
+    const freigabeFehlt = Profile.has('feature.polling') && Sync.isPermissionNeeded();
+    if (fromLocalStorage && state && freigabeFehlt && !projektAktiv) {
+      /* F-3101/#1175: nur der Freigabe-Banner (oben); Kopie weder zeigen noch
+         laden noch verwerfen noch als Bezug übernehmen. */
+      State.markClean();
+    } else if (recoveryBannerNoetig(fromLocalStorage, state, projektAktiv, freigabeFehlt)) {
       showRecoveryBanner(state);
       /* Recovery-Banner zeigt an — dirty bleibt false, User entscheidet selbst */
       State.markClean();
@@ -2139,33 +2182,7 @@ EventBus.on('board:reset', async () => {
          trägt. Nur wenn dort ein Board steht, gilt dieses und die Kopie geht
          still weg; sonst Hinweis, nichts geladen — und die Kopie bleibt
          erhalten (Kritik 20.11. K-6: sie kann der einzige Stand sein). */
-      let ausOrdner = null;
-      try {
-        /* Kritik 20.11. K-2: dieselbe Quellenreihenfolge wie im Pfad
-           `!state && isActive` (F-795/#449) — auf einem migrierten Board ist
-           `fold(base + inbox)` die Wahrheit, die Projektion nur Abschrift.
-           Sonst wäre der Diff-Bezug (`markAdopted`) eine veraltete Projektion. */
-        if (await Sync.isMigrated()) {
-          const gefaltet = await Sync.projectorReconcile();
-          if (gefaltet?.board) ausOrdner = Storage.checkVersion(gefaltet);
-        }
-        if (!ausOrdner) {
-          const raw = await Sync.read();
-          if (raw && raw !== Sync.READ_ERROR) {
-            const syncData = StoragePlugin.getActivePlugin().parseAndMigrate(raw);
-            if (syncData?.board) ausOrdner = syncData;
-          }
-        }
-      } catch { ausOrdner = null; }
-      if (ausOrdner) {
-        State.set(ausOrdner);
-        State.markClean();
-        Sync.markAdopted(State.get());
-        if (state.board?.id) Storage.discardAutosave(state.board.id);
-      } else {
-        showRecoveryBanner(state);
-        State.markClean();
-      }
+      await uebernehmeOrdnerStand(state);
     } else if (state) {
       /* Im Projekt-Modus: aboard-sync.json bevorzugen wenn neuer.
          F-428: entgatet — sonst zeigt das slim Template in claude-code den

@@ -203,6 +203,12 @@ In der Einzeldatei gibt es außerdem den Knopf **KI-Kontext** unten links im Ein
 
 Findet die Einzeldatei beim Öffnen ungespeicherte Änderungen aus der letzten Sitzung, bietet sie an, diese zu laden oder zu verwerfen.
 
+Manchmal liegt im Browser noch eine ältere Zwischenkopie, also ein Zwischenstand, den sich der Browser gemerkt hat. Was dann passiert, hängt davon ab, wie du arbeitest:
+
+- **Einzeldatei:** Beim Öffnen erscheint der Hinweis „Nicht gespeicherte Änderungen der letzten Session gefunden.“ mit den Knöpfen „Laden“ und „Verwerfen“.
+- **Mit verbundenem Projektordner:** Maßgeblich ist der Stand im Projektordner. Ist dort ein Board, verschwindet die alte Browser-Kopie still, ohne Meldung. Nur wenn die Projektdatei gerade nicht lesbar ist oder fehlt, erscheint der Hinweis „Der Projektordner konnte gerade nicht gelesen werden. Im Browser liegt noch eine ältere Zwischenkopie — sie bleibt erhalten; maßgeblich ist weiter der Projektordner.“ mit dem Knopf „Alles klar“.
+- **Projektordner bekannt, aber noch nicht freigegeben:** Dann erscheint nur der Hinweis zur Freigabe des Projektordners mit „Erlauben“. Die Browser-Kopie bleibt dabei unangetastet. Antwortet der Browser auf die Freigabe nicht, steht dort „Der Browser antwortet nicht auf die Freigabe des Projektordners. Wähle den Ordner bitte neu.“ mit dem Knopf „Ordner neu wählen“.
+
 Auf dem Server warnt aBoard, wenn jemand anderes das Board gleichzeitig geändert hat, und lässt dich wählen: eigene Version behalten oder die des Servers laden.
 
 ## Board in einem Ordner (Projekt-Modus)

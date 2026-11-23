@@ -203,6 +203,12 @@ In the single file there is also the **AI Context** button at the bottom left of
 
 If the single file finds unsaved changes from the last session when opening, it offers to load or discard them.
 
+Sometimes an older interim copy is still stored in the browser, that is, a working state the browser has remembered. What happens then depends on how you work:
+
+- **Single file:** When you open it, the notice "Unsaved changes from the last session found." appears, with the buttons "Load" and "Discard".
+- **With a connected project folder:** The project folder is authoritative. If a board is there, the old browser copy disappears silently, without a message. Only if the project file cannot be read at the moment or is missing does the notice appear: "The project folder could not be read just now. An older interim copy is still in the browser — it is kept; the project folder remains authoritative." with the button "Got it".
+- **Project folder known but not yet permitted:** Then only the notice about permission for the project folder appears, with "Allow". The browser copy is left untouched. If the browser does not answer the permission request, the notice reads "The browser does not answer the permission request for the project folder. Please choose the folder again." with the button "Choose folder again".
+
 On the server, aBoard warns if someone else has changed the board at the same time, and lets you choose: keep your own version or load the server's.
 
 ## Board in a folder (project mode)

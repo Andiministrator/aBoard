@@ -42,13 +42,17 @@ it('Entscheidung: Banner nur ohne aktiven Projektordner', () => {
 
 it('Ladepfad: aktiver Projektordner fragt nicht, Verzweigung nutzt recoveryBannerNoetig', () => {
   expect(quelle).toContain("const projektAktiv = Profile.has('feature.polling') && Sync.isActive();");
-  expect(quelle).toContain('if (recoveryBannerNoetig(fromLocalStorage, state, projektAktiv)) {');
+  expect(quelle).toContain('recoveryBannerNoetig(fromLocalStorage, state, projektAktiv, freigabeFehlt)');
   /* Eigener Zweig: die Browser-Kopie wird nur verworfen, wenn der Ordner ein
      Board lieferte; sonst Hinweis, nie State.set(state) oder persistGated(state). */
   const zweig = quelle.slice(quelle.indexOf('} else if (fromLocalStorage && state && projektAktiv) {'));
   const ende = zweig.indexOf('} else if (state) {');
   expect(ende).toBeGreaterThan(0);
-  const koerper = zweig.slice(0, ende);
+  expect(zweig.slice(0, ende)).toContain('await uebernehmeOrdnerStand(state);');
+  expect(zweig.slice(0, ende)).not.toContain('State.set(state)');
+  expect(zweig.slice(0, ende)).not.toContain('persistGated');
+  /* Der Körper (#1175 herausgelöst) wird in recovery-freigabe-3101.test.js als Verhalten geprüft. */
+  const koerper = schneide('async function uebernehmeOrdnerStand(', '\n}\n');
   expect(koerper).toContain('if (state.board?.id) Storage.discardAutosave(state.board.id);');
   expect(koerper).toContain('showRecoveryBanner(state);');
   /* K-2: auf migrierten Boards zuerst der Fold, nicht die Projektion. */
