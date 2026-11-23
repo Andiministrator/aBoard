@@ -309,6 +309,11 @@ function createProjectPlugin() {
       const restored = await Sync.tryRestoreHandle(boardId);
       if (!restored) return { ok: false, error: 'no-handle' };
 
+      /* F-3106 Verify B3: hängt die Freigabe, fragte requestPermission denselben stummen Handle. */
+      if (Sync.isFreigabeHaengend?.()) {
+        Sync.clearActiveHandle();
+        return { ok: false, error: 'permission-hangs' };
+      }
       if (Sync.isPermissionNeeded()) {
         const granted = await Sync.requestPermission();
         if (!granted) {

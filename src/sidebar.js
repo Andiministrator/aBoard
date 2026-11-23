@@ -440,7 +440,16 @@ async function openDocViewer(opts) {
     return;
   }
   /* Bestehenden Markdown-Renderer verwenden (ADR-0009/0010 — kein neues Surface) */
-  body.appendChild(Markdown.render(text));
+  body.appendChild(Markdown.render(ohneHtmlKommentare(text)));
+}
+
+/* F-3109 (Karte #1186): HTML-Kommentare blendet ein Markdown-Leser aus — hier vor allem die
+   Abzugs-Marken (`<!-- abzug:… -->`, ADR-0152) samt Inhalt der `abzug:nur`-Blöcke. Der Renderer
+   zeigt rohes HTML als Text, deshalb vorher entfernen; Code-Zäune bleiben unberührt. */
+export function ohneHtmlKommentare(text) {
+  return text.split(/(^ {0,3}(?:```|~~~)[\s\S]*?^ {0,3}(?:```|~~~)[^\n]*$)/m)
+    .map((teil, i) => (i % 2 ? teil : teil.replace(/^[ \t]*<!--[\s\S]*?-->[ \t]*\n?|<!--[\s\S]*?-->/gm, '')))
+    .join('');
 }
 
 function closeDocViewer() {

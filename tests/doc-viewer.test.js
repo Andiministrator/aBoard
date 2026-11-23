@@ -175,3 +175,28 @@ describeProjektor('buildDocEntriesSection', () => {
     expect(label.textContent).toBe('README')
   })
 })
+
+/* F-3109 (Karte #1186): Der Leser zeigte rohes HTML als Text — auch die Abzugs-Marken
+   (`<!-- abzug:… -->`, ADR-0152) samt Inhalt der `abzug:nur`-Blöcke. */
+describe('F-3109 — HTML-Kommentare im Dokumentationsleser', () => {
+  it('blendet Marken und nur-Blöcke aus, lässt Code-Zäune und den übrigen Text stehen', async () => {
+    const { ohneHtmlKommentare } = await import('../src/sidebar.js')
+    const text = [
+      'Vorher',
+      '<!-- abzug:aus -->',
+      'Intern',
+      '<!-- abzug:ein -->',
+      '<!-- abzug:nur',
+      'Nur öffentlich',
+      '-->',
+      'Mitten <!-- still --> im Satz',
+      '```',
+      '<!-- im Code bleibt -->',
+      '```',
+      'Nachher',
+    ].join('\n')
+    expect(ohneHtmlKommentare(text)).toBe([
+      'Vorher', 'Intern', 'Mitten  im Satz', '```', '<!-- im Code bleibt -->', '```', 'Nachher',
+    ].join('\n'))
+  })
+})

@@ -204,18 +204,26 @@ export const Renderer = (() => {
 
   /* ── Sprint-Meta-Sonderkarte (ADR-0036) ─────────────────────────── */
 
+  /* F-3110 (Karte #1190): Meta-Karten tragen ihren Titel fest auf Deutsch (model.js, beim Anlegen).
+     Angezeigt wird er in der Oberflächensprache — nur solange er der vorgegebene ist; die Daten
+     bleiben unverändert (Meta-Karten speichern ihren Titel nie zurück, ADR-0036). */
+  function metaTitel(card) {
+    const vorgabe = Model.META_TITEL?.[card.metaType];
+    return vorgabe && card.title === vorgabe ? I18n.t('meta.title.' + card.metaType) : card.title;
+  }
+
   function renderSprintMetaCard(card) {
     const cardEl = el('div', 'card card--sprint-meta');
     cardEl.dataset.id = card.id;
     cardEl.setAttribute('tabindex', '0');
     cardEl.setAttribute('role', 'button');
-    cardEl.setAttribute('aria-label', card.title);
+    cardEl.setAttribute('aria-label', metaTitel(card));
     cardEl.setAttribute('draggable', 'false');
 
     /* Titel (fest — kein Edit-Icon) */
     const title = el('div', 'card-title');
     const titleText = el('span', 'card-title-text');
-    titleText.textContent = card.title;
+    titleText.textContent = metaTitel(card);
     title.appendChild(titleText);
     cardEl.appendChild(title);
 

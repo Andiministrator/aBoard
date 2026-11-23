@@ -423,6 +423,21 @@ describe('Storage-Plugin — switchBoard(boardId)', () => {
     permSpy.mockRestore(); readSpy.mockRestore(); checkSpy.mockRestore()
   })
 
+  /* F-3106 Verify B3: hängt die Freigabe, fragt der Wechsel den stummen Handle nicht erneut. */
+  it('Project.switchBoard() liefert error=permission-hangs ohne requestPermission, wenn die Freigabe hängt', async () => {
+    vi.spyOn(Sync, 'stopPolling').mockImplementation(() => {})
+    const clearSpy = vi.spyOn(Sync, 'clearActiveHandle').mockImplementation(() => {})
+    vi.spyOn(Sync, 'tryRestoreHandle').mockResolvedValue(true)
+    vi.spyOn(Sync, 'isPermissionNeeded').mockReturnValue(true)
+    vi.spyOn(Sync, 'isFreigabeHaengend').mockReturnValue(true)
+    const reqSpy = vi.spyOn(Sync, 'requestPermission').mockResolvedValue(true)
+    const result = await __testing__.createProjectPlugin().switchBoard('b-4')
+    expect(result).toEqual({ ok: false, error: 'permission-hangs' })
+    expect(reqSpy).not.toHaveBeenCalled()
+    expect(clearSpy).toHaveBeenCalledTimes(2)
+    vi.restoreAllMocks()
+  })
+
   /* F-854 (Karte #488): Das Sentinel aus F-477 wird geprüft, nicht dem
      TypeError von `JSON.parse` überlassen. Vor dem Fix war das Ergebnis
      bit-identisch — `JSON.parse(Symbol)` wirft, der catch schluckt, `parsed`

@@ -1762,6 +1762,7 @@ EventBus.on('sync:switch-to-board', async ({ boardId }) => {
   if (!result.ok) {
     const key = result.error === 'no-handle'         ? 'sync.no-handle-for-board'
               : result.error === 'permission-denied' ? 'sync.permission-needed'
+              : result.error === 'permission-hangs'  ? 'sync.permission-hangs'
               /* F-854: transienter Lesefehler ist nicht "Datei kaputt" — der
                  Nutzer soll es erneut versuchen, nicht die Datei verdaechtigen. */
               : result.error === 'read-error'        ? 'sync.read-error'
@@ -1794,7 +1795,7 @@ EventBus.on('sync:switch-to-board', async ({ boardId }) => {
              nichts. Stattdessen den Nutzer zum Berechtigungs-Prompt führen
              (die Sidebar zeigt den Button, sobald neu gerendert wurde). */
           if (Sync.isPermissionNeeded()) {
-            showExportToast(I18n.t('sync.permission-needed'));
+            showExportToast(I18n.t(Sync.isFreigabeHaengend?.() ? 'sync.permission-hangs' : 'sync.permission-needed'));
           } else {
             /* F-464, zweiter Teil: `clearActiveHandle()` hat `activeBoardId`
                genullt, und `tryRestoreHandle()` OHNE Argument setzt sie nicht
@@ -2063,7 +2064,7 @@ EventBus.on('board:reset', async () => {
        ADR-0048 nutzt ihn ohnehin nicht primär); bei undefined schadet er nichts. */
     const restored = await Sync.init(onExternalUpdate, embeddedBoardId);
     if (restored && Sync.isPermissionNeeded()) {
-      showPermissionBanner();
+      showPermissionBanner(Sync.isFreigabeHaengend?.());
     } else if (restored && !state && Sync.isActive()) {
       /* F-357 (Sprint-41-Kritiker, Re-Install von 0d7cd40): state war null
          (embedded leer + kein localStorage), aber FSA-Handle existiert —
@@ -2564,18 +2565,31 @@ function showConflictBanner(onMine, onServer, text, mineLabel, serverLabel, deta
   document.body.prepend(banner);
 }
 
-function showPermissionBanner() {
+/* F-3106 (Karte #1179): `haengt` = Chrome hat die Rechteabfrage für den
+   gespeicherten Ordner nicht beantwortet. „Erlauben“ fragte denselben Handle
+   erneut und bliebe stumm; geholfen hat in der Diagnose nur das Neu-Wählen. */
+function showPermissionBanner(haengt = false) {
   const banner = document.createElement('div');
   banner.className = 'recovery-banner sync-permission-banner';
   const msg = document.createElement('span');
-  msg.textContent = I18n.t('sync.permission-needed');
+  msg.textContent = I18n.t(haengt ? 'sync.permission-hangs' : 'sync.permission-needed');
   const btn = document.createElement('button');
   btn.className = 'btn btn-primary';
-  btn.textContent = I18n.t('sync.grant-permission');
+  btn.textContent = I18n.t(haengt ? 'sync.pick-again' : 'sync.grant-permission');
   btn.addEventListener('click', async () => {
-    banner.remove();
-    EventBus.emit('sync:request-permission');
+    /* Verify B2: bei „neu wählen“ bleibt das Banner stehen, bis der Ordner wirklich verbunden ist —
+       ein abgebrochener Dialog oder ein zurückgenommener Wechsel ließ sonst keinen Weg zurück. */
+    if (!haengt) banner.remove();
+    EventBus.emit(haengt ? 'sync:pick-directory' : 'sync:request-permission');
   });
+  if (haengt) {
+    const weg = () => {
+      if (Sync.isPermissionNeeded()) return;
+      banner.remove();
+      EventBus.off('config:project-changed', weg);
+    };
+    EventBus.on('config:project-changed', weg);
+  }
   banner.appendChild(msg);
   banner.appendChild(btn);
   document.body.prepend(banner);

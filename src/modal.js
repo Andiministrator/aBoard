@@ -4,6 +4,7 @@ import { Markdown }           from './markdown.js';
 import { Config }             from './config.js';
 import { Profile }            from './profile.js';
 import { I18n }               from './i18n.js';
+import { Model }              from './model.js';
 import {
   trashIcon, boldIcon, italicIcon, codeIcon, headingIcon,
   listIcon, orderedListIcon, checklistIcon, linkIcon, quoteIcon,
@@ -3566,7 +3567,10 @@ export const Modal = (() => {
     }
 
     for (const id of Object.values(BERUEHRT_FELDER)) delete overlay.querySelector(id)?.dataset.beruehrt;
-    overlay.querySelector('#modal-title').value      = card.title;
+    /* F-3110: Meta-Karten-Titel in der Oberflächensprache (nur Anzeige, gespeichert wird er nie) */
+    overlay.querySelector('#modal-title').value      = card.kind === 'sprint-meta'
+      && card.title === Model.META_TITEL?.[card.metaType]
+      ? I18n.t('meta.title.' + card.metaType) : card.title;
     /* Verify V-2 (F-1947): wie complexity — „normal“, „P1“, „high“ aus Konsumenten-Boards. */
     /* Kritiker Sprint 88 (F-1963): `''` zeigt „mittel“ (vergleichsWert hält es beim
        Schliessen als unverändert), 0/false sind Fremdwerte — kein `||`. */

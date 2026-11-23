@@ -102,8 +102,21 @@ async function storeHandle(handle, arg) {
   await idbPut(keyFor(arg), handle);
 }
 
-async function loadHandle(arg) {
-  return await idbGet(keyFor(arg));
+/* F-3106 (Karte #1179): Frist für Browser-Aufrufe im Startpfad, die nie
+   antworten können. Liefert nach Ablauf FRIST_ABGELAUFEN statt zu hängen. */
+export const FREIGABE_FRIST_MS = 3000;
+/* Laden des Handles: länger als die Öffnungsfrist in idb.js (3 s), damit deren Fehler zuerst kommt;
+   danach greift sie auch für eine hängende Lese-Transaktion. */
+export const LADE_FRIST_MS = 6000;
+const FRIST_ABGELAUFEN = Symbol('frist-abgelaufen');
+function mitFrist(promise, ms = FREIGABE_FRIST_MS) {
+  let t;
+  const ablauf = new Promise(r => { t = setTimeout(() => r(FRIST_ABGELAUFEN), ms); });
+  return Promise.race([Promise.resolve(promise).finally(() => clearTimeout(t)), ablauf]);
+}
+
+async function loadHandle(arg, streng = false) {
+  return await idbGet(keyFor(arg), streng ? { streng: true } : undefined);
 }
 
 async function deleteHandle(arg) {
@@ -127,6 +140,7 @@ export const Sync = (() => {
   let activeBoardId  = null;       /* zu welchem Board gehört dirHandle */
   let pollTimer      = null;
   let lastHash       = '';
+  let freigabeHaengt = false;      /* F-3106: queryPermission hat nicht geantwortet */
   let pendingState   = null;       /* bei Modal-offen zwischengespeichert */
   let onUpdate       = null;       /* callback(state) wenn extern geändert */
   let permNeeded     = false;      /* true → Klick nötig zum Re-Autorisieren */
@@ -255,7 +269,9 @@ export const Sync = (() => {
         handle:     dirHandle,
         boardId:    activeBoardId,
         permNeeded,
-        stored:     await loadHandle().catch(() => null),
+        freigabeHaengt,
+        /* Verify B3: mit Frist; FRIST_ABGELAUFEN = Stand unbekannt, der Revert lässt IDB dann in Ruhe */
+        stored:     await mitFrist(loadHandle().catch(() => null)),
         /* Sprint-51-Kritiker (K1): Die erste Fassung hat diese Felder beim
            Revert auf null/'' gesetzt — mit der Begründung, sie gehörten zum
            zwischenzeitlich gewählten Verzeichnis. Das stimmt nicht: zwischen
@@ -293,7 +309,7 @@ export const Sync = (() => {
          andere file://-Kopie hat einen anderen pathname und überschreibt
          diesen Eintrag nicht mehr (F-246). */
       await storeHandle(h);
-      permNeeded = false;
+      permNeeded = false; freigabeHaengt = false;
       return h.name;
     } catch (e) {
       if (e.name === 'AbortError') return null;
@@ -328,6 +344,7 @@ export const Sync = (() => {
     dirHandle     = prev.handle;
     activeBoardId = prev.boardId;
     permNeeded    = prev.permNeeded;
+    freigabeHaengt = prev.freigabeHaengt;
     /* K1: exakt zurücklegen statt nullen — siehe Begründung in pickDirectory. */
     lastHash        = prev.lastHash;
     lastAdopted     = prev.lastAdopted;
@@ -338,7 +355,8 @@ export const Sync = (() => {
     _inboxOpCount   = prev.inboxOpCount;
 
     try {
-      if (prev.stored) await storeHandle(prev.stored);
+      if (prev.stored === FRIST_ABGELAUFEN) { /* Stand unbekannt — nichts überschreiben, nichts löschen */ }
+      else if (prev.stored) await storeHandle(prev.stored);
       else             await deleteHandle();
     } catch { /* IndexedDB unerreichbar → der In-Memory-Handle zählt */ }
     return isActive();
@@ -349,23 +367,46 @@ export const Sync = (() => {
      Legacy-Migration mehr — die alten `projectDir-<id>`-Einträge sind genau
      die geteilten/kollidierenden (F-246) und dürfen nicht adoptiert werden.
      Fehlt der Deployment-Eintrag → false → Nutzer wählt einmalig neu. */
+  /* F-3106 (Karte #1179): Chromium beantwortet `queryPermission` auf einem
+     gespeicherten Handle manchmal nie — der Start blieb dann still auf einer
+     leeren Seite stehen. Nach der Frist gilt der Handle als „Freigabe nötig“
+     (wie 'prompt', also kein Lesen, kein Schreiben, kein frisches Board) und
+     `freigabeHaengt` sagt dem Start, dass er „Ordner neu wählen“ anbieten soll:
+     Erlauben würde auf demselben hängenden Handle wieder nicht antworten. */
   async function tryRestoreHandle(arg) {
-    const h = await loadHandle(arg);
+    freigabeHaengt = false;
+    let h;
+    try { h = await mitFrist(loadHandle(arg, true), LADE_FRIST_MS); }
+    catch (e) { if (!e?.idbFrist) return false; h = FRIST_ABGELAUFEN; }
+    /* Verify B1: Antwortet schon IndexedDB nicht, ist unbekannt, ob ein Ordner gespeichert ist —
+       nicht „kein Handle“ melden (sonst still ein leeres Board), sondern wie unten
+       „Freigabe nötig, Ordner neu wählen“. Ohne Handle bleibt der Sync inaktiv. */
+    if (h === FRIST_ABGELAUFEN) {
+      dirHandle = null; permNeeded = true; freigabeHaengt = true;
+      return true;
+    }
     if (!h) return false;
     if (typeof arg === 'string' && !arg.startsWith('/')) activeBoardId = arg;
     try {
-      const perm = await h.queryPermission({ mode: 'readwrite' });
+      const perm = await mitFrist(h.queryPermission({ mode: 'readwrite' }));
       if (perm === 'granted') { dirHandle = h; permNeeded = false; return true; }
       if (perm === 'prompt')  { dirHandle = h; permNeeded = true;  return true; }
+      if (perm === FRIST_ABGELAUFEN) {
+        dirHandle = h; permNeeded = true; freigabeHaengt = true;
+        return true;
+      }
     } catch {}
     return false;
   }
+
+  function isFreigabeHaengend() { return freigabeHaengt; }
 
   async function requestPermission() {
     if (!dirHandle) return false;
     try {
       const perm = await dirHandle.requestPermission({ mode: 'readwrite' });
       permNeeded = perm !== 'granted';
+      if (!permNeeded) freigabeHaengt = false;
       return perm === 'granted';
     } catch { return false; }
   }
@@ -382,7 +423,7 @@ export const Sync = (() => {
     stopPolling();
     dirHandle = null;
     activeBoardId = null;
-    permNeeded = false;
+    permNeeded = false; freigabeHaengt = false;
     lastHash = '';
     /* ADR-0067: Projektor-Bezug + base-Cache gehören zum alten Board/Handle */
     lastAdopted = null;
@@ -1719,7 +1760,7 @@ export const Sync = (() => {
     _setOnUpdate(cb)  { onUpdate  = cb; },
     _reset() {
       dirHandle = null; activeBoardId = null; lastHash = '';
-      pendingState = null; onUpdate = null; permNeeded = false;
+      pendingState = null; onUpdate = null; permNeeded = false; freigabeHaengt = false;
       lastAdopted = null; baseSnapshot = null; baseSnapshotSig = null; _inboxOpCount = 0;
       _historyIds = null; _historyKey = '';            /* F-448 */
       _gemeldeteWaisen.clear();                        /* F-459 */
@@ -1746,7 +1787,7 @@ export const Sync = (() => {
 
   return {
     init, pickDirectory, revertPickedDirectory, commitPickedDirectory, pickLaeuft,
-    requestPermission, tryRestoreHandle,
+    requestPermission, tryRestoreHandle, isFreigabeHaengend,
     write, read, READ_ERROR: SYNC_READ_ERROR, markBaseline, startPolling, stopPolling, poll,
     persistGated,
     getInboxOpCount, getInboxBloatInfo, requestCompaction, haengeOpsAn,

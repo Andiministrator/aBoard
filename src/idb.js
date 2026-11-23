@@ -6,6 +6,11 @@
 const DB_NAME  = 'aboard-handles';
 const DB_STORE = 'handles';
 let dbPromise  = null;
+/* F-3106 (Karte #1179): Chromium beantwortet das Öffnen manchmal nie (gesehen
+   bei gespeicherten Handles, deren Rechte-Eintrag hängt). Ohne Frist hängt der
+   ganze Start; danach gilt das Öffnen als gescheitert und der nächste Aufruf
+   versucht es neu. */
+export const IDB_FRIST_MS = 3000;
 
 function openDB() {
   if (dbPromise) return dbPromise;
@@ -14,10 +19,22 @@ function openDB() {
      Verbindung hält (V-B). */
   let meine;
   meine = dbPromise = new Promise((resolve, reject) => {
+    let erledigt = false;
+    const frist = setTimeout(() => {
+      erledigt = true;
+      if (dbPromise === meine) dbPromise = null;
+      const e = new Error('IndexedDB antwortet nicht (Frist)');
+      e.idbFrist = true;
+      reject(e);
+    }, IDB_FRIST_MS);
     const req = indexedDB.open(DB_NAME, 1);
     req.onupgradeneeded = e => e.target.result.createObjectStore(DB_STORE);
     req.onsuccess  = e => {
       const db = e.target.result;
+      clearTimeout(frist);
+      /* Kam die Verbindung erst nach der Frist, wartet niemand mehr auf sie. */
+      if (erledigt) { db.close(); return; }
+      erledigt = true;
       /* F-138: dbPromise cached die offene Verbindung dauerhaft. Der Browser
          kann sie aber jederzeit von sich aus schließen — Quota-Eviction,
          oder ein anderer Tab/eine andere aboard.html-Instanz verlangt ein
@@ -41,7 +58,12 @@ function openDB() {
       };
       resolve(db);
     };
-    req.onerror    = () => { if (dbPromise === meine) dbPromise = null; reject(req.error); };
+    req.onerror    = () => {
+      clearTimeout(frist);
+      erledigt = true;
+      if (dbPromise === meine) dbPromise = null;
+      reject(req.error);
+    };
   });
   return dbPromise;
 }
@@ -54,7 +76,9 @@ export async function idbPut(key, value) {
   } catch {}
 }
 
-export async function idbGet(key) {
+/* F-3106 Verify B1: `streng` unterscheidet „Eintrag fehlt“ (null) von „IndexedDB antwortet nicht“
+   (wirft den Frist-Fehler weiter); ohne `streng` bleibt jeder Fehler wie bisher `null`. */
+export async function idbGet(key, { streng = false } = {}) {
   try {
     const db = await openDB();
     return new Promise(resolve => {
@@ -62,7 +86,10 @@ export async function idbGet(key) {
       req.onsuccess = () => resolve(req.result ?? null);
       req.onerror   = () => resolve(null);
     });
-  } catch { return null; }
+  } catch (e) {
+    if (streng && e?.idbFrist) throw e;
+    return null;
+  }
 }
 
 export async function idbDelete(key) {

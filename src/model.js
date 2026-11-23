@@ -1,4 +1,7 @@
 export const Model = (() => {
+  /* Gespeicherter Titel der Sprint-Meta-Karten (Daten, nicht Anzeige — die übersetzt
+     renderer.js/modal.js, F-3110). */
+  const META_TITEL = Object.freeze({ start: '📋 Sprint-Start', end: '🏁 Sprint-Abschluss' });
   function newId() { return crypto.randomUUID(); }
   function now()   { return new Date().toISOString().slice(0, 10); }
 
@@ -85,7 +88,7 @@ export const Model = (() => {
        ohnehin von der Normalisierung (ADR-0127) gesetzt — geerbt ist es also
        nur früher da, nicht anders. */
     return {
-      ...createCard(metaType === 'start' ? '📋 Sprint-Start' : '🏁 Sprint-Abschluss',
+      ...createCard(META_TITEL[metaType === 'start' ? 'start' : 'end'],
         columnId, displayId),
       kind:        'sprint-meta',
       metaType,
@@ -219,5 +222,5 @@ export const Model = (() => {
     return true;
   }
 
-  return { newId, now, createCard, createSprintMetaCard, createTemplate, assignDisplayId, createColumnDef, createDefaultColumnDefs, createSprint, createBacklogSprint, createBoard, verschiebeSwimlane, darfArchiviertWerden };
+  return { META_TITEL, newId, now, createCard, createSprintMetaCard, createTemplate, assignDisplayId, createColumnDef, createDefaultColumnDefs, createSprint, createBacklogSprint, createBoard, verschiebeSwimlane, darfArchiviertWerden };
 })();
