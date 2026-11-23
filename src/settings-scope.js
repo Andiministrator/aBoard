@@ -73,6 +73,9 @@ export const SETTINGS_CLASSIFICATION = {
   /* ── USER-lokale globale Präferenzen ──────────────────────────────────── */
   theme:    { persistScope: 'global',     serverScope: 'user' },
   density:  { persistScope: 'global',     serverScope: 'user' }, /* Karte #973: Kartendichte */
+  corners:  { persistScope: 'global',     serverScope: 'user' }, /* ADR-0153: Darstellung */
+  font:     { persistScope: 'global',     serverScope: 'user' },
+  accent:   { persistScope: 'global',     serverScope: 'user' },
   sortierung: { persistScope: 'global',   serverScope: 'user' }, /* Karte #1004 */
   language: { persistScope: 'global',     serverScope: 'user' },
   userName: { persistScope: 'global',     serverScope: 'board' }, /* im Server-Modus nicht gesetzt (Feld ausgeblendet); wer „ich“ bin, sagt dort getCurrentUser() — für awaitingUser zählen Name und E-Mail daraus (Verify Sprint 78, V-1) */

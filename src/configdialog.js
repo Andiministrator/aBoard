@@ -1,4 +1,4 @@
-import { Config }             from './config.js';
+import { Config, DARSTELLUNG } from './config.js';
 import { Profile }            from './profile.js';
 import { SettingsScope, SECTION_DIALOG_MAP, isSectionRelevant } from './settings-scope.js';
 import { I18n }               from './i18n.js';
@@ -174,6 +174,7 @@ export const ConfigDialog = (() => {
       userName: overlay.querySelector('#cfg-userName')?.value ?? Config.get('userName'),
       theme:    overlay.querySelector('#cfg-theme')?.value,
       density:  overlay.querySelector('#cfg-density')?.value,
+      ...Object.fromEntries(DARSTELLUNG.map(k => [k, overlay.querySelector(`#cfg-${k}`)?.value])),
       sortierung: overlay.querySelector('#cfg-sortierung')?.value,
       language: overlay.querySelector('#cfg-language')?.value,
       /* boardMode wird über Events gehandhabt — hier nicht speichern */
@@ -216,6 +217,7 @@ export const ConfigDialog = (() => {
     const root = document.documentElement;
     if (values.theme)    root.setAttribute('data-theme', values.theme);
     if (values.density)  root.setAttribute('data-density', values.density);
+    for (const k of DARSTELLUNG) if (values[k]) root.setAttribute('data-' + k, values[k]);
     if (values.language) root.setAttribute('lang', values.language === 'de' ? 'de' : 'en');
   }
 
@@ -594,6 +596,10 @@ export const ConfigDialog = (() => {
         ['normal',  'config.density.normal'],
         ['kompakt', 'config.density.kompakt'],
       ]);
+      /* ADR-0153 (Karte #1183): Darstellung — Ecken, Schrift, Akzentfarbe */
+      addRow('config.corners', 'corners', [['square', 'config.corners.square'], ['round', 'config.corners.round']]);
+      addRow('config.font', 'font', ['system', 'serif', 'mono'].map(v => [v, 'config.font.' + v]));
+      addRow('config.accent', 'accent', ['teal', 'blue', 'green', 'violet', 'graphite'].map(v => [v, 'config.accent.' + v]));
       addRow('config.sortierung', 'sortierung', [
         ['manuell',       'config.sortierung.manuell'],
         ['dringlichkeit', 'config.sortierung.dringlichkeit'],
@@ -1223,7 +1229,7 @@ export const ConfigDialog = (() => {
   function populateSelects(ov) {
     /* ADR-0065: Defensive Zugriffe — nicht jede Sektion ist in jedem Dialog vorhanden */
     /* Karte #150: #cfg-userName-Feld entfernt — Identity-Liste deckt es ab */
-    for (const k of ['theme', 'density', 'sortierung', 'language']) {
+    for (const k of ['theme', 'density', ...DARSTELLUNG, 'sortierung', 'language']) {
       const sel = ov.querySelector(`#cfg-${k}`);
       if (sel) sel.value = Config.get(k);
     }
@@ -1268,6 +1274,7 @@ export const ConfigDialog = (() => {
     snapshot = {
       theme:    Config.get('theme'),
       density:  Config.get('density'),
+      ...Object.fromEntries(DARSTELLUNG.map(k => [k, Config.get(k)])),
       sortierung: Config.get('sortierung'),
       language: Config.get('language'),
     };

@@ -10,6 +10,11 @@
 
 aBoard ist ein Kanban-Board, das als einzelne HTML-Datei direkt im Browser läuft: keine Installation, kein Internet, kein Backend. Doppelklick, und los.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/board-dark.png" />
+  <img src="docs/images/board-light.png" alt="Ein aBoard-Board mit einem Sprint: Karten in den Spalten Backlog, Ready, In progress und Done, mit Labels, Owner, Schätzungen und den Flags „Critical“ und „Blocked“." width="100%" />
+</picture>
+
 Die Idee stammt von [Nullboard](https://github.com/apankrat/nullboard) von Alex Pankratov, aBoard geht aber weiter: Sprints als Swimlanes (waagerechte Zeilen quer durch alle Spalten), strukturierte Karten mit Markdown, Flags, Schätzungen und Verweisen, ein Kalender, Vorlagen und wiederkehrende Karten.
 
 ## Was in diesem Repository liegt

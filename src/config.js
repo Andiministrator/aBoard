@@ -81,6 +81,10 @@ const DEFAULTS = {
   version:         CONFIG_VERSION,
   theme:           'system',      /* 'system' | 'light' | 'dark'     */
   density:         'normal',      /* 'normal' | 'kompakt' (Karte #973)  */
+  /* ADR-0153 (Karte #1183): Darstellung je Gerät */
+  corners:         'square',      /* 'square' | 'round' (Karte #1183) */
+  font:            'system',      /* 'system' | 'serif' | 'mono'     */
+  accent:          'teal',        /* 'teal' | 'blue' | 'green' | 'violet' | 'graphite' */
   sortierung:      'manuell',     /* 'manuell' | 'dringlichkeit' (Karte #1004) */
   language:        'en',          /* 'en' | 'de'                     */
   userName:        '',            /* Autor-Tag in Kommentaren        */
@@ -124,7 +128,7 @@ if (IS_PROJECTOR_BUILD) {
    spiegelt diese Menge als persistScope:'global' — der Test difft gegen den Import,
    nicht gegen eine hartcodierte Kopie. */
 export const GLOBAL_KEYS = new Set([
-  'version', 'theme', 'density', 'sortierung', 'language', 'userName',
+  'version', 'theme', 'density', 'corners', 'font', 'accent', 'sortierung', 'language', 'userName',
   'attachmentMaxBytes', 'attachmentBoardWarnBytes', 'attachmentBoardHardBytes',
 ]);
 
@@ -260,11 +264,15 @@ function set(key, value) {
   apply();
 }
 
+/* ADR-0153: Darstellungs-Schlüssel, je als data-<schlüssel> an <html> */
+export const DARSTELLUNG = ['corners', 'font', 'accent'];
+
 /* Einstellungen sofort im DOM wirksam machen */
 function apply() {
   const root = document.documentElement;
   root.setAttribute('data-theme', current.theme);
   root.setAttribute('data-density', current.density);
+  for (const k of DARSTELLUNG) root.setAttribute('data-' + k, current[k]);
   root.setAttribute('lang', current.language === 'de' ? 'de' : 'en');
 }
 

@@ -23,7 +23,7 @@ Welche Variante du vor dir hast, erklärt [Varianten](varianten.md).
 |---|---|
 | Datei | Öffnen, Exportieren (JSON) |
 | Ansichten | Kalender |
-| Einstellungen | **Benutzer-Einstellungen** (Identitäten, Theme hell/dunkel/System, Sprache Deutsch/Englisch) und **Board-Einstellungen** (Modus und Projektordner, Board-Hintergrund, Vorlagen, Anhang-Grenzen) |
+| Einstellungen | **Benutzer-Einstellungen** (Identitäten, Theme hell/dunkel/System, Kartendichte, Darstellung — Ecken abgerundet oder eckig, Schrift System/Serif/Monospace, Akzentfarbe —, Sprache Deutsch/Englisch; gilt für dieses Gerät) und **Board-Einstellungen** (Modus und Projektordner, Board-Hintergrund, Vorlagen, Anhang-Grenzen) |
 | Dokumentation | nur in `aboard.html` mit Ordner-Verbindung (Projekt-Modus): README und Wissens-Index des Projekts lesen |
 | weitere | nur auf dem Server: Wissen (wenn eingerichtet), Server-Verwaltung (für Admins), Clients und Projekte |
 

@@ -23,7 +23,7 @@ Which variant you have in front of you is explained in [Variants](variants.md).
 |---|---|
 | File | Open, Export (JSON) |
 | Views | Calendar |
-| Settings | **User Settings** (identities, theme light/dark/system, language German/English) and **Board Settings** (mode and project folder, board background, templates, attachment limits) |
+| Settings | **User Settings** (identities, theme light/dark/system, card density, appearance — rounded or square corners, font system/serif/monospace, accent color —, language German/English; applies to this device) and **Board Settings** (mode and project folder, board background, templates, attachment limits) |
 | Documentation | only in `aboard.html` connected to a folder: read the project's README and knowledge index |
 | more | server only: Knowledge (if set up), Server administration (for admins), Clients and Projects |
 

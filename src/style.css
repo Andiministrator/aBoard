@@ -80,6 +80,29 @@
   }
 }
 
+/* ── Darstellung (ADR-0153, Karte #1183): Ecken, Schrift, Akzent — je Gerät,
+   data-corners/-font/-accent an <html>. Voreinstellung: square, system, teal. Akzentwerte: AA ≥ 5:1, geprüft in tests/darstellung-1183.test.js. */
+[data-corners="square"] *, [data-corners="square"] ::before, [data-corners="square"] ::after { border-radius: 0 !important; }
+/* Kreise bleiben rund — neue Kreise hier ergänzen (Server-CSS stattdessen mit eigenem !important, s. .board-header-avatar) */
+[data-corners="square"] :is(.identity-avatar, .card-assignee-avatar, .sprint-archived-pill) { border-radius: 50% !important; }
+[data-font="serif"] { --font: Georgia, Cambria, 'Times New Roman', serif; }
+[data-font="mono"]  { --font: ui-monospace, Consolas, Menlo, monospace; }
+:is([data-font="serif"], [data-font="mono"]) :is(button, input, select, textarea) { font-family: inherit; }
+[data-accent="blue"]     { --accent: #205fb6; --accent-btn: #205fb6; --accent-dim: #dce8f9; }
+[data-accent="green"]    { --accent: #1d7240; --accent-btn: #1d7240; --accent-dim: #def7e9; }
+[data-accent="violet"]   { --accent: #7439c6; --accent-btn: #7439c6; --accent-dim: #e9dff6; }
+[data-accent="graphite"] { --accent: #5a636d; --accent-btn: #5a636d; --accent-dim: #e8ebee; }
+[data-theme="dark"][data-accent="blue"]     { --accent: #5e9aed; --accent-btn: #1f5aad; --accent-dim: #0b2241; }
+[data-theme="dark"][data-accent="green"]    { --accent: #22bf63; --accent-btn: #207e47; --accent-dim: #0f3d22; }
+[data-theme="dark"][data-accent="violet"]   { --accent: #b089e6; --accent-btn: #5d2e9e; --accent-dim: #23113b; }
+[data-theme="dark"][data-accent="graphite"] { --accent: #889caf; --accent-btn: #5c6670; --accent-dim: #22262a; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"])[data-accent="blue"]     { --accent: #5e9aed; --accent-btn: #1f5aad; --accent-dim: #0b2241; }
+  :root:not([data-theme="light"])[data-accent="green"]    { --accent: #22bf63; --accent-btn: #207e47; --accent-dim: #0f3d22; }
+  :root:not([data-theme="light"])[data-accent="violet"]   { --accent: #b089e6; --accent-btn: #5d2e9e; --accent-dim: #23113b; }
+  :root:not([data-theme="light"])[data-accent="graphite"] { --accent: #889caf; --accent-btn: #5c6670; --accent-dim: #22262a; }
+}
+
 /* ── Scrollbalken ───────────────────────────────────────────────── */
 * {
   scrollbar-width: thin;
@@ -104,7 +127,7 @@ input[type="checkbox"] {
 /* ── Reset ─────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: var(--font, system-ui, -apple-system, sans-serif);
   font-size: 14px;
   line-height: 1.5;
   color: var(--text);
@@ -3033,7 +3056,7 @@ body.maximized-pane-active .modal {
   flex-shrink: 0;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: 50% !important; /* ADR-0153: bleibt rund bei „eckig“ — eigene Regel, weil stripServerCss sie im Nicht-Server-Build entfernt (keine Selektorliste) */
   display: flex;
   align-items: center;
   justify-content: center;
