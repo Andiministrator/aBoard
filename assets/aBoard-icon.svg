@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="74 48 362 224">
+  <defs><style>
+    .main       { fill: #0B5D73; }
+    .stroke-main { stroke: #0B5D73; }
+    .card-green  { fill: #63D2B0; }
+    .card-yellow { fill: #E9C85D; }
+    .card-gray   { fill: #D9DEE3; }
+  </style></defs>
+  <g transform="translate(40,40)">
+    <rect x="120" y="20" width="260" height="200" rx="34" class="stroke-main" stroke-width="18" fill="none"/>
+    <circle cx="86" cy="160" r="40" class="stroke-main" stroke-width="18" fill="none"/>
+    <path d="M128 160 L128 70 Q128 30 168 30 L205 30" class="stroke-main" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="220" y1="50" x2="220" y2="220" class="stroke-main" stroke-width="6" stroke-linecap="round"/>
+    <line x1="300" y1="50" x2="300" y2="220" class="stroke-main" stroke-width="6" stroke-linecap="round"/>
+    <rect x="158" y="66" width="42" height="30" rx="7" class="card-green"/>
+    <rect x="158" y="114" width="42" height="30" rx="7" class="card-gray"/>
+    <rect x="240" y="66" width="42" height="46" rx="7" class="card-yellow"/>
+    <rect x="240" y="132" width="42" height="38" rx="7" class="card-green"/>
+    <rect x="318" y="66" width="42" height="46" rx="7" class="card-gray"/>
+    <rect x="318" y="130" width="42" height="38" rx="7" class="card-yellow"/>
+  </g>
+</svg>

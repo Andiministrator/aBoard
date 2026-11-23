@@ -1,0 +1,3111 @@
+/* ── Theme-Variablen ───────────────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --bg:           #edf1f4;
+  --surface:      #ffffff;
+  --surface-2:    #f2f5f7;
+  --border:       #cfd6db;
+  --text:         #1a1d23;
+  --text-muted:   #656b78;       /* F-454: von #6b7280 nachgedunkelt — gegen --surface-2/--bg
+                                     unterschritt der Altwert AA 4,5:1 (4,42:1 bzw. 4,26:1) */
+  --accent:       #0B5D73;       /* Logo-Teal */
+  --accent-btn:   #0B5D73;       /* Primary-Button */
+  --accent-dim:   #ddf0f5;
+  --btn-bg:       #D9DEE3;       /* Logo-Grau */
+  --btn-bg-hover: #c8cfd5;
+  --prio-high-bg: #E9C85D;       /* Logo-Gelb */
+  --prio-high-fg: #6b4a00;
+  --prio-low-bg:  #63D2B0;       /* Logo-Grün */
+  --prio-low-fg:  #0a4a38;
+  --lb:           60% 90%;       /* Karte #971: Labelfarben hsl(var(--h) …), AA min 5,04:1 */
+  --lf:           70% 26%;
+  /* F-2674/F-2676: Datum überfällig/bald, Komplexität hoch — AA min 4,93:1 */
+  --due-o:        #b91c1c;
+  --due-s:        #92400e;
+  --cx-h:         #7e22ce;
+  --col-width:    280px;
+  --radius:       8px;
+  --shadow:       0 1px 3px rgba(0,0,0,.1);
+}
+
+[data-theme="dark"] {
+  --bg:           #0e1a1e;
+  --surface:      #152028;
+  --surface-2:    #1c2c35;
+  --border:       #2a3d47;
+  --text:         #ddeef2;
+  --text-muted:   #7a9faa;
+  --accent:       #2db5d0;       /* Logo-Teal aufgehellt — für Links, Fokus */
+  --accent-btn:   #0e6e87;       /* Dunkleres Teal für Buttons mit weißer Schrift */
+  --accent-dim:   #0d2f3a;
+  --btn-bg:       #1f3540;
+  --btn-bg-hover: #2a4555;
+  --prio-high-bg: #6b540e;       /* Gelb gedämpft — F-454: von #7a5f10 nachgedunkelt,
+                                     gegen --prio-high-fg unterschritt der Altwert AA 4,5:1
+                                     (4,02:1); jetzt 4,82:1 */
+  --prio-high-fg: #f0d070;
+  --prio-low-bg:  #0d4a3a;       /* Grün gedämpft */
+  --prio-low-fg:  #63D2B0;
+  --lb:           40% 22%;       /* Karte #971: AA min 6,59:1 */
+  --lf:           60% 78%;
+  --due-o:        #f87171;
+  --due-s:        #fbbf24;
+  --cx-h:         #c084fc;
+  --shadow:       0 1px 3px rgba(0,0,0,.5);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:           #0e1a1e;
+    --surface:      #152028;
+    --surface-2:    #1c2c35;
+    --border:       #2a3d47;
+    --text:         #ddeef2;
+    --text-muted:   #7a9faa;
+    --accent:       #2db5d0;
+    --accent-btn:   #0e6e87;
+    --accent-dim:   #0d2f3a;
+    --btn-bg:       #1f3540;
+    --btn-bg-hover: #2a4555;
+    --prio-high-bg: #6b540e;      /* F-454, siehe Begründung im [data-theme="dark"]-Block oben */
+    --prio-high-fg: #f0d070;
+    --prio-low-bg:  #0d4a3a;
+    --prio-low-fg:  #63D2B0;
+    --lb:           40% 22%;
+    --lf:           60% 78%;
+    --due-o:        #f87171;
+    --due-s:        #fbbf24;
+    --cx-h:         #c084fc;
+    --shadow:       0 1px 3px rgba(0,0,0,.5);
+  }
+}
+
+/* ── Scrollbalken ───────────────────────────────────────────────── */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+::-webkit-scrollbar              { width: 6px; height: 6px; }
+::-webkit-scrollbar-track        { background: transparent; }
+::-webkit-scrollbar-thumb        { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover  { background: var(--text-muted); }
+::-webkit-scrollbar-corner       { background: transparent; }
+
+/* ── Checkboxes ─────────────────────────────────────────────────── */
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+[data-theme="dark"] input[type="checkbox"] { color-scheme: dark; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) input[type="checkbox"] { color-scheme: dark; }
+}
+
+/* ── Reset ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ── Layout ────────────────────────────────────────────────────── */
+#app { display: flex; flex-direction: column; height: 100vh; }
+
+/* #114: Board-Hintergrund */
+#app.board--has-bg::before{content:'';position:fixed;inset:0;background-image:var(--board-bg-image);background-size:cover;background-position:center;background-attachment:fixed;opacity:.15;pointer-events:none;z-index:0}
+/* #727: Darstellung. Spalten, Karten, Kopf- und Sprintzeilen haben deckende Hintergründe → Text bleibt in beiden Themen lesbar. */
+#app.board--bg-voll::before,#app.board--bg-dunkel::before{opacity:1}
+#app.board--bg-dunkel::before{background-image:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),var(--board-bg-image)}
+@media(prefers-reduced-motion:reduce){#app.board--has-bg::before{background-attachment:scroll}}
+#app.board--has-bg>*{position:relative;z-index:1}
+/* #740: Gleiches z-index macht Kopf und Board-Fläche zu Geschwister-Stapelkontexten; die Fläche steht im DOM später und überdeckte die Aufklapper des Kopfs (Board-Menü). */
+#app.board--has-bg>#board-header{z-index:2}
+.config-bg-thumb{width:80px;height:50px;border-radius:4px;border:1px solid var(--border);background-color:var(--surface-2);background-size:cover;background-position:center;flex-shrink:0}
+.config-bg-thumb--set{border-color:var(--accent)}
+.config-bg-hint{font-size:11px;color:var(--text-muted);font-style:italic}
+.config-bg-buttons{display:flex;gap:8px}
+
+/* ── awaitingUser-Banner (Karte #115) ──────────────────────────── */
+.awaiting-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 16px;
+  background: #fff4cc;
+  border-bottom: 1px solid #e6d78a;
+  color: #5a4200;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+[data-theme="dark"] .awaiting-banner {
+  background: #3a3000;
+  border-bottom-color: #5a4a00;
+  color: #f0d070;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .awaiting-banner {
+    background: #3a3000;
+    border-bottom-color: #5a4a00;
+    color: #f0d070;
+  }
+}
+.awaiting-banner-text { flex: 1; }
+.awaiting-banner-question { font-style: normal; font-weight: 500; }
+.awaiting-banner-time { color: inherit; opacity: 0.7; }
+.awaiting-banner-btn {
+  padding: 3px 10px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.awaiting-banner-btn:hover { background: rgba(0,0,0,.08); }
+
+/* Pulse nur ohne reduced-motion */
+@media (prefers-reduced-motion: no-preference) {
+  .awaiting-banner {
+    animation: awaiting-pulse 2.5s ease-in-out infinite;
+  }
+  @keyframes awaiting-pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.82; }
+  }
+}
+
+/* ── Header ────────────────────────────────────────────────────── */
+#board-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+.board-logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.board-logo svg {
+  height: 24px;
+  width: auto;
+}
+/* Karte #704: Titel = Knopf (Board-Umschalter) + Stift (Umbenennen) + Menü.
+   Die Menüeinträge teilen sich ihr Aussehen mit .bulk-dropdown-item. */
+.board-title-wrap { position: relative; display: flex; align-items: center; min-width: 0; }
+.board-title-h1 { margin: 0; font-size: 18px; font-weight: 600; }
+#board-title { font: inherit; color: var(--text); background: none; border: 0; padding: 2px 6px; cursor: pointer; text-align: left; }
+#board-title::after { content: ' ▾'; content: ' ▾' / ''; font-size: 12px; }
+#board-title:hover { color: var(--accent); }
+.board-title-edit { padding: 2px 6px; color: var(--text-muted); background: none; border: 0; cursor: pointer; opacity: 0; }
+.board-title-wrap:hover .board-title-edit, .board-title-wrap:focus-within .board-title-edit { opacity: 1; }
+@media (hover: none) { .board-title-edit { opacity: 1; } }
+.board-menu {
+  position: absolute; top: 100%; left: 0; z-index: 210;
+  min-width: 240px; max-width: min(380px, calc(100vw - 28px)); max-height: 70vh; overflow-y: auto;
+  padding: 4px 0; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: 0 4px 12px rgba(0,0,0,.15);
+}
+.board-menu-head { padding: 6px 14px 2px; font-size: 11px; font-style: italic; color: var(--text-muted); }
+.board-menu-item { overflow: hidden; text-overflow: ellipsis; }
+.board-menu-item:focus-visible { background: var(--surface-2); }
+.board-menu-item--current { font-weight: 600; }
+.board-menu-item--current::before { content: '✓ '; content: '✓ ' / ''; }
+.board-menu-item small { margin-left: 8px; color: var(--text-muted); font-size: 11px; }
+#board-title-input {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 2px 8px;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.header-filter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: center;
+}
+.filter-select {
+  font-size: 12px;
+  padding: 3px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  cursor: pointer;
+  max-width: 130px;
+}
+.filter-select--active {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.filter-flag {
+  font-size: 13px;
+  padding: 3px 7px;
+  opacity: 0.45;
+  border-color: transparent;
+}
+.filter-flag--active {
+  opacity: 1;
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.filter-clear {
+  font-size: 13px;
+  padding: 2px 7px;
+  opacity: 0.6;
+  border-color: transparent;
+}
+.filter-clear:hover { opacity: 1; }
+.card--filtered {
+  opacity: 0.2;
+  pointer-events: none;
+}
+
+
+/* ── Bulk-Selektion (Karte #63) ──────────────────────────────── */
+.card--selected {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  background: var(--accent-dim);
+}
+.card--selected:hover {
+  background: var(--accent-dim);
+}
+
+/* Bulk-Action-Bar — schwebendes Panel unten rechts */
+.bulk-action-bar {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  font-size: 13px;
+  flex-wrap: wrap;
+  max-width: 640px;
+}
+.bulk-action-bar--hidden {
+  display: none;
+}
+.bulk-action-count {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+.bulk-action-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+/* Dropdown innerhalb der Bulk-Bar */
+.bulk-dropdown {
+  position: relative;
+  display: inline-block;
+}
+.bulk-dropdown-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  min-width: 160px;
+  z-index: 210;
+  padding: 4px 0;
+  opacity: 0;
+  visibility: hidden; /* geschlossen: nicht fokussierbar (VO-1); verzögert, damit das Ausblenden animiert */
+  pointer-events: none;
+  transform: translateY(4px);
+  transition: opacity .12s, transform .12s, visibility 0s linear .12s;
+}
+.bulk-dropdown-menu--open {
+  opacity: 1;
+  visibility: visible;
+  transition-delay: 0s;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.bulk-dropdown-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 6px 14px;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.bulk-dropdown-item:hover { background: var(--surface-2); }
+.bulk-dropdown-input {
+  display: block;
+  width: 100%;
+  padding: 5px 10px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 13px;
+}
+.bulk-dropdown-input:focus { outline: none; }
+
+/* ARIA-Live-Region für Screenreader (visuell versteckt) */
+#bulk-select-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Archivierte Karte (Karte #60) — gedämpfter Style ─────────── */
+.card--archived {
+  opacity: 0.5;
+  border-style: dashed;
+  background: var(--surface-2);
+}
+
+/* ── Sprint-Meta-Sonderkarten (ADR-0036) ────────────────────── */
+.card--sprint-meta {
+  border: 1px dashed var(--border);
+  background: var(--surface-2);
+  opacity: 0.85;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 6px 8px;
+}
+.card--sprint-meta .card-title-text {
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 11px;
+}
+.card--sprint-meta:hover {
+  opacity: 1;
+  border-color: var(--accent);
+}
+.card--sprint-meta .card-comment-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ── Such-Highlighting: gematchter Teilstring ───────────────── */
+mark.search-hit {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 2px;
+  padding: 0 1px;
+  font-weight: 600;
+  /* kein font-inherit nötig, mark ist inline */
+}
+
+/* ── Such-Leiste im Header ──────────────────────────────────── */
+.header-search {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.search-input {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  width: 160px;
+  transition: border-color .15s, width .2s;
+}
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  width: 220px;
+}
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+.search-clear {
+  font-size: 13px;
+  padding: 2px 7px;
+  opacity: 0.6;
+  border-color: transparent;
+}
+.search-clear:hover { opacity: 1; }
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ── Schaltflächen ─────────────────────────────────────────────── */
+.btn {
+  padding: 6px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background .15s;
+}
+.btn:hover { background: var(--btn-bg-hover); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn:disabled:hover { background: var(--btn-bg); }
+.btn-primary { background: var(--accent-btn); border-color: var(--accent-btn); color: #fff; }
+.btn-primary:hover { filter: brightness(0.88); }
+.btn-danger { color: #dc2626; border-color: rgba(220,38,38,.3); background: rgba(220,38,38,.08); }
+.btn-danger:hover { background: rgba(220,38,38,.15); }
+.btn-sm   { padding: 4px 10px; font-size: 12px; }
+.btn-icon { padding: 6px 9px; font-size: 15px; line-height: 1; }
+
+/* ── Board ─────────────────────────────────────────────────────── */
+#board-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  padding: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex: 1;
+  align-items: flex-start;
+}
+
+/* ── Spalte ────────────────────────────────────────────────────── */
+.column {
+  display: flex;
+  flex-direction: column;
+  width: var(--col-width);
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-height: 100%;
+}
+.column-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--border);
+  cursor: grab;
+  user-select: none;
+}
+.column-header:active { cursor: grabbing; }
+.column-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color .15s;
+}
+.column-toggle:hover { color: var(--text); }
+.col-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+.column-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.column-title:hover { color: var(--accent); }
+.column-title-input {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 6px;
+  background: var(--surface-2);
+  color: var(--text);
+}
+.col-header-right {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+/* Karte #146: Counter ist gleichzeitig Color-Button (öffnet Farb-Popover) */
+.column-count {
+  font-size: 11px;
+  color: var(--text);           /* F-454: war var(--text-muted) — gegen die var(--border)-
+                                    Fläche dieser Regel nur 3,29:1 (hell) / 3,97:1 (dunkel);
+                                    var(--text) liegt in beiden Themes deutlich über AA 4,5:1 */
+  background: var(--border);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  padding: 1px 8px;
+  flex-shrink: 0;
+  cursor: pointer;
+  line-height: 1.4;
+  transition: border-color .12s, transform .1s;
+  font-family: inherit;
+}
+.column-count:hover { border-color: var(--text-muted); }
+.column-count:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Karte #147: Eingeklappte Spalte — schmal, Titel um 90° gekippt, oben bündig.
+   Action-Buttons (Delete/Clear/Archive) verschwinden; Toggle + Counter bleiben. */
+.column--collapsed {
+  width: 36px;
+  min-width: 36px;
+}
+.column--collapsed .column-header {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 2px;
+  border-bottom: none;
+  cursor: default;
+}
+.column--collapsed .col-title-group {
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+.column--collapsed .column-title {
+  /* Karte #149: sideways-lr — einziger writing-mode, der Buchstaben CCW dreht
+     (Kopf nach links, Lesefluss von unten nach oben, Wort oben bündig).
+     Chrome 128+, Firefox 87+, Safari 16.4+. */
+  writing-mode: sideways-lr;
+  text-align: start;
+  max-height: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+.column--collapsed .column-count {
+  font-size: 10px;
+  padding: 1px 6px;
+}
+.column--collapsed .col-header-right { display: none; }
+.btn-col-delete,
+.btn-col-clear,
+.btn-col-archive-all {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity .15s, color .15s;
+}
+.column-header:hover .btn-col-delete,
+.column-header:hover .btn-col-clear { opacity: 1; }
+.col-header-right:hover .btn-col-delete,
+.col-header-right:hover .btn-col-clear { opacity: 1; }
+.btn-col-delete:hover { color: #dc2626; }
+.btn-col-clear:hover  { color: #b8922a; }
+.btn-col-clear--always { opacity: 1 !important; } /* Erledigt-Spalte: immer sichtbar */
+/* Karte #279: Massen-Archiv erscheint nur in Erledigt-Spalten → immer sichtbar */
+.btn-col-archive-all { opacity: 1; }
+.btn-col-archive-all:hover { color: #b8922a; }
+
+/* ── Archiv-Toggle im Spalten-Header (Karte #60) ───────────── */
+.btn-col-archive-toggle {
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.4;
+  transition: color .15s, border-color .15s, background .15s;
+  white-space: nowrap;
+}
+.btn-col-archive-toggle:hover {
+  color: var(--accent);
+  border-color: var(--border);
+}
+.btn-col-archive-toggle--active {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  opacity: 1;
+}
+
+/* ── Archiv-Button im Modal-Footer (Karte #60) ─────────────── */
+.btn-archive {
+  font-size: 12px;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.btn-archive:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Spaltenfarbe / Tint-System (Karte #122) ──────────────── */
+/*
+  Spalten mit --col-tint erhalten einen sanften Farbtint, der
+  Light/Dark automatisch respektiert (color-mix mischt gegen --surface).
+  Fallback: Wenn color-mix() nicht unterstützt wird (sehr alte Browser),
+  zeigt der Header den Roh-HEX — akzeptabel, da Chrome 111+/Safari 16.2+/Firefox 113+.
+*/
+/* Karte #149: alle Tint-Mischungen in oklab (vorher oklch).
+   OKLCH ist polar — Mischen von h=90 (Gelb) mit h=~250 (Grau) ging den
+   kürzeren Weg über h=170 (Cyan/Grün). OKLab ist kartesisch (a/b), keine
+   Hue-Drift mehr. */
+.column--tinted {
+  border-color: color-mix(in oklab, var(--col-tint) 35%, var(--border));
+}
+.column--tinted .column-header {
+  background: color-mix(in oklab, var(--col-tint) 18%, var(--surface));
+  border-bottom-color: color-mix(in oklab, var(--col-tint) 35%, var(--border));
+}
+.column--tinted .column-cards {
+  background: color-mix(in oklab, var(--col-tint) 8%, var(--surface-2));
+}
+/* Karte #146/#148: Counter-Badge bei gesetzter Spaltenfarbe — gleiche Farbe nur dunkler.
+   `color-mix in oklab` mit Schwarz hält die Hue-Wahrnehmung stabil (vorher: oklch(from ...
+   calc(l - 0.15) c h) verfärbte Gelb h=90 zu Oliv, weil OKLCH bei niedriger L/hoher C
+   den Hue 90 als grünlich wahrnimmt). White text für Kontrast. */
+.column--tinted .column-count {
+  background: color-mix(in oklab, var(--col-tint) 75%, black);
+  color: #fff;
+  border-color: color-mix(in oklab, var(--col-tint) 55%, black);
+}
+/* Farb-Popover */
+.col-color-popover {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 10px;
+  z-index: 500;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity .12s, transform .12s;
+  min-width: 170px;
+}
+.col-color-popover.popover--open {
+  opacity: 1;
+  transform: translateY(0);
+}
+.col-color-palette {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.col-color-swatch-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform .1s, border-color .1s;
+}
+.col-color-swatch-btn:hover,
+.col-color-swatch-btn:focus { transform: scale(1.15); border-color: var(--text); outline: none; }
+.col-color-swatch-btn--selected { border-color: var(--text) !important; }
+.col-color-free-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.col-color-free-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.col-color-input {
+  width: 32px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  background: none;
+}
+.col-color-reset {
+  width: 100%;
+  font-size: 12px;
+}
+
+/* ── Identity-Avatar (Karte #123) ─────────────────────────────── */
+/*
+  Kreisförmiger Avatar mit Hintergrundfarbe + zentriertem Icon/Buchstaben.
+  Größe wird inline gesetzt (24/32/20 px). Bild-Variante setzt zusätzlich
+  background-image; das `.identity-avatar-glyph`-Child bleibt zur Sicherheit
+  unsichtbar, weil background-size: cover es überdeckt.
+*/
+.identity-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  vertical-align: middle;
+  line-height: 1;
+  overflow: hidden;
+  background-color: #7c3aed;
+}
+.identity-avatar-glyph {
+  font-weight: 600;
+  line-height: 1;
+  user-select: none;
+}
+.identity-avatar--image .identity-avatar-glyph {
+  /* Bei Bild-Avataren bleibt der Glyph als Fallback im DOM, wird aber vom
+     Hintergrundbild (cover) überdeckt. */
+  visibility: hidden;
+}
+/* Owner-Badge: Avatar links, Label rechts */
+.card-owner-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.card-owner-badge-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.column-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 40px;
+}
+.column-footer {
+  padding: 6px 8px 8px;
+  border-top: 1px solid var(--border);
+}
+
+/* ── Karte ─────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: box-shadow .15s;
+  user-select: none;
+  overflow: hidden; /* Cover-Bild darf nicht aus der abgerundeten Karte herausragen */
+  flex-shrink: 0; /* Karten nie kleiner als ihr Inhalt — overflow-y:auto auf .column-cards greift */
+}
+.card:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+/* Karte #173: Cover-Bild als abgedunkelter Karten-Hintergrund. Renderer
+   setzt linear-gradient(rgba(0,0,0,.55) overlay) + url(...) inline. */
+.card--has-cover {
+  background-size: cover;
+  background-position: center;
+  color: #f5f5f5;
+  /* Nachtrag #173: Mindest-Höhe, damit das Cover-Bild auf titel-only-Karten
+     nicht auf 30 px zusammenquetscht. */
+  min-height: 110px;
+}
+.card--has-cover .card-title,
+.card--has-cover .card-title-text,
+.card--has-cover .card-display-id,
+.card--has-cover .card-footer { color: #f5f5f5; }
+/* In Erledigt-Spalte: Cover-Karten etwas gedimmt (F-250: .is-done statt fester id) */
+.column.is-done .card--has-cover { opacity: 0.7; }
+.column.is-done .card--has-cover:hover { opacity: 1; }
+/* Karte #973: Kartendichte „kompakt“ (Einstellung, data-density an <html>). Kein Cover,
+   im Footer nur Flags, Datum und Owner-Avatar, weniger Innenabstand. Labels bleiben.
+   Bewusst eine Liste der Abzeichen, die BLEIBEN: Ein neues Abzeichen ist in „kompakt“
+   von selbst ausgeblendet. Ausgeblendet sind damit auch Checkliste n/m, Bearbeiter-Cluster,
+   Verweis-Zähler, Aufwand, Wiederholung, Zähler, Priorität, Komplexität (F-2708, dokumentiert in
+   docs/glossar.md). Ausgeschriebene Selektoren statt natives CSS-Nesting (F-2711): vor Chrome 120 /
+   Safari 17.2 / Firefox 117 würde ein Nesting-Block still verworfen. */
+[data-density="kompakt"] .column-cards { gap: 4px; }
+[data-density="kompakt"] .card--has-cover { background: var(--surface) !important; min-height: 0; color: inherit; }
+[data-density="kompakt"] .card--has-cover :is(.card-title, .card-title-text, .card-display-id, .card-footer) { color: inherit; }
+/* 29.10.: Owner und Abzeichen in die Label-Zeile, lange Titel auf zwei Zeilen */
+[data-density="kompakt"] .card { padding: 4px 8px; display: flex; flex-wrap: wrap; align-items: center; column-gap: 6px; }
+[data-density="kompakt"] .card-title { flex-basis: 100%; }
+[data-density="kompakt"] .card-title-text { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+/* F-2748: Tastatur (j/k markiert, Tab fokussiert) — voller Titel statt Tooltip, der bei Fokus nie erscheint.
+   F-2751: :focus-visible, nicht :focus-within — Karten haben tabindex=0, ein Mausklick fokussiert sie auch */
+[data-density="kompakt"] .card--keyboard-active .card-title-text { display: block; overflow: visible; }
+[data-density="kompakt"] .card:focus-visible .card-title-text { display: block; overflow: visible; }
+[data-density="kompakt"] .card-footer { margin: 6px 0 0 auto; }
+[data-density="kompakt"] .card-footer>:not(.card-flag-badge, .card-date-badge, .card-qa-badge, .card-link-blocked-badge, .card-owner-badge),
+[data-density="kompakt"] .card-owner-badge--avatar .card-owner-badge-label { display: none; }
+.card-title { font-size: 13px; font-weight: 500; word-break: break-word; display: flex; gap: 4px; align-items: baseline; }
+.card-title-text { flex: 1; min-width: 0; }
+.card-display-id {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 400;
+  flex-shrink: 0;
+  opacity: .55;
+  text-decoration: none;
+  padding: 0 3px;
+  border-radius: 3px;
+}
+.card-finding-id { font-size: 10px; font-weight: 600; flex-shrink: 0; padding: 0 4px; border-radius: 3px; background: var(--accent-dim); color: var(--accent); }
+.card-display-id:hover { opacity: 1; background: var(--accent-dim); color: var(--accent); }
+.card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+.label {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  font-weight: 500;
+}
+/* Karte #971: Labelfarbe aus dem Text (faerbeLabel in identity.js) */
+.lc {
+  background: hsl(var(--h) var(--lb));
+  color: hsl(var(--h) var(--lf));
+}
+
+/* Karten in „Erledigt": Labels/Badges aus, Karte gedimmt (Hover hebt auf)
+   F-250: .is-done (Titel-Semantik) statt fester id col-erledigt */
+.column.is-done .card { opacity: 0.6; }
+.column.is-done .card:hover { opacity: 1; }
+.column.is-done .card-labels,
+.column.is-done .card-footer { display: none; }
+
+/* ── Karte-Quick-Add ───────────────────────────────────────────── */
+.btn-add-card {
+  width: 100%;
+  text-align: left;
+  color: var(--text-muted);
+  border: none;
+  background: transparent;
+  font-size: 13px;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-add-card:hover { color: var(--text); background: var(--border); }
+.card-add-form { display: flex; flex-direction: column; gap: 6px; }
+.card-add-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.card-add-input:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+.card-add-actions { display: flex; gap: 6px; }
+
+/* ── Spalte-Hinzufügen Popover ─────────────────────────────────── */
+.col-add-popover {
+  position: fixed;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 220px;
+}
+.col-add-popover-input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.col-add-popover-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.col-add-popover-row { display: flex; gap: 6px; }
+.col-add-popover-row .btn { flex: 1; }
+
+/* ── Popover-Einblend-Animation ────────────────────────────────── */
+/* Gilt für alle Popover-Typen: col-add-popover, overflow-menu */
+.col-add-popover,
+.overflow-menu {
+  opacity: 0;
+  /* Karte #175 (C): leichter Spring beim Open. */
+  transform: translateY(-8px) scale(0.97);
+  transform-origin: top center;
+  transition: opacity 180ms ease-out,
+              transform 220ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.popover--open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ── Karten-Animationen ────────────────────────────────────────── */
+@keyframes card-fade-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Karte #175 (B): Drop-Pulse mit Spring-Bounce + Schatten-Aufblitzen. */
+@keyframes card-drop-pulse {
+  0%   { background-color: var(--accent-dim);
+         transform: scale(1.025);
+         box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  60%  { transform: scale(0.99); }
+  100% { background-color: transparent;
+         transform: scale(1);
+         box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+.card--just-dropped {
+  animation: card-drop-pulse 420ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Karte #175 (A): Karte landet in Erledigt — Glow-Sweep + Skalierungs-Bounce.
+   Wird vom Renderer flipAnimate gesetzt, wenn droppedCardId in einer
+   col-erledigt-Spalte landet. */
+@keyframes card-landed-erledigt {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0); transform: scale(1); }
+  30%  { box-shadow: 0 0 18px 6px rgba(34,197,94,0.55); transform: scale(1.04); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); transform: scale(1); }
+}
+.card--landed-erledigt {
+  animation: card-landed-erledigt 620ms cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* ── Modal (→ ADR-0016) ────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  /* Geschlossen-Zustand — kein display:none mehr, damit Transition läuft */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Karte #175 (C): Backdrop-Blur fadet mit ein. */
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  transition: opacity 200ms ease-out, visibility 200ms ease-out,
+              backdrop-filter 220ms ease-out, -webkit-backdrop-filter 220ms ease-out;
+}
+.modal-overlay--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.2);
+  padding: 0;
+  width: min(1100px, 95vw);
+  max-height: 95vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Ankerpunkt für .attachment-drop-overlay */
+  /* Karte #175 (C): Spring-Bounce beim Open. */
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 200ms ease-out,
+              transform 240ms cubic-bezier(.34, 1.56, .64, 1);
+}
+.modal-overlay--open .modal {
+  opacity: 1;
+  transform: scale(1);
+}
+.modal-field label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.modal-field input,
+.modal-field textarea,
+.modal-field select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.modal-field textarea { min-height: 100px; resize: vertical; }
+.modal-field input:focus,
+.modal-field textarea:focus,
+.modal-field select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+.modal-dialog-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+.modal-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 16px 20px 14px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+/* Scrollbarer Body zwischen Header und Footer */
+.modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.modal-title-left {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+.modal-title-header {
+  flex: 1;
+  min-width: 0;
+  font-size: 17px;
+  font-weight: 600;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 6px;
+  color: var(--text);
+  outline: none;
+}
+.modal-title-header:hover { border-color: var(--border); }
+.modal-title-header:focus { border-color: var(--accent); background: var(--surface-2); }
+.modal-card-id {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: none;
+  opacity: .7;
+  flex-shrink: 0;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+.modal-card-id:hover { opacity: 1; background: var(--accent-dim); color: var(--accent); }
+.btn-card-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: .5;
+  padding: 4px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color .15s, background .15s, opacity .15s;
+}
+.btn-card-delete:hover {
+  color: #dc2626;
+  background: rgba(220,38,38,.1);
+  opacity: 1;
+}
+/* Schließen-Kreuz oben rechts im Modal-Header (#82) */
+.btn-modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  opacity: .5;
+  padding: 4px 6px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  font-size: 18px;
+  transition: color .15s, background .15s, opacity .15s;
+}
+.btn-modal-close:hover {
+  color: var(--text);
+  background: var(--surface-2);
+  opacity: 1;
+}
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+}
+/* #260: margin-left:auto hält die Abbrechen/Speichern-Gruppe IMMER
+   rechtsbündig — auch wenn der linke KI-Kontext-Button via #248
+   (Server-/claude-code-Build) versteckt ist (sonst richtet
+   justify-content:space-between bei nur einem Kind linksbündig aus). */
+.modal-actions-right { display: flex; gap: 8px; margin-left: auto; }
+.modal-actions-left { margin-right: auto; }
+
+/* ── Drag-and-Drop ─────────────────────────────────────────────── */
+.card-dragging { opacity: 0.3; }
+.drag-ghost { opacity: 0.85; transform: rotate(1.5deg); }
+.column-header--sort .column-title::after { content: ' \21C5'; opacity: .6; } /* F-2763 */
+.column-drop-target {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+}
+
+/* ── Recovery-Banner (F-22) ────────────────────────────────────── */
+.recovery-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #fef3c7;
+  border-bottom: 2px solid #fbbf24;
+  color: #78350f;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 50;
+  font-size: 13px;
+}
+.recovery-banner span { flex: 1; }
+
+/* Sync-Permission-Banner: dunkles Design für besseren Kontrast */
+.sync-permission-banner {
+  background: var(--surface);
+  border-bottom-color: var(--accent);
+  color: var(--text);
+}
+
+/* Konflikt-Banner (Karte #77): rotes Schema — fordert Nutzer-Entscheidung */
+.conflict-banner {
+  background: #fee2e2;
+  border-bottom-color: #ef4444;
+  color: #7f1d1d;
+}
+
+/* ── Karten-Footer (Abzeichen: Checkliste, QA, Priorität, Flags, Aufwand, Datum, Verweise …) ── */
+.card-footer {
+  display: flex;
+  flex-wrap: wrap; /* #813: viele Abzeichen brechen in eine zweite Zeile um, statt rechts abgeschnitten zu werden */
+  align-items: center;
+  gap: 4px 6px;
+  margin-top: 5px;
+}
+/* #813: einzelne Abzeichen brechen in sich nicht um und schrumpfen nicht; ein Ausreißer
+   (langer Name im Claim-Abzeichen) wird mit Ellipse gekürzt statt von .card abgeschnitten */
+.card-footer > .card-checklist-summary,
+.card-footer > .card-qa-badge,
+.card-footer > .card-prio-badge,
+.card-footer > .card-flag-badge,
+.card-footer > .card-complexity-badge,
+.card-footer > .card-effort-badge,
+.card-footer > .card-date-badge,
+.card-footer > .card-link-badge,
+.card-footer > .card-count-badge,
+.card-footer > .card-link-blocked-badge,
+.card-footer > .card-comment-badge {
+  white-space: nowrap;
+  flex-shrink: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.card-checklist-summary {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.card-qa-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--prio-low-fg);
+  background: var(--prio-low-bg);
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.card-prio-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.card-prio-badge--high {
+  color: var(--prio-high-fg);
+  background: var(--prio-high-bg);
+}
+.card-prio-badge--low {
+  color: var(--prio-low-fg);
+  background: var(--prio-low-bg);
+}
+
+/* ── Owner-Badge auf Karten ────────────────────────────────────── */
+.card-owner-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 10px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.card-owner-badge--user {
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.card-owner-badge--claude {
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+
+/* #302: Assignees-Cluster — kleine Avatare neben Owner */
+.card-assignees-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+}
+.card-assignee-avatar {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--surface);
+  font-size: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.card-assignee-avatar--unknown {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+.card-assignee-overflow {
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 0 4px;
+}
+
+/* ── Flag-Badges auf Karten ────────────────────────────────────── */
+.card-flag-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+}
+.card-flag-badge--critical {
+  color: #dc2626;
+  background: rgba(220,38,38,.12);
+}
+.card-flag-badge--blocked {
+  color: #ea580c;
+  background: rgba(234,88,12,.12);
+}
+
+/* ── Komplexität- und Aufwand-Badges auf Karten ────────────────── */
+.card-complexity-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.card-complexity-badge--hoch {
+  color: var(--cx-h);
+  background: rgba(147,51,234,.1);
+  border-color: rgba(147,51,234,.25);
+}
+.card-complexity-badge--mittel {
+  color: var(--accent);
+  background: var(--accent-dim);
+  border-color: transparent;
+}
+.card-effort-badge {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 1px 4px;
+}
+
+/* ── Datum-Badges auf Karten (ADR-0034) ────────────────────────── */
+.card-date-badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.card-date-badge--overdue {
+  color: var(--due-o);
+  background: rgba(220,38,38,.12);
+  border-color: rgba(220,38,38,.25);
+}
+.card-date-badge--soon {
+  color: var(--due-s);
+  background: rgba(234,179,8,.15);
+  border-color: rgba(234,179,8,.3);
+}
+
+/* ── Flags im Modal als Umschalt-Pillen (Karte #817) ──────────────
+   Die Checkbox bleibt das Formularfeld (Tastatur, Lesepfade), sichtbar ist
+   ihr Label als Pille. Pillen und Chips nutzen das Aussehen der
+   Karten-Labels (.label / .card-labels) — kein eigener Satz Regeln. */
+.flag-row { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.qa-checkbox { position: absolute; opacity: 0; }
+/* Nacharbeit O-3: inaktiv dezent, aber lesbar (--text-muted ≥ 4.5:1), aktiv
+   gefüllt mit Rand und Häkchen — keine Deckkraft, die den Text mit ausbleicht. */
+.flag-row .label { border: 1px solid var(--accent); cursor: pointer; }
+.qa-checkbox:not(:checked) + .label { background: none; color: var(--text-muted); border-color: var(--border); }
+.qa-checkbox:checked + .label::before { content: '✓ '; }
+.qa-checkbox:focus-visible + .label { outline: 2px solid var(--accent); }
+.chip-x { border: 0; background: none; color: inherit; cursor: pointer; padding: 0 0 0 4px; }
+.modal-field .label select { width: auto; border: 0; background: none; color: inherit; padding: 0 4px; font-size: 12px; }
+/* Nacharbeit O-2/O-4: „+“ (Bearbeiter) als kompakter Chip-Knopf ohne Pfeil,
+   Label-Eingabe als erkennbares Feld mit Platzhalter „+ Label“. */
+.modal-field .chip-add {
+  width: 2.4em; padding: 1px 0; font-size: 12px; border: 1px dashed var(--accent); border-radius: 10px;
+  background: none; color: var(--accent); appearance: none; text-align: center; text-align-last: center; cursor: pointer;
+}
+.chip-add option { color: var(--text); background: var(--surface); }
+.modal-field input.chip-add { flex: 1 1 8em; min-width: 8em; max-width: 16em; padding: 1px 8px; text-align: left; cursor: text; }
+/* Termine-Sektion: Kopf mit Zusammenfassung */
+.modal-termine > summary { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; }
+#tab-panel-desc.tab-panel-active { display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Modal (erweitert für Typora-Ansicht → ADR-0029) ───────────── */
+.modal-desc-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Beschreibungs-Pane */
+.desc-pane {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 4.5em;
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--surface);
+}
+
+/* Ansicht-Modus */
+.desc-pane .md-content { padding: 10px 12px; }
+.desc-pane .md-empty { padding: 10px 12px; color: var(--text-muted); font-style: italic; }
+
+/* Typora-Edit-Modus (ADR-0029) */
+.typora-block {
+  padding: 4px 12px;
+  border-radius: 4px;
+  cursor: text;
+  transition: background .1s;
+}
+.typora-block:hover { background: var(--surface-2); }
+.typora-block.typora-editing { background: var(--accent-dim); cursor: default; padding: 4px 12px; }
+.typora-rendered { pointer-events: none; }
+.typora-rendered .md-content { padding: 0; }
+.typora-textarea {
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  padding: 4px;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.6;
+  color: var(--text);
+  background: transparent;
+  resize: none;
+  outline: none;
+  overflow: hidden;
+  box-sizing: border-box;
+  min-height: 1.5em;
+}
+.typora-placeholder { padding: 10px 12px; color: var(--text-muted); font-style: italic; cursor: text; }
+
+/* ── ADR-0076 / #267: Lese⇄Edit-Schalter — lebt in der .desc-toolbar
+   (NICHT in #desc-pane). Modus-Schalter zwischen Render-Ansicht und
+   WYSIWYG-Editor; im Lese-Modus sind die Format-Buttons ausgeblendet. */
+.desc-edit-toggle {
+  flex-shrink: 0;
+  margin-right: auto;          /* drückt Maximize nach rechts */
+  padding: 3px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+.desc-edit-toggle:hover { border-color: var(--accent, #0B5D73); }
+.desc-edit-toggle--active { background: var(--accent-dim); border-color: var(--accent, #0B5D73); }
+/* #267: Lese-Modus = keine Markdown-Format-Affordanz. Sichtbar bleiben
+   nur der Toggle selbst und der Maximize-Button. */
+.modal-desc-section:not(.desc-section-editing) .desc-toolbar > .toolbar-btn:not(.btn-maximize),
+.modal-desc-section:not(.desc-section-editing) .desc-toolbar > .toolbar-dropdown-wrap {
+  display: none;
+}
+/* Im Lese-Modus kein Edit-Affordance (kein Text-Cursor / kein Hover). */
+.desc-pane--readonly .typora-block { cursor: default; }
+.desc-pane--readonly .typora-block:hover { background: transparent; }
+/* #817: Links und Häkchen im Lese-Modus per Klick bedienbar. */
+.desc-pane--readonly .typora-rendered { pointer-events: auto; }
+
+/* ── Markdown-Toolbar ──────────────────────────────────────────── */
+.desc-toolbar {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding: 4px 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px 6px 0 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  flex-shrink: 0;
+}
+
+/* Toolbar-Button */
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.toolbar-btn:hover {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+.toolbar-btn:active {
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+/* Aktiv-Indikator: Selektion liegt in formatiertem Bereich (Bold/Italic/Code) */
+.toolbar-btn[aria-pressed="true"],
+.toolbar-btn.toolbar-btn-active {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.08);
+}
+
+/* Maximize-Button in der Editor-Toolbar — rechtsbündig (Karte #111) */
+.btn-maximize {
+  margin-left: auto;
+}
+
+/* Dropdown für Überschriften */
+.toolbar-dropdown-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.toolbar-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  z-index: 210;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,.15);
+  flex-direction: column;
+  min-width: 52px;
+}
+.toolbar-dropdown-menu.open { display: flex; }
+.toolbar-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 5px 10px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+}
+.toolbar-dropdown-item:hover { background: var(--surface-2); }
+
+/* Desc-Pane soll Toolbar-Border nahtlos anschließen */
+.desc-toolbar + .desc-pane {
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+/* ── Maximize-Modus (F-161: wirklich vollflächig) ─────────────── */
+/* F-173: Modal hat `transform: scale()` für die Open-Animation — das erzeugt
+   einen Containing-Block für `position: fixed`-Kinder. Solange ein Pane
+   maximiert ist, wird der Transform via Body-Klasse aufgehoben, damit
+   `.desc-maximized` tatsächlich am Viewport ankert. */
+body.maximized-pane-active .modal-overlay--open .modal,
+body.maximized-pane-active .modal {
+  transform: none;
+}
+.modal-desc-section.desc-maximized {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: var(--surface);
+  padding: 24px 32px;
+  display: flex;
+  flex-direction: column;
+}
+.modal-desc-section.desc-maximized .desc-pane {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+}
+
+.modal-meta-row {
+  display: flex;
+  gap: 12px;
+}
+.modal-meta-row .modal-field { flex: 1; }
+/* ADR-0138 §1: Datum und Uhrzeit nebeneinander */
+.modal-date-time { display: flex; gap: 6px; }
+.modal-field .modal-date-time input[type="time"] { width: auto; flex: 0 0 auto; }
+
+/* ── Markdown-Rendering ────────────────────────────────────────── */
+.md-content {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.md-content p { margin-bottom: 8px; }
+.md-content p:last-child { margin-bottom: 0; }
+.md-h1 { font-size: 18px; font-weight: 700; margin: 4px 0 10px; }
+.md-h2 { font-size: 15px; font-weight: 600; margin: 4px 0 8px; }
+.md-h3 { font-size: 13px; font-weight: 600; margin: 4px 0 6px; }
+.md-content hr { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+.md-blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 10px;
+  margin: 6px 0;
+  color: var(--text-muted);
+}
+.md-blockquote p { margin-bottom: 4px; }
+.md-pre {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  margin: 6px 0;
+}
+.md-pre code { font-family: 'Consolas', 'Menlo', monospace; font-size: 12px; }
+.md-inline-code {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-family: 'Consolas', 'Menlo', monospace;
+  font-size: 12px;
+}
+.md-ul, .md-ol, .md-checklist {
+  padding-left: 18px;
+  margin: 4px 0;
+}
+.md-ul li, .md-ol li, .md-checklist li {
+  margin-bottom: 3px;
+}
+.md-checklist { list-style: none; padding-left: 0; }
+.md-checklist li { display: flex; align-items: baseline; gap: 6px; }
+.md-checkbox { margin-top: 2px; cursor: pointer; flex-shrink: 0; }
+.md-checklist-done { text-decoration: line-through; color: var(--text-muted); }
+.md-content a { color: var(--accent); text-decoration: underline; }
+.md-content strong { font-weight: 600; }
+.md-content em { font-style: italic; }
+.md-content del { text-decoration: line-through; color: var(--text-muted); }
+.md-table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 6px 0;
+  font-size: 12px;
+}
+.md-table th, .md-table td {
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  text-align: left;
+}
+.md-table th { background: var(--surface-2); font-weight: 600; }
+
+/* ── Tab-Bar im Modal ──────────────────────────────────────────── */
+.modal-tab-bar {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 2;
+  margin: -16px -20px 0;
+  padding: 0 20px;
+}
+.tab-btn {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: -2px;
+  border-radius: 4px 4px 0 0;
+  transition: color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--text); background: var(--surface-2); }
+.tab-btn.tab-active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.tab-panel { display: none; padding-top: 14px; }
+.tab-panel.tab-panel-active { display: block; }
+
+/* ── Comment-Count-Badge im Kommentare-Tab ─────────────────────── */
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--accent);
+  color: #fff;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+/* F-454: var(--accent) ist im Dark-Theme ein aufgehelltes Teal (#2db5d0) — #fff
+   erreicht darauf nur 2,43:1. Im Light-Theme (dunkles Teal) passt #fff (AA
+   bestanden), deshalb kein globaler Farbwechsel, sondern eine gezielte
+   Dark-Override analog zum bestehenden Muster bei .awaiting-banner weiter oben. */
+[data-theme="dark"] .tab-badge { color: var(--bg); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tab-badge { color: var(--bg); }
+}
+
+/* ── Kommentare ────────────────────────────────────────────────── */
+.comments-section { display: flex; flex-direction: column; gap: 8px; }
+.comments-list    {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: var(--surface-2);
+}
+.comment-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+/* #857: jeder Kommentar als eigene Kachel, Kopfzeile abgesetzt */
+.comment-item  {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 6px;
+}
+.comment-meta  {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+.comment-author-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.comment-date { font-size: 11px; color: var(--text-muted); }
+/* Karte #172: Markdown-Rendering — Block-Elemente regeln eigene Abstände,
+   pre-wrap entfällt. word-break bleibt für lange URLs/Wörter. */
+.comment-text { font-size: 13px; line-height: 1.5; word-break: break-word; }
+.comment-text .md-content > *:first-child { margin-top: 0; }
+.comment-text .md-content > *:last-child  { margin-bottom: 0; }
+.comment-form {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  align-items: end;
+}
+.comment-input {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  resize: none;
+  min-height: 34px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+.comment-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+/* #856: Kommentar-Tab aktiv → Modal in voller erlaubter Höhe, Liste füllt
+   den Raum zwischen Tab-Leiste und Eingabeformular. */
+.modal.modal--kommentare { height: 95vh; }
+.modal.modal--kommentare .tab-panel.tab-panel-active#tab-panel-comments {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.modal.modal--kommentare .comments-section {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.modal.modal--kommentare .comments-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
+}
+.modal.modal--kommentare .comment-form { flex: 0 0 auto; }
+
+/* ── Karten-Verweise (ADR-0032) ──────────────────────────────── */
+.links-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.tab-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.link-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+.link-group { display: flex; flex-direction: column; gap: 4px; }
+.link-group-heading {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 2px 0;
+}
+.link-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+.link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  color: var(--text-muted);
+}
+.link-icon--blocks,
+.link-icon--blocked-by { color: #d97706; }
+.link-icon--depends-on,
+.link-icon--required-for { color: #6366f1; }
+.link-icon--related { color: var(--text-muted); }
+.link-target {
+  flex: 1;
+  color: var(--accent);
+  text-decoration: none;
+  word-break: break-word;
+}
+.link-target:hover { text-decoration: underline; }
+.link-target--dead { color: var(--text-muted); font-style: italic; }
+.link-col-badge {
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.link-remove-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.link-remove-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Picker (eingebetteter Dialog im Verknüpfungen-Tab) */
+.link-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.link-picker-search {
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.link-picker-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.link-picker-type-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.link-picker-type-select {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface-2);
+}
+.link-picker-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.link-picker-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  text-align: left;
+}
+.link-picker-row:hover { background: var(--surface-2); }
+.link-picker-sprint-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.link-picker-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 6px 8px;
+}
+.link-picker-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Karten-Footer-Badge (#970: Zähler 💬/📎/≡ im selben Stil) */
+.card-link-badge,
+.card-count-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Computed-Badge: Karte durch offene blocked-by-Links blockiert (ADR-0032 Karte #54) */
+.card-link-blocked-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: #b91c1c;
+  background: rgba(185,28,28,.12);
+  cursor: help;
+}
+
+/* ── Config-Dialog ─────────────────────────────────────────────── */
+.config-dialog { width: min(560px, 95vw); }
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.config-label { font-size: 14px; font-weight: 500; }
+.config-select {
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 130px;
+}
+/* ── Projekt-Sync (→ ADR-0021) ─────────────────────────────────── */
+.sync-toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  z-index: 300;
+  animation: sync-fadein .2s ease;
+}
+/* ADR-0032 Karte #54: Auto-Entsperren-Toast (grüner Akzent) */
+.unlocked-toast {
+  border-left-color: #16a34a;
+  bottom: 60px; /* über sync-toast stapeln */
+}
+.sync-badge {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--accent-btn);
+  color: #fff;
+  border-radius: var(--radius);
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 300;
+  box-shadow: var(--shadow);
+}
+@keyframes sync-fadein { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Config-Dialog Projekt-Bereich */
+.config-separator {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 0 2px;
+  letter-spacing: .04em;
+}
+.config-project-area { display: flex; flex-direction: column; gap: 10px; }
+.config-project-status {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* ── Swimlane-Modus (→ ADR-0019) ───────────────────────────────── */
+#board-columns.swimlane-mode {
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+}
+.swimlane {
+  border-bottom: 2px solid var(--border);
+}
+.swimlane:last-child { border-bottom: none; }
+.sprint-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 10px;
+  padding: 2px 4px;
+  border-radius: 3px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: color .15s;
+}
+.sprint-toggle:hover { color: var(--text); }
+.sprint-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.sprint-title {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+  /* Punkt 5 (Karte #126): Truncation bei langem Sprintnamen */
+  flex: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+.sprint-title[role="button"] { cursor: pointer; }
+.sprint-title[role="button"]:hover { color: var(--accent); }
+.sprint-title-input {
+  flex: 1;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 8px;
+  background: var(--surface);
+  color: var(--text);
+}
+.btn-sprint-delete {
+  opacity: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  transition: opacity .15s, color .15s;
+}
+.sprint-header:hover .btn-sprint-delete { opacity: 1; }
+.btn-sprint-delete:hover { color: #dc2626; }
+
+/* Karte #145: Swimlane-Kind-Toggle als kompakter Icon-Button im Sprint-Header.
+   F-215 (Karte #162): Hover-Reveal analog zu .btn-sprint-delete — sehr seltene
+   Aktion, kein dauerhafter visueller Lärm im Header. */
+.btn-sprint-kind {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity .15s, background-color .15s;
+}
+.sprint-header:hover .btn-sprint-kind { opacity: 1; }
+.btn-sprint-kind:hover { background-color: var(--surface-2); }
+
+/* ── Sprint-Archivierung (ADR-0117, Karte #346) ─────────────────── */
+/* Gleiche Sichtbarkeitslogik wie .btn-sprint-kind: erscheint beim Hover über
+   den Header. Ausnahme: bei einer bereits archivierten Swimlane bleibt der
+   Knopf dauerhaft sichtbar — sonst gäbe es keinen auffindbaren Weg zurück
+   (ein Bedienelement, das man nur durch Raten findet, ist keiner). */
+.btn-sprint-archive {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity .15s, background-color .15s;
+}
+.sprint-header:hover .btn-sprint-archive { opacity: 1; }
+.btn-sprint-archive:hover { background-color: var(--surface-2); }
+.btn-sprint-archive[aria-pressed="true"] { opacity: 1; }
+/* Tastaturbedienung: ohne das wäre der Knopf beim Durchtabben unsichtbar. */
+.btn-sprint-archive:focus-visible { opacity: 1; }
+
+.sprint-archived-pill {
+  flex-shrink: 0;
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background-color: var(--surface-2);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+/* ── Sprint-Velocity-Widget (Karte #61) ─────────────────────────── */
+.sprint-velocity {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.sprint-velocity-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.sprint-velocity-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+.sprint-velocity-num {
+  font-size: 11px;
+}
+.sprint-velocity-effort {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Punkt 3 (Karte #126): Stundenangabe auf Mobile ausblenden */
+@media (max-width: 600px) {
+  .sprint-velocity-effort { display: none; }
+}
+
+/* Sparkline-CSS bleibt erhalten — buildSparklineSVG() wird ggf. für Burndown-Modal genutzt */
+.sparkline {
+  display: block;
+  overflow: visible;
+}
+.sparkline-goal {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  fill: none;
+}
+.sparkline-line {
+  stroke: var(--accent);
+  stroke-width: 2;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+.sparkline-dot {
+  fill: var(--accent);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+}
+
+/* Punkt 2 (Karte #126): Sprint-Progress-Linie zwischen Header und Spalten */
+.sprint-progress-line {
+  height: 2px;
+  width: 100%;
+  background: var(--border);
+  overflow: hidden;
+}
+.sprint-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.swimlane-columns {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+  padding: 14px 20px;
+  overflow-x: auto;
+  align-items: flex-start;
+  min-height: 60px;
+}
+
+/* ── Overflow-Menü (mobile) ──────────────────────────────────────── */
+.overflow-menu {
+  position: fixed;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 200;
+  min-width: 160px;
+  padding: 4px 0;
+}
+.overflow-menu-item {
+  display: block;
+  width: 100%;
+  padding: 11px 16px;
+  text-align: left;
+  background: none;
+  border: none;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+.overflow-menu-item:hover { background: var(--surface-2); }
+.overflow-menu-sep { height: 1px; background: var(--border); margin: 4px 0; }
+
+/* ── Anhänge (ADR-0033) ──────────────────────────────────────────── */
+.attachments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.attachments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.attachment-empty {
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+.attachment-entry {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.attachment-preview-slot,
+.attachment-preview {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.attachment-thumb {
+  max-width: 40px;
+  max-height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.attachment-meta {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.attachment-name {
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-size {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.attachment-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+}
+.attachment-btn:hover {
+  background: var(--surface);
+  color: var(--text);
+}
+/* Karte #62: Cover-Aktions-Button im Anhänge-Tab */
+.attachment-cover-btn { font-size: 14px; }
+.attachment-cover-btn--active { color: var(--accent); }
+.attachment-cover-badge {
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.attachment-entry--cover {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+.attachments-actions { display: flex; gap: 8px; }
+.attachments-board-size {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 0;
+  font-style: italic;
+}
+
+/* ── Attachment-Drop-Overlay (ADR-0033, Karte #50) ──────────────────── */
+.attachment-drop-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent, #4f8ef7) 20%, transparent);
+  border: 3px dashed var(--accent, #4f8ef7);
+  border-radius: var(--radius, 8px);
+  z-index: 10;
+  pointer-events: none;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent, #4f8ef7);
+}
+
+/* Inline-Bild im Markdown (attachment:// oder https://) */
+.md-inline-img {
+  max-width: 100%;
+  max-height: 400px;
+  border-radius: 4px;
+  display: block;
+  margin: 4px 0;
+}
+
+/* F-856 / ADR-0122: Platzhalter für ein externes Bild, das nicht von selbst
+   geladen wird. Gestrichelter Rahmen — es ist eine Leerstelle, kein Inhalt. */
+.md-ext-img,
+.md-ext-img:visited {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+.md-ext-img {
+  display: block;
+  max-width: 100%;
+  margin: 4px 0;
+  padding: 6px 10px;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: .85em;
+  text-align: left;
+  cursor: pointer;
+}
+.md-ext-img:hover {
+  border-style: solid;
+  color: var(--text);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────── */
+.hide-mobile { /* controlled by media query */ }
+.show-mobile { display: none; }
+
+/* Barrierefreiheits-Hilfsklasse: visuell versteckt, für Screenreader sichtbar */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile { display: none !important; }
+  /* Karte #817: Details-Tab mobil einspaltig */
+  .modal-meta-row { flex-direction: column; }
+  .show-mobile { display: inline-flex; }
+
+  #board-header {
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .board-title-wrap { flex: 1; position: static; }
+  #board-header { position: relative; }
+  .board-menu { left: 14px; right: 14px; max-width: none; }
+  .header-actions { margin-left: auto; }
+  .header-filter {
+    display: none;          /* standardmäßig ausgeblendet */
+    order: 10;
+    flex-basis: 100%;
+    justify-content: flex-start;
+    gap: 6px;
+    padding-top: 2px;
+  }
+  .header-filter.filter-visible { display: flex; }
+
+  /* Suche auf Mobile: volle Breite unter dem Header-Inhalt */
+  .header-search {
+    order: 11;
+    flex-basis: 100%;
+    padding-top: 2px;
+  }
+  .search-input {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .search-input:focus {
+    width: 100%;
+  }
+
+  /* Flat-Modus: Spalten horizontal mit Scroll-Snap */
+  #board-columns:not(.swimlane-mode) {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px;
+    gap: 10px;
+  }
+  #board-columns:not(.swimlane-mode) > .column {
+    scroll-snap-align: start;
+    width: calc(100vw - 40px);
+    min-width: 0;
+  }
+
+  /* Swimlane-Modus: jede Lane scrollt separat */
+  .swimlane-columns {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .swimlane-columns > .column {
+    scroll-snap-align: start;
+    width: calc(100vw - 40px);
+    min-width: 0;
+  }
+
+  /* ── Modals als Bottom Sheet ────────────────────────────── */
+  .modal-overlay {
+    align-items: flex-end;
+  }
+  .modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: 16px 16px 0 0;
+  }
+  /* #856: Kommentar-Tab mobil in voller Sheet-Höhe */
+  .modal.modal--kommentare { height: 92vh; }
+  /* Drag-Handle als visueller Hinweis — erstes Flex-Kind vor Header */
+  .modal::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin: 8px auto 0;
+    flex-shrink: 0;
+  }
+  .modal-header-row {
+    padding: 10px 16px 12px;
+    border-radius: 0;
+  }
+  .modal-body {
+    padding: 12px 16px;
+  }
+  .modal-actions {
+    padding: 10px 16px max(10px, env(safe-area-inset-bottom));
+  }
+  .config-dialog { width: 100%; }
+  /* Buttons am unteren Rand: größere Touch-Ziele */
+  .modal-actions .btn { padding: 10px 16px; }
+}
+
+/* ── Aktivitäts-Log (ADR-0037) ─────────────────────────────────── */
+.history-section { display: flex; flex-direction: column; gap: 8px; }
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  background: var(--surface-2);
+}
+.activity-empty { font-size: 12px; color: var(--text-muted); font-style: italic; }
+.activity-entry { display: flex; flex-direction: column; gap: 2px; }
+.activity-meta  { display: flex; gap: 8px; align-items: baseline; }
+.activity-author-tag {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 1px 6px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.activity-date  { font-size: 11px; color: var(--text-muted); }
+.activity-label { font-size: 13px; line-height: 1.5; word-break: break-word; }
+.activity-load-more {
+  margin-top: 4px;
+  align-self: flex-start;
+  font-size: 12px;
+}
+
+/* ── Tastatur-Navigation (ADR-0035) ────────────────────────────── */
+.card--keyboard-active {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+/* Help-Overlay (Shortcut-Referenz) */
+.shortcuts-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 500;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+.shortcuts-overlay--open { opacity: 1; }
+
+.shortcuts-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  padding: 24px 28px;
+  min-width: 320px;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shortcuts-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.shortcuts-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.shortcuts-table td {
+  padding: 5px 8px;
+  font-size: 13px;
+  color: var(--text);
+  vertical-align: middle;
+}
+.shortcuts-table td:first-child {
+  white-space: nowrap;
+  width: 1%;
+}
+.shortcuts-table kbd {
+  display: inline-block;
+  padding: 2px 7px;
+  font-family: monospace;
+  font-size: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 1px 0 var(--border);
+  color: var(--text);
+  min-width: 28px;
+  text-align: center;
+}
+.shortcuts-close {
+  align-self: flex-end;
+}
+
+/* ── Templates (ADR-0040, Karte #65) ───────────────────────────── */
+
+/* Dropdown unter „+ Karte"-Button */
+.template-dropdown {
+  position: absolute;
+  z-index: 200;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.18);
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: fadein .12s ease;
+}
+.template-dropdown-item {
+  background: none;
+  border: none;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.template-dropdown-item:hover { background: var(--surface-2); }
+.template-dropdown-item:first-child { font-style: italic; color: var(--text-muted); }
+
+/* Config-Dialog Templates-Liste */
+.config-templates-list { display: flex; flex-direction: column; gap: 4px; margin-bottom: 4px; }
+.config-templates-empty { font-size: 12px; color: var(--text-muted); font-style: italic; margin: 0; }
+.config-template-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+}
+.config-template-title {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--accent);
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.config-template-title:hover { text-decoration: underline; }
+.config-template-delete {
+  flex-shrink: 0;
+  padding: 2px 6px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+/* Config-Dialog Identitäten-Liste (Karte #123) */
+.config-identities-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+.config-identity-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+.config-identity-preview {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+.config-identity-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.config-identity-kind {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 2px;
+}
+.config-identity-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.config-identity-field .config-label {
+  font-size: 11px;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+/* ADR-0108 (#339): type="email" mit aufgenommen — ohne das saehe das
+   Adressfeld anders aus als das Anzeigename-Feld direkt darueber, obwohl
+   beide dieselbe Zeile derselben Liste sind. */
+.config-identity-field input[type="text"],
+.config-identity-field input[type="email"] {
+  flex: 1;
+  font-size: 12px;
+  padding: 2px 6px;
+  min-width: 0;
+}
+/* Der Hilfetext unter dem Adressfeld bricht die Flex-Zeile absichtlich um:
+   er gehoert unter das Feld, nicht daneben. */
+.config-identity-field:has(> .config-bg-hint) { flex-wrap: wrap; }
+.config-identity-field > .config-bg-hint { flex-basis: 100%; margin-left: 76px; }
+.config-identity-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+/* F-315/ADR-0078: .config-input--readonly + .config-server-hint entfernt —
+   die zugehörigen DOM-Pfade in configdialog.js waren toter Code, seit
+   ADR-0078 die Identitäten-Sektion im Server-Modus komplett ausblendet. */
+/* ── Erweitert-Sektion im Board-Einstellungen-Dialog (Karte #223) ──
+   Server-only: stripServerCss() in vite.config.base.js entfernt diese Regeln
+   aus aboard.html und dem Template (Karte #729). .config-advanced NIE in eine
+   Selektorliste setzen, weder vorne noch dahinter — das Muster schneidet sonst
+   mitten in die Liste oder nimmt die Nachbarselektoren mit
+   (tests/strip-server-css.test.js). */
+.config-advanced {
+  margin-top: 4px;
+}
+.config-advanced__summary {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 0 2px;
+  letter-spacing: .04em;
+  cursor: pointer;
+  list-style: disclosure-closed;
+  user-select: none;
+}
+.config-advanced[open] .config-advanced__summary {
+  padding-bottom: 6px;
+}
+.config-advanced .config-row {
+  margin-top: 4px;
+}
+
+/* Comment-Meta / Activity-Meta: Avatar links neben Autor (Karte #123) */
+.comment-meta .identity-avatar,
+.activity-meta .identity-avatar {
+  margin-right: 2px;
+  align-self: center;
+}
+
+/* Spalten-Footer muss relativ positioniert sein für Dropdown */
+.column-footer { position: relative; }
+
+/* Modal: „Als Template speichern"-Button */
+#modal-save-as-template-btn { margin-left: 4px; }
+
+/* Karten-Export-Submenü (#292) */
+.modal-export-wrap { position: relative; display: inline-block; margin-left: 4px; }
+.modal-export-menu {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 50;
+  box-shadow: 0 4px 12px rgba(0,0,0,.12);
+}
+.modal-export-menu button { white-space: nowrap; text-align: left; }
+
+/* ── App-Sidebar (Karte #176) ──────────────────────────────────── */
+/* Slide-in von links via Logo-Klick. Overlay über dem Inhalt, Backdrop
+   schließt. Spring-Animation analog Modal/Popover (#175 C). */
+.app-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  z-index: 99;
+  backdrop-filter: blur(0);
+  -webkit-backdrop-filter: blur(0);
+  transition: opacity 200ms ease-out, visibility 200ms ease-out,
+              backdrop-filter 220ms ease-out, -webkit-backdrop-filter 220ms ease-out;
+}
+.app-sidebar-backdrop--open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+/* Build-Version im Sidebar-Fuss (Karte #347). Fussnote, kein Menüpunkt:
+   klein, gedämpft, nicht anklickbar. `margin-top: auto` schiebt sie bei
+   kurzem Sidebar-Inhalt an den unteren Rand; bei langem läuft sie im Flow
+   mit (kein position:fixed — sonst Kollision mit dem Chat-Tail-Footer,
+   #283-Lehre). */
+.app-sidebar-version {
+  margin-top: auto;
+  padding: 10px 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+  opacity: .75;
+  user-select: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.app-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: min(320px, 90vw);
+  background: var(--surface);
+  box-shadow: 4px 0 24px rgba(0,0,0,.18);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform 240ms cubic-bezier(.34, 1.56, .64, 1);
+  outline: none;
+}
+.app-sidebar--open {
+  transform: translateX(0);
+}
+.app-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.app-sidebar-title {
+  font-size: 15px;
+  font-weight: 600;
+}
+.app-sidebar-section {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.app-sidebar-section:last-child { border-bottom: none; }
+.app-sidebar-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+  padding: 6px 16px;
+  font-weight: 600;
+}
+.app-sidebar-row {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 120ms ease-out;
+}
+.app-sidebar-row:hover {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+}
+.app-sidebar-row-icon {
+  font-size: 14px;
+  text-align: center;
+}
+.app-sidebar-row-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* Share-Styles: seit Karte #702 als String in share-section.js (nur Server-Build). */
+
+/* ── Header-Avatar (Karte #201, ADR-0059) ────────────────────────── */
+/* Kompakter Initialen-Kreis rechts in #board-header.
+   Nur gerendert wenn Forward-Auth AN + identifizierter User vorhanden. */
+.board-header-avatar {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  user-select: none;
+  cursor: default;
+  order: 99; /* immer rechts — flex-order nach allen anderen Header-Elementen */
+}
+
+/* Logo wird klickbar — Cursor + Hover-Hint signalisieren das. */
+.board-logo[role="button"] {
+  cursor: pointer;
+  transition: opacity 120ms ease-out;
+}
+.board-logo[role="button"]:hover {
+  opacity: 0.75;
+}
+
+/* Karte #175 (D): Sprint-Aktivierung — Sweep-Highlight läuft einmal über
+   den Sprint-Header, wenn ADR-0047 autoActivateSprintStart greift. Renderer
+   setzt die Klasse temporär (~700ms), wenn die Sprint-Start-Karte einen
+   sprint-activate-Activity-Eintrag innerhalb der letzten 4s hat. */
+@keyframes sprint-activated-sweep {
+  0%   { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+.sprint-header--just-activated {
+  background-image: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(34,197,94,0.28) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: sprint-activated-sweep 700ms ease-out;
+}
+
+/* #326: Swimlane-DnD — Drag-Handle am Sprint-Header + Drop-Indikator. */
+.sprint-drag-handle {
+  cursor: grab;
+  font-size: 14px;
+  color: var(--text-muted, #999);
+  padding: 0 4px;
+  user-select: none;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.sprint-drag-handle:hover { color: var(--text, #333); }
+.sprint-drag-handle:active { cursor: grabbing; }
+.sprint-drag-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+.swimlane-drop-target {
+  outline: 2px dashed var(--accent, #0099ff);
+  outline-offset: -2px;
+}
+
+/* ── Dokument-Viewer Overlay + Knowledge-Liste (Karten #274/#275) ──────
+   CSS in sidebar.js per JS-Injection (gegated hinter IS_PROJECTOR_BUILD),
+   damit der slim-Build (aboard.template.html) das CSS via DCE komplett
+   los wird. Reduktion: ADR-0088-Folgekarte #286 / F-320. */
+
+/* ── Barrierefreiheit: Reduced-Motion ──────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,13 @@
+node_modules/
+dist/
+dist-template/
+aboard.html
+aboard.template.html
+tmp/
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*~

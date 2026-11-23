@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>aBoard</title>
+</head>
+<body>
+
+<!-- App-Daten (eingebettetes JSON, Quelle der Wahrheit → ADR-0014) -->
+<script type="application/json" id="app-data">
+{
+  "version": "2",
+  "board": {
+    "id": "aboard-project",
+    "title": "aBoard",
+    "columnDefs": [
+      { "id": "col-backlog",   "title": "Backlog"   },
+      { "id": "col-in-arbeit", "title": "In Arbeit" },
+      { "id": "col-erledigt",  "title": "Erledigt"  }
+    ],
+    "sprints": [
+      {
+        "id": "sprint-11",
+        "title": "Sprint 11",
+        "cards": [
+          {
+            "id": "s11-ki-export",
+            "title": "KI-Kontext im Projekt-Modus → Projektordner schreiben",
+            "description": "Im Projekt-Modus soll 'KI-Kontext' den Export direkt als Datei in den Projektordner schreiben (via FSA) statt herunterzuladen. Button evtl. umbenennen.",
+            "status": "offen", "priority": "mittel",
+            "labels": ["feature", "app"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "s11-f15",
+            "title": "F-15: /projekt-start erkennt Sprint-Abschlüsse nicht zuverlässig",
+            "description": "Kein verifizierbarer Check ob der letzte Sprint ordnungsgemäß abgeschlossen wurde. Lösung: aboard-sync.json auswerten statt docs/status.md.",
+            "status": "offen", "priority": "mittel",
+            "labels": ["[K]", "framework"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "s11-f08",
+            "title": "F-08: Sprint-Abschluss ohne Pflichtfeld Sprint-Referenz",
+            "description": "Sprint-Definition bleibt für neue Sessions unklar wenn kein Pflichtfeld erzwingt, welcher Sprint abgeschlossen wird.",
+            "status": "offen", "priority": "mittel",
+            "labels": ["[V]", "framework"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "s11-f07",
+            "title": "F-07: Spurensicherung-Checkbox in Schritt-QA zahnlos",
+            "description": "Keine technische Durchsetzung — der Check ist nur eine Erinnerung ohne Blockier-Mechanismus.",
+            "status": "offen", "priority": "mittel",
+            "labels": ["[D]", "framework"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "s11-f45",
+            "title": "F-45: Board-als-Markdown-Export",
+            "description": "Nur KI-Kontext (strukturierter Text) und JSON implementiert. Echter .md-Export fehlt — kein ADR vorhanden.",
+            "status": "offen", "priority": "niedrig",
+            "labels": ["[D]", "app"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          }
+        ]
+      },
+      {
+        "id": "__backlog__",
+        "title": "Backlog",
+        "cards": [
+          {
+            "id": "card-framework-test",
+            "title": "Framework in weiteren Projekten einsetzen",
+            "description": "Framework v1.0 erfordert Einsatz in ≥ 2 Projekten. /retrofit-projekt und /init-projekt auf Basis von Praxiserfahrungen verbessern.",
+            "status": "offen", "priority": "mittel",
+            "labels": ["framework"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-backlog",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-milestone-dogfooding",
+            "title": "✓ Dogfooding-Meilenstein — aBoard verwaltet sich selbst",
+            "description": "aboard-sync.json ersetzt docs/status.md. Das Board ist ab Sprint 10 die primäre Quelle für Projektstatus und Planung.\n\nSprint 10 abgeschlossen.",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["milestone"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint10",
+            "title": "Sprint 10 — Projekt-Modus (ADR-0021)",
+            "description": "- sync.js: FSA Directory-Handle, IndexedDB, 15s-Polling mit Modal-Guard\n- aboard-sync.json als Sync-Datei\n- Kein localStorage im Projekt-Modus\n- Config-Erweiterung: boardMode + projectName\n- ConfigDialog: Projekt-Modus-Sektion\n- Toast + Badge für Sync-Feedback",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint9",
+            "title": "Sprint 9 — Stabilität (F-37, F-56, F-30, F-79)",
+            "description": "- localStorage pro Board-ID (aboard-autosave-{id})\n- v1→v2 Migration erkennt Sprint-/Wave-/Phase-Spalten automatisch\n- Recovery-Key-Bug behoben",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint8",
+            "title": "Sprint 8 — i18n vollständig (F-68–F-74)",
+            "description": "- Alle UI-Strings auf I18n.t() — renderer.js, modal.js, configdialog.js\n- Neue Keys für Confirms, Badges, Placeholders, ARIA-Labels",
+            "status": "erledigt", "priority": "mittel",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint7",
+            "title": "Sprint 7 — Stabilität + i18n (F-62–F-67)",
+            "description": "- Typora stale-lines behoben\n- Popovers aus gespeichertem HTML entfernen\n- ConfigDialog Focus-Trap\n- Overlay-Cache bei Sprachwechsel invalidieren",
+            "status": "erledigt", "priority": "mittel",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint6",
+            "title": "Sprint 6 — Backlog-Abbau (F-39, F-50, F-58, F-61)",
+            "description": "- card:add-cancel ohne Re-Render\n- buildPopover-Refactor: ARIA + Focus-Trap + Re-Attach\n- renderCardAddForm I18n",
+            "status": "erledigt", "priority": "mittel",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint5",
+            "title": "Sprint 5 — Swimlane-Modus (ADR-0019) + KI-Export",
+            "description": "- Schema v2: ColumnDefs + Sprints, Card.columnId\n- v1→v2 Migration\n- Flat- + Swimlane-Rendering\n- Sprint add/delete/rename\n- Sprint-übergreifendes DnD\n- F-52: Kommentare + qa im KI-Export",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint4",
+            "title": "Sprint 4 — UX-Qualität + Kommentare",
+            "description": "- Karten-Kommentare (ADR-0020)\n- QA-Checkbox\n- UI-Farbpalette (Logo-Teal)\n- Spalte leeren\n- Standard-Bearbeitungsmodus aus Config\n- F-41/47/54/55 behoben",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint3",
+            "title": "Sprint 3 — Markdown, Export, Accessibility",
+            "description": "- Eigener Markdown-Parser (ADR-0009/0010)\n- Modal 3-Ansichten: Ansicht / Typora / Quelltext (ADR-0017)\n- KI-Kontext + JSON-Export (ADR-0011)\n- F-34, F-40, F-44, F-46 behoben",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-12", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint2",
+            "title": "Sprint 2 — Grundfunktionen",
+            "description": "- Build-Setup: Vite + src/ + bun\n- Karten-CRUD + Modal (ADR-0016)\n- Spalten-Verwaltung, Drag-and-Drop\n- Speichern/Öffnen FSA + Fallback (ADR-0015)\n- Recovery-Modus",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-11", "updated": "2026-05-12"
+          },
+          {
+            "id": "card-sprint1",
+            "title": "Sprint 1 — Implementierungsvorbereitung",
+            "description": "- Knowledge-Base (16 URLs, 6 Sources, 3 Topics)\n- ADRs 0013–0015\n- index.html Grundgerüst mit Modul-Stubs",
+            "status": "erledigt", "priority": "hoch",
+            "labels": ["sprint"],
+            "milestone": null, "session": null, "comments": [], "qa": false,
+            "columnId": "col-erledigt",
+            "created": "2026-05-11", "updated": "2026-05-11"
+          }
+        ]
+      }
+    ]
+  }
+}
+</script>
+
+<!-- DOM-Container -->
+<div id="app">
+  <header id="board-header"></header>
+  <main id="board-columns"></main>
+</div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

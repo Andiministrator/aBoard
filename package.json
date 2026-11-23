@@ -1,0 +1,22 @@
+{
+  "name": "aboard",
+  "version": "1.66.0",
+  "description": "Offline-Board für strukturierte Projektplanung — als einzelne HTML-Datei",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --config vite.config.js && cp dist/index.html aboard.html",
+    "build:template": "vite build --config vite.config.template.js && cp dist-template/index.html aboard.template.html",
+    "test": "vitest run && vitest run --config vitest.config.slim.js",
+    "test:standalone": "vitest run",
+    "test:slim": "vitest run --config vitest.config.slim.js"
+  },
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "happy-dom": "^20.9.0",
+    "playwright-core": "^1.64.1",
+    "vite": "^8.0.12",
+    "vite-plugin-singlefile": "^2.3.3",
+    "vitest": "^4.1.6"
+  }
+}
