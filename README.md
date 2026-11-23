@@ -39,10 +39,10 @@ The **[Handbook](docs/handbook/README.md)**: [Variants](docs/handbook/variants.m
 
 | Area | What |
 |---|---|
-| **Board** | Columns Backlog → Ready → In Progress → Done, drag & drop, multiple boards |
+| **Board** | Columns Backlog → Ready → In Arbeit → Erledigt (renamable), drag & drop, multiple boards |
 | **Swimlanes** | Sprints and thematic rows, collapsible, archivable |
 | **Cards** | Markdown description, owner and assignees, labels, comments, attachments, due date with time |
-| **Flags and estimates** | ⚡ Critical · ⊘ Blocked · ✓ QA; complexity and effort in hours |
+| **Flags and estimates** | ⚡ Critical · ⊘ Blocked · ✓ QA done; complexity and effort in hours |
 | **Links** | blocks / depends on / related, with a back-link on the target card |
 | **Templates** | Card templates and recurring cards |
 | **Calendar** | Month and week view, events even without a card |

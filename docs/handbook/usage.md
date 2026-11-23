@@ -24,21 +24,21 @@ Which variant you have in front of you is explained in [Variants](variants.md).
 | File | Open, Export (JSON) |
 | Views | Calendar |
 | Settings | **User Settings** (identities, theme light/dark/system, language German/English) and **Board Settings** (mode and project folder, board background, templates, attachment limits) |
-| Documentation | project mode only: read the project's Markdown files, such as the README |
+| Documentation | only in `aboard.html` connected to a folder: read the project's README and knowledge index |
 | more | server only: Knowledge (if set up), Server administration (for admins), Clients and Projects |
 
 At the bottom of the sidebar is the version of aBoard.
 
 ## Columns
 
-A fresh board has four columns: **Backlog → Ready → In Progress → Done**.
+A fresh board has four columns: **Backlog → Ready → In Arbeit → Erledigt**. The default titles are German in every interface language (*In Arbeit* = in progress, *Erledigt* = done); click a title to rename it.
 
 | Column | Meaning |
 |---|---|
 | Backlog | parking lot for ideas: captured, but not yet released for work |
 | Ready | commitment point: this is to be done next |
-| In Progress | currently being worked on |
-| Done | completed |
+| In Arbeit | currently being worked on (in progress) |
+| Erledigt | completed (done) |
 
 Columns can be renamed (click the title), collapsed, added (**＋**) and deleted. The column header also offers bulk actions: archive or delete all cards of the column. Deleting applies across all swimlanes, which is why aBoard asks first.
 
@@ -50,7 +50,7 @@ Swimlanes are horizontal rows across the whole board. Every card belongs to exac
 
 With **⊞** you create a new swimlane and choose its type:
 
-- **Sprint** — a work period with a start and an end. Every sprint gets two special cards: **📋 Sprint start** for instructions and notes at the beginning, **🏁 Sprint end** for the retrospective at the end. As soon as the first card of the sprint leaves the Backlog, the start card moves to Done when the board is loaded; this shows that the sprint is running. The sprint header shows progress, for example "3/8 cards", and, once effort has been estimated, done against estimated hours.
+- **Sprint** — a work period with a start and an end. Every sprint gets two special cards: **📋 Sprint-Start** for instructions and notes at the beginning, **🏁 Sprint-Abschluss** for the retrospective at the end. As soon as the first card of the sprint leaves the Backlog, the start card moves to Erledigt when the board is loaded; this shows that the sprint is running. The sprint header shows progress, for example "3/8 cards", and, once effort has been estimated, done against estimated hours.
 - **Lane** — a topic or person row without sprint mechanics: no special cards, no progress display.
 
 A swimlane can later be switched between sprint and lane, collapsed and expanded, and moved (drag the handle or use the arrow keys up/down). When a sprint is deleted, its cards move to the Backlog.
@@ -84,7 +84,7 @@ A click on a card opens it. The window has several tabs:
 
 Below are the fields of the card (see the next section). When the window is closed, aBoard saves the changes automatically.
 
-**Description:** It opens in reading mode. **"✏ Edit"** switches to editing mode: a click on a paragraph makes it editable, and a toolbar helps with formatting (`Ctrl+B` bold, `Ctrl+I` italic, headings, lists, checklists, links, quotes). **"✓ Done"** switches back. Checkmarks in checklists can also be set in reading mode. aBoard loads images from foreign servers only after a click, so that nothing goes onto the network unnoticed.
+**Description:** It opens in reading mode. The **✏** button (tooltip “Edit”) switches to editing mode: a click on a paragraph makes it editable, and a toolbar helps with formatting (`Ctrl+B` bold, `Ctrl+I` italic, headings, lists, checklists, links, quotes). **"✓ Done"** switches back. Checkmarks in checklists can also be set in reading mode. aBoard loads images from foreign servers only after a click, so that nothing goes onto the network unnoticed.
 
 **Exporting a card:** The "📄 Export" menu in the card window prints the card or saves it as a PDF, saves it as Markdown, or opens an email with its content.
 
@@ -96,18 +96,18 @@ Below are the fields of the card (see the next section). When the window is clos
 | **Labels** | free keywords, separated by commas, for example `bug, feature` |
 | **Owner** | who is responsible for the card: a person or, in project mode and on the server, a Claude model |
 | **Assignees** | further people or models who contribute |
-| **Complexity** (`einfach`/`mittel`/`hoch`) | a rough estimate of how demanding the task is — project mode and server only |
+| **Complexity** (Simple/Medium/High) | a rough estimate of how demanding the task is — project mode and server only |
 | **Effort (h)** | estimated hours, for example `0.5` — project mode and server only |
 | **⚡ Critical** | the card is urgent and blocks progress |
 | **⊘ Blocked** | the card is waiting for something else (an answer, an external system) |
-| **✓ QA** | the card has been checked and is ready for acceptance |
+| **✓ QA** (“QA done”) | the card has been checked and is ready for acceptance |
 | **Due date** | a deadline; optionally with a time |
 | **Start date** | a start date; optionally with a time, for information only |
 | **Recurring** | daily, weekly (with weekday) or monthly (with day of the month) |
 
 Complexity and effort help to estimate a task realistically before it starts; the tile shows both as small badges. The flags Critical, Blocked and QA are simple yes/no switches, visible as symbols on the card.
 
-**Due date:** An overdue card gets a red badge, one due within the next three days a yellow one. In the Done column the badge is omitted.
+**Due date:** An overdue card gets a red badge, one due within the next three days a yellow one. In the Erledigt (done) column the badge is omitted.
 
 **Owner and identities:** Which names are available in the Owner field is set under User Settings → Identities (display name, color). On a server board, the Owner field instead offers the people who have a role on the board; Claude models only on boards that already use them.
 

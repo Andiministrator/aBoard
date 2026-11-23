@@ -27,7 +27,7 @@ bun run build               # aboard.html (project file)
 1. Put `aboard.template.html` in a fixed place and rename it if you like, for example `my-planning.html`.
 2. Open it in the browser with a double-click. Done.
 
-On first opening, aBoard creates an empty board with the columns Backlog, Ready, In Progress and Done.
+On first opening, aBoard creates an empty board with the columns Backlog, Ready, In Arbeit (in progress) and Erledigt (done); you can rename them.
 
 **Do not forget to save.** Until the first save, the board lives only in browser storage. The **Save** button in the header writes it into the HTML file:
 

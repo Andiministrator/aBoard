@@ -24,7 +24,7 @@ Welche Variante du vor dir hast, erklärt [Varianten](varianten.md).
 | Datei | Öffnen, Exportieren (JSON) |
 | Ansichten | Kalender |
 | Einstellungen | **Benutzer-Einstellungen** (Identitäten, Theme hell/dunkel/System, Sprache Deutsch/Englisch) und **Board-Einstellungen** (Modus und Projektordner, Board-Hintergrund, Vorlagen, Anhang-Grenzen) |
-| Dokumentation | nur im Projekt-Modus: Markdown-Dateien des Projekts lesen, etwa die README |
+| Dokumentation | nur in `aboard.html` mit Ordner-Verbindung (Projekt-Modus): README und Wissens-Index des Projekts lesen |
 | weitere | nur auf dem Server: Wissen (wenn eingerichtet), Server-Verwaltung (für Admins), Clients und Projekte |
 
 Unten in der Seitenleiste steht die Version von aBoard.
@@ -84,7 +84,7 @@ Ein Klick auf eine Karte öffnet sie. Das Fenster hat mehrere Reiter:
 
 Darunter stehen die Felder der Karte (siehe nächster Abschnitt). Beim Schließen des Fensters speichert aBoard die Änderungen automatisch.
 
-**Beschreibung:** Sie öffnet sich im Lesemodus. **„✏ Bearbeiten“** schaltet in den Bearbeitungsmodus: Ein Klick auf einen Absatz macht ihn editierbar, eine Werkzeugleiste hilft beim Formatieren (`Strg+B` fett, `Strg+I` kursiv, Überschriften, Listen, Checklisten, Links, Zitate). **„✓ Fertig“** schaltet zurück. Häkchen in Checklisten lassen sich auch im Lesemodus setzen. Bilder von fremden Servern lädt aBoard erst nach einem Klick, damit nichts unbemerkt ins Netz geht.
+**Beschreibung:** Sie öffnet sich im Lesemodus. Der Knopf **✏** (Hinweis „Bearbeiten“) schaltet in den Bearbeitungsmodus: Ein Klick auf einen Absatz macht ihn editierbar, eine Werkzeugleiste hilft beim Formatieren (`Strg+B` fett, `Strg+I` kursiv, Überschriften, Listen, Checklisten, Links, Zitate). **„✓ Fertig“** schaltet zurück. Häkchen in Checklisten lassen sich auch im Lesemodus setzen. Bilder von fremden Servern lädt aBoard erst nach einem Klick, damit nichts unbemerkt ins Netz geht.
 
 **Export einer Karte:** Das Menü „📄 Export“ im Karten-Fenster druckt die Karte bzw. speichert sie als PDF, speichert sie als Markdown oder öffnet eine E-Mail mit ihrem Inhalt.
 
@@ -100,7 +100,7 @@ Darunter stehen die Felder der Karte (siehe nächster Abschnitt). Beim Schließe
 | **Aufwand (h)** | geschätzte Stunden, etwa `0.5` — nur im Projekt-Modus und auf dem Server |
 | **⚡ Kritisch** | die Karte ist dringend und blockiert den Fortschritt |
 | **⊘ Blockiert** | die Karte wartet auf etwas anderes (eine Antwort, ein externes System) |
-| **✓ QA** | die Karte wurde geprüft und ist abnahmebereit |
+| **✓ QA** („QA abgeschlossen“) | die Karte wurde geprüft und ist abnahmebereit |
 | **Fällig am** | ein Termin; optional mit Uhrzeit |
 | **Start am** | ein Starttermin; optional mit Uhrzeit, nur zur Information |
 | **Wiederkehrend** | täglich, wöchentlich (mit Wochentag) oder monatlich (mit Tag im Monat) |
