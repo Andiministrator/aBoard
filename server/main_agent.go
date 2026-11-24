@@ -409,7 +409,7 @@ func runAgentTokenMit(args []string, out io.Writer) error {
 			fmt.Fprintf(out, "Vorschlags-Token %q angelegt: Board %s, gültig bis %s. Es legt nur neue Karten in der Swimlane „Vorschläge“ an und liest nichts.\n", t.Name, t.BoardID, t.ExpiresAt)
 		} else if t.Delegierend {
 			fmt.Fprintf(out, "Delegierendes Dienst-Token %q angelegt: kein Board, Rolle höchstens %s, gültig bis %s.\n", t.Name, t.Role, t.ExpiresAt)
-			fmt.Fprintf(out, "Es wirkt nur mit signiertem %s und gesetztem %s (docs/handbuch/server/konfiguration.md (ABOARD_OWUI_*)).\n", api.OWUIUserJWTHeader, api.OWUIJWTSecretFileEnv)
+			fmt.Fprintf(out, "Es wirkt nur mit signiertem %s und gesetztem %s (siehe docs/handbuch/server/konfiguration.md, Abschnitt ABOARD_OWUI_*).\n", api.OWUIUserJWTHeader, api.OWUIJWTSecretFileEnv)
 		} else if t.Mehrere {
 			fmt.Fprintf(out, "Agent %q angelegt: %d Boards (%s), Rolle %s%s, gültig bis %s.\n", t.Name, len(t.Boards), strings.Join(t.Boards, ", "), t.Role, fuer, t.ExpiresAt)
 			fmt.Fprintln(out, "Nur Werkzeuge (/werkzeuge/…, /openapi.json, /mcp), keine rohen Ops. Später freigegebene Boards kommen nicht dazu.")

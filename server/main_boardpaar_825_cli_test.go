@@ -19,28 +19,28 @@ func TestBoardpaar825_CLI(t *testing.T) {
 		t.Errorf("abe mit Recht: %q %v", out, err)
 	}
 	// Seite aus: kein Auftrag.
-	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "tg", "--link", "https://i.example/#board=b1"); err == nil {
+	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "team", "--link", "https://i.example/#board=b1"); err == nil {
 		t.Error("Auftrag auf Seite aus angenommen")
 	}
 	if _, err := boardpaarCLI(t, db, "seite", "--setzen", "innen"); err != nil {
 		t.Fatal(err)
 	}
 	t.Setenv("ABOARD_PUBLIC_BASE_URL", "")
-	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "tg"); err == nil || !strings.Contains(err.Error(), "ABOARD_PUBLIC_BASE_URL") {
+	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "team"); err == nil || !strings.Contains(err.Error(), "ABOARD_PUBLIC_BASE_URL") {
 		t.Errorf("ohne Adresse: %v", err)
 	}
 	t.Setenv("ABOARD_PUBLIC_BASE_URL", "https://innen.example")
-	if out, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "tg"); err != nil || !strings.Contains(out, "Auftrag") {
+	if out, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "team"); err != nil || !strings.Contains(out, "Auftrag") {
 		t.Fatalf("Auftrag: %q %v", out, err)
 	}
-	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "tg"); err == nil {
+	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "team"); err == nil {
 		t.Error("zweiter offener Auftrag angenommen")
 	}
-	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "tg", "--typ", "abs"); err == nil {
+	if _, err := boardpaarCLI(t, db, "kopie-anlegen", "--board", "b1", "--ziel", "team", "--typ", "abs"); err == nil {
 		t.Error("fremde Option angenommen")
 	}
 	out, err := boardpaarCLI(t, db, "liste")
-	if err != nil || !strings.Contains(out, "b1 → tg") || !strings.Contains(out, "offen") {
+	if err != nil || !strings.Contains(out, "b1 → team") || !strings.Contains(out, "offen") {
 		t.Errorf("liste: %q %v", out, err)
 	}
 	if out, _ := boardpaarCLI(t, db, "liste", "--json"); !strings.Contains(out, `"auftraege"`) || !strings.Contains(out, `"darf_anlegen": true`) {

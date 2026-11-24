@@ -80,7 +80,7 @@ Sätzen, die ein Sprachmodell weitergeben kann.
 | Code | Bedeutung |
 |---|---|
 | `400` | Anfrage ungültig: kaputtes JSON, fehlendes Pflichtfeld, unbekannter Schlüssel in einer Op, mehrdeutiger `/agent`-Pfad |
-| `401` | keine Identität (Forward-Auth im strengen Modus; bei der eingebauten Anmeldung keine gültige Sitzung), Agenten-Token fehlt, ist unbekannt, abgelaufen oder widerrufen — oder ein Agenten-Token (`abt_…`) an einem Pfad für Menschen |
+| `401` | keine Identität (bei Forward-Auth; bei der eingebauten Anmeldung keine gültige Sitzung), Agenten-Token fehlt, ist unbekannt, abgelaufen oder widerrufen — oder ein Agenten-Token (`abt_…`) an einem Pfad für Menschen |
 | `403` | angemeldet, aber nicht berechtigt (keine oder zu niedrige Rolle, kein Admin, Pfad für Agenten nicht freigegeben, Cross-Origin-Anfrage aus dem Browser) |
 | `404` | Board, Karte oder Datei gibt es nicht; auch Funktionen, die abgeschaltet sind (etwa die Ausgangsschleuse) |
 | `409` | Konflikt: `PUT /boards/{id}` mit veraltetem `If-Match`, Name schon vergeben, letzter Owner würde entfernt |
@@ -347,7 +347,7 @@ angemeldete Person, die kein Admin ist, mit `403` (`forbidden: not an admin`).
 | `/admin/boardpaar/innen/{board}` | DELETE | internes Board entkoppeln |
 | `/admin/boardpaar/aussen` | POST | externes Board koppeln oder seine Adresse ändern, Body `{"board_id", "innen_link_basis"}`; `409` für eine außen entkoppelte Kopie (Spiegel-Marken oder Herkunft „Kopie“) — sie kommt nur über einen neuen Auftrag zurück |
 | `/admin/boardpaar/aussen/{board}` | DELETE | externes Board entkoppeln; seine Schatten gehen mit. Eine externe Kopie behandelt die Schreibschranke danach wie ein gewöhnliches Board (Ops, Agenten); der Server merkt sich aber ihre Herkunft (Notweg, Liste „Außen entkoppelte Kopien“, Wiederaufnahme, und von Hand koppeln ergibt `409`); ab v1.55.0 gibt auch der Browser die früheren Spiegel frei (bis v1.54.0 blieben sie dort gesperrt). Die Spiegel bleiben **mit vollem Inhalt** stehen, Änderungen von außen gehen nicht mehr nach innen — soll die Kopie weg, ist `DELETE /admin/boardpaar/kopien/{board}` der Weg (Einzelheiten: [Administration](administration.md#externe-kopie-anlegen)) |
-| `/admin/boardpaar/kopien/{board}` | DELETE | ab v1.55.0: Notweg „Kopie außen löschen“ — löscht eine externe Kopie samt Kopplung, Schatten, Journal, Anhängen, ohne die Board-Rolle owner zu verlangen. Nur auf der Seite `aussen` (sonst `409`) und nur für Kopien: gekoppelt mit `kopie` oder außen entkoppelt (vom Server als Kopie angelegt — Migration 0042 —, keine Kopplung); jedes andere Board `409`, auch mit selbst gesetzten Spiegel-Marken, unbekannt `404`, Datenbank belegt `503`. Antwort `{"ok": true, "board_id", "entkoppelt"}`. Innen ändert sich nichts; ein neuer Auftrag legt die Kopie frisch an ([Administration](administration.md#board-paar-intern-und-extern)) |
+| `/admin/boardpaar/kopien/{board}` | DELETE | ab v1.55.0: Notweg „Kopie außen löschen“ — löscht eine externe Kopie samt Kopplung, Schatten, Journal, Anhängen, ohne die Board-Rolle owner zu verlangen. Nur auf der Seite `aussen` (sonst `409`) und nur für Kopien: gekoppelt mit `kopie` oder außen entkoppelt (vom Server als Kopie angelegt — Migration 0042 —, keine Kopplung); jedes andere Board `409`, auch mit selbst gesetzten Spiegel-Marken, unbekannt `404`, Datenbank belegt `503`. Antwort `{"ok": true, "board_id", "entkoppelt"}`. Innen ändert sich nichts; ein neuer Auftrag legt die Kopie frisch an ([Administration](administration.md#kopie-abbauen)) |
 | `/admin/boardpaar/kopien/{board}/bearbeitbar` | PUT | ab v1.56.0: Schalter „bearbeitbar“ einer Kopie, Body `{"bearbeitbar": true\|false}` (Pflicht; fehlt er oder hat einen anderen Typ: `400`). Bearbeitbar ist die Kopie nur zusammen mit `boardpaar.rueckweg = an`; sonst gilt für sie der Schreibschutz. Nur auf der Seite `aussen` und nur für gekoppelte Kopien (`kopie`): Stufe-1-Kopplung oder andere Seite `409`, nicht gekoppelt `404`. Antwort `{"ok": true, "board_id", "bearbeitbar"}`. Schickt das Skript das Feld am nächsten Hinweg, gewinnt sein Wert. Die Partnerliste (`GET /admin/boardpaar`, `aussen[]`) trägt den Wert je Eintrag als `bearbeitbar` |
 | `/admin/boardpaar/zugaenge` | POST | Zugang anlegen, Body `{"typ": "abs", "abe" oder "abr", "name"}`, optional `"darf_anlegen": true` (nur `abe`: darf außen Kopien anlegen); `201` mit dem Klartext, nur in dieser Antwort |
 | `/admin/boardpaar/zugaenge/{id}` | DELETE | Zugang widerrufen |
@@ -543,8 +543,8 @@ sein. Gelöscht wird nur zweistufig: `GET` liefert Vorschau und Bestätigungscod
 Ein **delegierendes Token** (Open WebUI) erreicht ausschließlich diese Werkzeug-Pfade, keinen der
 Board-Pfade darüber, ebenso ein **Personen-Token für mehrere Boards** (das Board aus dem Pfad muss in
 seiner Liste stehen und die Person dort einen eigenen Eintrag haben). Ein **Vorschlags-Token** erreicht
-keinen Werkzeug-Pfad. Zu den Token-Arten siehe
-die Erklärung oben: Ein delegierendes Token ist das Dienst-Token von Open WebUI, das je Anfrage für die
+keinen Werkzeug-Pfad.
+Zu den Token-Arten: Ein delegierendes Token ist das Dienst-Token von Open WebUI, das je Anfrage für die
 angemeldete Person handelt; ein Personen-Token für mehrere Boards gehört einer Person und nennt
 mehrere Boards; ein Vorschlags-Token darf nur Vorschläge einreichen.
 
@@ -554,3 +554,4 @@ Ganz-Board-`PUT`, die Board-Liste, Protokoll, Freigaben, Mitglieder, Transfer, K
 `/me`, `/users/me/*`, `/known-users`, `/clients`, `/projects` und `/admin/*`. Ein gültiges Token auf
 einem gesperrten Pfad ergibt `403`, ein fehlendes oder ungültiges `401` — auch für Pfade, die es gar
 nicht gibt, damit ein Unbekannter nichts über die Routen erfährt.
+

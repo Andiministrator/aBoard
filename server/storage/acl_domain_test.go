@@ -171,7 +171,7 @@ func TestAclDomain_AgentenBrauchenPersoenlichenEintrag(t *testing.T) {
 		t.Fatalf("Vorbedingung: anna auf b2 = %q %v", role, found)
 	}
 	// … einen Agenten bekommt sie dort trotzdem nicht.
-	if _, _, err := repo.Anlegen(ctx, AgentTokenAnlage{Name: "anna-tg", BoardID: "b2", Role: "editor", UserID: "u-anna", Selbstbedienung: true}); !errors.Is(err, ErrAgentKeinZugang) {
+	if _, _, err := repo.Anlegen(ctx, AgentTokenAnlage{Name: "anna-team", BoardID: "b2", Role: "editor", UserID: "u-anna", Selbstbedienung: true}); !errors.Is(err, ErrAgentKeinZugang) {
 		t.Fatalf("Anlegen nur über Domain: err=%v, erwartet ErrAgentKeinZugang", err)
 	}
 	liste, err := repo.SelbstbedienungsBoardsFuer(ctx, "anna@firma.de")

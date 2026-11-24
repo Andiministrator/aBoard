@@ -1,6 +1,7 @@
 node_modules/
-dist/
-dist-template/
+# Nur die Build-Ausgaben der Wurzel: server/web/dist/index.html ist der Platzhalter für go:embed
+/dist/
+/dist-template/
 aboard.html
 aboard.template.html
 tmp/

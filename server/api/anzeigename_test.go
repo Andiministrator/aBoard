@@ -113,7 +113,7 @@ func (e *anzeigeEnv) gespeicherterName(t *testing.T, email string) string {
 // Gegenprobe: vor #577 lieferte /me die Konto-ID.
 func TestMe_NumerischeKontoIDZeigtEMail(t *testing.T) {
 	env := newAnzeigeEnv(t)
-	resp := env.get(t, "/me", map[string]string{"Remote-User": googleKontoID, "Remote-Email": "tg@example.com"})
+	resp := env.get(t, "/me", map[string]string{"Remote-User": googleKontoID, "Remote-Email": "team@example.com"})
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("/me: %d", resp.StatusCode)
 	}
@@ -121,10 +121,10 @@ func TestMe_NumerischeKontoIDZeigtEMail(t *testing.T) {
 	if err := json.NewDecoder(resp.Body).Decode(&me); err != nil {
 		t.Fatal(err)
 	}
-	if me["name"] != "tg@example.com" {
+	if me["name"] != "team@example.com" {
 		t.Fatalf("/me name = %v, soll die E-Mail statt der Konto-ID", me["name"])
 	}
-	if me["email"] != "tg@example.com" {
+	if me["email"] != "team@example.com" {
 		t.Fatalf("/me email = %v", me["email"])
 	}
 }
@@ -132,11 +132,11 @@ func TestMe_NumerischeKontoIDZeigtEMail(t *testing.T) {
 // Gegenprobe: vor #577 legte der Erstkontakt die Konto-ID als users.name an.
 func TestACLGuard_ErstkontaktSpeichertAnzeigeName(t *testing.T) {
 	env := newAnzeigeEnv(t)
-	resp := env.get(t, "/boards", map[string]string{"Remote-User": googleKontoID, "Remote-Email": "tg@example.com"})
+	resp := env.get(t, "/boards", map[string]string{"Remote-User": googleKontoID, "Remote-Email": "team@example.com"})
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("GET /boards: %d", resp.StatusCode)
 	}
-	if n := env.gespeicherterName(t, "tg@example.com"); n != "tg@example.com" {
+	if n := env.gespeicherterName(t, "team@example.com"); n != "team@example.com" {
 		t.Fatalf("users.name = %q, soll die E-Mail", n)
 	}
 }
@@ -145,14 +145,14 @@ func TestACLGuard_ErstkontaktSpeichertAnzeigeName(t *testing.T) {
 func TestACLGuard_ZiehtBestandsnamenNach(t *testing.T) {
 	env := newAnzeigeEnv(t)
 	ctx := context.Background()
-	if _, err := env.users.Upsert(ctx, "u-alt", "tg@example.com", googleKontoID); err != nil {
+	if _, err := env.users.Upsert(ctx, "u-alt", "team@example.com", googleKontoID); err != nil {
 		t.Fatal(err)
 	}
-	kopf := map[string]string{"Remote-User": googleKontoID, "Remote-Email": "tg@example.com"}
+	kopf := map[string]string{"Remote-User": googleKontoID, "Remote-Email": "team@example.com"}
 	if resp := env.get(t, "/boards", kopf); resp.StatusCode != http.StatusOK {
 		t.Fatalf("GET /boards: %d", resp.StatusCode)
 	}
-	if n := env.gespeicherterName(t, "tg@example.com"); n != "tg@example.com" {
+	if n := env.gespeicherterName(t, "team@example.com"); n != "team@example.com" {
 		t.Fatalf("Bestandsname = %q, nicht nachgezogen", n)
 	}
 
@@ -161,11 +161,11 @@ func TestACLGuard_ZiehtBestandsnamenNach(t *testing.T) {
 	if resp := env.get(t, "/boards", kopf); resp.StatusCode != http.StatusOK {
 		t.Fatalf("GET /boards: %d", resp.StatusCode)
 	}
-	if n := env.gespeicherterName(t, "tg@example.com"); n != "Tanja G." {
+	if n := env.gespeicherterName(t, "team@example.com"); n != "Tanja G." {
 		t.Fatalf("Bestandsname = %q, soll Remote-Name", n)
 	}
 	// Die Zuordnung bleibt dieselbe Zeile.
-	u, _ := env.users.GetByEmail(ctx, "tg@example.com")
+	u, _ := env.users.GetByEmail(ctx, "team@example.com")
 	if u.ID != "u-alt" {
 		t.Fatalf("users.id = %q — Nachziehen hat eine neue Zeile angelegt", u.ID)
 	}

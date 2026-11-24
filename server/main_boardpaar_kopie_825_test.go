@@ -323,8 +323,8 @@ func TestBoardpaar93_AuftragTitelNormalform(t *testing.T) {
 	}
 	abs, _, _ := innen.paar.TokenAnlegen(ctx, storage.BoardpaarTypAusgang, "push", "t")
 	abr, _, _ := innen.paar.TokenAnlegen(ctx, storage.BoardpaarTypRueckweg, "rueck", "t")
-	anfrage825(t, innen.srv, "PUT", "/agent/boardpaar/ziele", abr, map[string]any{"ziele": []string{"tg"}})
-	if _, err := innen.paar.AuftragAnlegen(ctx, "b-lang", "tg", "https://innen.example/#board=b-lang", "admin"); err != nil {
+	anfrage825(t, innen.srv, "PUT", "/agent/boardpaar/ziele", abr, map[string]any{"ziele": []string{"team"}})
+	if _, err := innen.paar.AuftragAnlegen(ctx, "b-lang", "team", "https://innen.example/#board=b-lang", "admin"); err != nil {
 		t.Fatal(err)
 	}
 	_, b := anfrage825(t, innen.srv, "GET", "/agent/boardpaar/auftraege", abs, nil)

@@ -601,7 +601,7 @@ environment variables — for example to an own, OpenAI-compatible model server 
 the own network:
 
 ```
-ABOARD_LLM_OPENAI_BASE_URL=http://llm.local:8000/v1
+ABOARD_LLM_OPENAI_BASE_URL=http://llm.example.org:8000/v1
 ABOARD_LLM_OPENAI_MODELLE=modell-a,modell-b
 ABOARD_LLM_SERVERSCHLUESSEL_FILE=/run/secrets/aboard-llm-schluessel
 ```
@@ -889,7 +889,7 @@ affected. Values other than `an` and `aus` stop the start.
 
 ```
 ABOARD_AUSGAENGE=aus
-ABOARD_AUSGAENGE_ERLAUBT=llm.local:8000,smtp.example.org:587
+ABOARD_AUSGAENGE_ERLAUBT=llm.example.org:8000,smtp.example.org:587
 ```
 
 - For HTTP, the host in the URL counts, not an intermediate proxy. Whoever goes
@@ -904,7 +904,7 @@ ABOARD_AUSGAENGE_ERLAUBT=llm.local:8000,smtp.example.org:587
   resolution.
 
 The start log states the state, e.g.
-`Ausgänge: AUS — erlaubt nur: llm.local:8000, smtp.example.org:587`. A blocked
+`Ausgänge: AUS — erlaubt nur: llm.example.org:8000, smtp.example.org:587`. A blocked
 attempt appears with its target in the error message. Both variables are read
 only at start.
 
@@ -1127,7 +1127,7 @@ agents, from v1.55.0 also in the browser). Emergency route there: in the admin t
 **external** server, **"Delete copy outside"** (from v1.55.0; before that only as owner via
 `DELETE /boards/{id}`). Every server admin may do this, even without being owner of the board; to confirm, one types
 the name of the board (or its board ID). The button is at every copy in the partner list outside and, after uncoupling, under
-"Copies uncoupled outside" ([Removing a copy](#board-pair-internal-and-external)). Deleting also takes along changes from outside that the
+"Copies uncoupled outside" ([Removing a copy](#removing-a-copy)). Deleting also takes along changes from outside that the
 script has not yet acknowledged; the completed job stays inside, and a new job inside creates the copy
 anew. Anyone may switch the "confidential" switch on, only a human may switch it off. **Before the first push**, review the existing content: existing cards
 are not confidential, their titles go out with the first run. With an **external copy**, non-confidential cards even go out
@@ -1196,7 +1196,7 @@ stage-1 operation or another copy hangs on the same board (see "Converting stage
   (`409`). Whoever wants it back creates a new job inside: The script hits the same board, and the
   server **takes the copy back in** (board and members stay) — provided it created it as a copy itself.
   A copy that was uncoupled outside before v1.55.0 counts as an ordinary board; the job
-  then ends outside with `409` (see [Removing a copy](#board-pair-internal-and-external)).
+  then ends outside with `409` (see [Removing a copy](#removing-a-copy)).
 - **Copy uncoupled outside:** For the write guard it is an ordinary board (ops, agents): Editors can change everything, none of it goes inwards. The server does remember its origin, though (emergency route, list "Copies uncoupled outside", taking it back in); it therefore also refuses
   coupling by hand if the mirror markers are missing. The cards from inside stay **with full content** — the confirmation dialog when uncoupling
   a copy says so and points to "Delete copy outside". From v1.55.0 the
@@ -1208,7 +1208,7 @@ stage-1 operation or another copy hangs on the same board (see "Converting stage
   that the script has not yet acknowledged are deleted by the server after 25 days (on the next clean-up run); if the copy is
   taken back in before that, they still go inwards.
 - **Uncoupling inside** deletes all jobs of the board, including completed ones. The external board remains; an admin
-  outside deletes it with "Delete copy outside" ([Removing a copy](#board-pair-internal-and-external)). Nothing is ever deleted across the boundary.
+  outside deletes it with "Delete copy outside" ([Removing a copy](#removing-a-copy)). Nothing is ever deleted across the boundary.
 - **Converting stage-1 boards:** A stage-1 board is not rebuilt. Create a copy inside (a
   **new** board is created outside), create the old board's own cards outside by hand inside, uncouple the old **external** board outside
   and delete it as its owner via `DELETE /boards/{id}` ("Delete copy outside" applies only to copies

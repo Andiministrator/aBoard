@@ -80,7 +80,7 @@ sentences that a language model can pass on.
 | Code | Meaning |
 |---|---|
 | `400` | Invalid request: broken JSON, missing required field, unknown key in an op, ambiguous `/agent` path |
-| `401` | no identity (forward auth in strict mode; with the built-in login no valid session), agent token missing, unknown, expired or revoked — or an agent token (`abt_…`) on a path for people |
+| `401` | no identity (with forward auth; with the built-in login no valid session), agent token missing, unknown, expired or revoked — or an agent token (`abt_…`) on a path for people |
 | `403` | logged in, but not authorized (no role or too low a role, not an admin, path not released for agents, cross-origin request from the browser) |
 | `404` | board, card or file does not exist; also functions that are switched off (such as the outbound gateway) |
 | `409` | conflict: `PUT /boards/{id}` with a stale `If-Match`, name already taken, last owner would be removed |
@@ -543,8 +543,7 @@ Deletion only happens in two steps: `GET` returns a preview and a confirmation c
 A **delegating token** (Open WebUI) reaches only these tool paths, none of the
 board paths above, and likewise a **personal token for several boards** (the board from the path must be in
 its list and the person must have an entry of their own there). A **proposal token** reaches
-no tool path. For the token kinds see
-the explanation above: a delegating token is the service token of Open WebUI that acts for the
+no tool path. For the token kinds: a delegating token is the service token of Open WebUI that acts for the
 logged-in person on each request; a personal token for several boards belongs to one person and names
 several boards; a proposal token may only submit proposals.
 

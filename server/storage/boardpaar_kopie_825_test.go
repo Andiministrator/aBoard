@@ -497,13 +497,13 @@ func TestBoardpaar93_HatAuftrag(t *testing.T) {
 	if _, err := NewBoardRepo(db).Insert(ctx, "b1", "B", "2", CanonicalEmptyBoardState("b1", "B")); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := r.ZieleSetzen(ctx, []string{"tg"}); err != nil {
+	if _, err := r.ZieleSetzen(ctx, []string{"team"}); err != nil {
 		t.Fatal(err)
 	}
 	if ja, err := r.HatAuftrag(ctx, "b1"); err != nil || ja {
 		t.Fatalf("ohne Auftrag: %v %v", ja, err)
 	}
-	a, err := r.AuftragAnlegen(ctx, "b1", "tg", "https://innen.example/#board=b1", "admin")
+	a, err := r.AuftragAnlegen(ctx, "b1", "team", "https://innen.example/#board=b1", "admin")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -516,7 +516,7 @@ func TestBoardpaar93_HatAuftrag(t *testing.T) {
 	if ja, _ := r.HatAuftrag(ctx, "b1"); ja {
 		t.Error("zurückgezogener Auftrag zählt")
 	}
-	b, _ := r.AuftragAnlegen(ctx, "b1", "tg", "https://innen.example/#board=b1", "admin")
+	b, _ := r.AuftragAnlegen(ctx, "b1", "team", "https://innen.example/#board=b1", "admin")
 	if _, err := r.AuftragErledigt(ctx, b.ID); err != nil {
 		t.Fatal(err)
 	}

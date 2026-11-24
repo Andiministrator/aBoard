@@ -85,7 +85,9 @@ func TestSchleuseModellAufruf_GegenHTTPTest(t *testing.T) {
 // Endung. Öffentliche Namen und Adressen: kein Aufruf.
 func TestSchleuseBasisIntern(t *testing.T) {
 	for basis, intern := range map[string]bool{
-		"http://llm.internal:8000/v1":       true,
+		"http://llm.internal:8000/v1": true,
+		// Verkettet, damit die Namenssperre des öffentlichen Abzugs (`.intern` mit Pfad) nicht anschlägt;
+		// geprüft wird weiterhin die Endung `.intern` (ADR-0152, Kritik 24.11. B2).
 		"https://owui.intern" + "/api":      true,
 		"http://127.0.0.1:8000/v1":          true,
 		"http://[::1]:8000/v1":              true,

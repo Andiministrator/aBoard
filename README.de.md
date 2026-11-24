@@ -59,7 +59,8 @@ Das **[Handbuch](docs/handbuch/README.md)**: [Varianten](docs/handbuch/varianten
 bun install
 bun run dev                              # Entwicklungsserver
 bun run build && bun run build:template  # beide Fassungen
-bun run test                             # Tests in beiden Build-Kontexten (nicht: bun test)
+bun run test                             # Tests in allen drei Build-Kontexten (nicht: bun test)
+(cd server && go test ./...)             # Tests des Servers
 ```
 
 `bun test` (Buns eigener Test-Runner) funktioniert nicht, weil er die Browser-Umgebung (happy-dom) nicht einrichtet; immer `bun run test`.

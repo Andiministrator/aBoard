@@ -90,7 +90,7 @@ Dialog hat diese Reiter:
 | Agenten-Zugänge | Tokens für Agenten |
 | Kalender | Zeitzone der Uhrzeiten |
 | Wissen | Lesesicht auf einen eingehängten Markdown-Ordner (siehe [unten](#wissensquelle)) |
-| Board-Paar | Seite dieser Instanz (aus, innen, außen), Partnerlisten innen und außen, Zugänge `abs_`/`abe_`/`abr_` für das Push-Skript, externe Kopien, Board-Paar-Team und der Schalter „Bearbeiten außen erlauben“ (siehe [unten](#board-paar-intern-und-extern)) |
+| Board-Paar | Seite dieser Instanz (aus, innen, außen), Partnerlisten innen und außen, Zugänge `abs_`/`abe_`/`abr_` für das Push-Skript, externe Kopien, Board-Paar-Team und der Schalter „Bearbeiten außen erlauben“ (siehe [unten](#kopie-abbauen)) |
 | Clients & Projekte | Kunden und Projekte, denen Karten zugeordnet werden können |
 | Ausgangsschleuse | nur sichtbar, wenn die Schleuse eingeschaltet ist |
 
@@ -612,7 +612,7 @@ Zugang einmal über Umgebungsvariablen ein — etwa zu einem eigenen,
 OpenAI-kompatiblen Modellserver im eigenen Netz:
 
 ```
-ABOARD_LLM_OPENAI_BASE_URL=http://llm.local:8000/v1
+ABOARD_LLM_OPENAI_BASE_URL=http://llm.example.org:8000/v1
 ABOARD_LLM_OPENAI_MODELLE=modell-a,modell-b
 ABOARD_LLM_SERVERSCHLUESSEL_FILE=/run/secrets/aboard-llm-schluessel
 ```
@@ -908,7 +908,7 @@ betroffen. Andere Werte als `an` und `aus` halten den Start an.
 
 ```
 ABOARD_AUSGAENGE=aus
-ABOARD_AUSGAENGE_ERLAUBT=llm.local:8000,smtp.example.org:587
+ABOARD_AUSGAENGE_ERLAUBT=llm.example.org:8000,smtp.example.org:587
 ```
 
 - Bei HTTP zählt der Rechner in der URL, nicht ein dazwischengeschalteter
@@ -923,7 +923,7 @@ ABOARD_AUSGAENGE_ERLAUBT=llm.local:8000,smtp.example.org:587
   Namensauflösung abhinge.
 
 Das Start-Log nennt den Zustand, z. B.
-`Ausgänge: AUS — erlaubt nur: llm.local:8000, smtp.example.org:587`. Ein
+`Ausgänge: AUS — erlaubt nur: llm.example.org:8000, smtp.example.org:587`. Ein
 gesperrter Versuch steht mit seinem Ziel in der Fehlermeldung. Beide Variablen
 werden nur beim Start gelesen.
 
@@ -1149,7 +1149,7 @@ Agenten, ab v1.55.0 auch im Browser). Notweg dort: im Admin-Reiter „Board-Paar
 **externen** Servers **„Kopie außen löschen“** (ab v1.55.0; davor nur als Eigentümer über
 `DELETE /boards/{id}`). Jeder Server-Admin darf das, auch ohne Eigentümer des Boards zu sein; zur Bestätigung tippt man
 den Namen des Boards (oder seine Board-ID) ein. Der Knopf steht an jeder Kopie in der Partnerliste außen und, nach einem Entkoppeln, unter
-„Außen entkoppelte Kopien“ ([Kopie abbauen](#board-paar-intern-und-extern)). Das Löschen nimmt auch Änderungen von außen mit, die das
+„Außen entkoppelte Kopien“ ([Kopie abbauen](#kopie-abbauen)). Das Löschen nimmt auch Änderungen von außen mit, die das
 Skript noch nicht bestätigt hat; der erledigte Auftrag bleibt innen stehen, und ein neuer Auftrag innen legt die Kopie
 frisch an. Den Schalter „vertraulich“ einschalten darf jeder, abschalten nur ein Mensch. **Vor dem ersten Push** den Bestand durchsehen: bestehende Karten
 sind nicht vertraulich, ihre Titel gehen mit dem ersten Lauf hinaus. Bei einer **externen Kopie** gehen nicht
@@ -1219,7 +1219,7 @@ Stufe-1-Betrieb oder eine andere Kopie hängt am selben Board (siehe „Stufe-1-
   (`409`). Wer sie zurückhaben will, legt innen einen neuen Auftrag an: Das Skript trifft dasselbe Board, und der
   Server **nimmt die Kopie wieder auf** (Board und Mitglieder bleiben) — sofern er sie selbst als Kopie angelegt hat.
   Eine Kopie, die schon vor v1.55.0 außen entkoppelt wurde, gilt als gewöhnliches Board; der Auftrag
-  endet dann außen mit `409` (siehe [Kopie abbauen](#board-paar-intern-und-extern)).
+  endet dann außen mit `409` (siehe [Kopie abbauen](#kopie-abbauen)).
 - **Außen entkoppelte Kopie:** Sie ist für die Schreibschranke ein gewöhnliches Board (Ops, Agenten): Bearbeiter können alles ändern, nichts davon geht nach
   innen. Der Server merkt sich aber ihre Herkunft (Notweg, Liste „Außen entkoppelte Kopien“, Wiederaufnahme); von Hand
   koppeln lehnt er deshalb auch ab, wenn die Spiegel-Marken fehlen. Die Karten von innen bleiben dabei **mit vollem Inhalt** stehen — der Bestätigungsdialog beim Entkoppeln
@@ -1232,7 +1232,7 @@ Stufe-1-Betrieb oder eine andere Kopie hängt am selben Board (siehe „Stufe-1-
   die das Skript noch nicht bestätigt hat, löscht der Server nach 25 Tagen (beim nächsten Aufräumlauf); wird die Kopie vorher
   wieder aufgenommen, kommen sie noch nach innen.
 - **Entkoppeln innen** löscht alle Aufträge des Boards, auch erledigte. Das externe Board bleibt bestehen; ein Admin
-  außen löscht es mit „Kopie außen löschen“ ([Kopie abbauen](#board-paar-intern-und-extern)). Gelöscht wird nie über die Grenze hinweg.
+  außen löscht es mit „Kopie außen löschen“ ([Kopie abbauen](#kopie-abbauen)). Gelöscht wird nie über die Grenze hinweg.
 - **Stufe-1-Boards umstellen:** Ein Stufe-1-Board wird nicht umgebaut. Innen eine Kopie anlegen (es entsteht ein
   **neues** Board außen), eigene Karten des alten Boards außen von Hand innen anlegen, das alte **externe** Board außen
   entkoppeln und als dessen Eigentümer über `DELETE /boards/{id}` löschen („Kopie außen löschen“ gilt nur für Kopien
@@ -1403,3 +1403,4 @@ Clickjacking); eine Seite unter derselben Adresse darf es weiterhin.
 Ein vorgeschalteter Reverse-Proxy sollte diesen Kopf weder entfernen noch
 überschreiben. Sicherheitsköpfe wie HSTS setzt der Server nicht selbst; sie
 gehören in den Reverse-Proxy.
+

@@ -31,8 +31,9 @@ bun run build && bun run build:template
 |---|---|---|
 | `bun run build` | `aboard.html` | mit Op-Inbox- und Projektor-Schicht (Projekt-Datei) |
 | `bun run build:template` | `aboard.template.html` | ohne Projektor-Schicht, mit Größenlimit (Einzeldatei) |
+| `bun run build:server` | `server/web/dist/` | Oberfläche für den Server, die das Server-Programm per `go:embed` einbettet |
 
-Beide entstehen aus demselben `src/`. Wer etwas an `src/`, `assets/`, `index.html` oder `vite.config*.js` ändert, baut deshalb immer beide.
+Alle entstehen aus demselben `src/`. Wer etwas an `src/`, `assets/`, `index.html` oder `vite.config*.js` ändert, baut deshalb immer die beiden Einzeldateien; die Server-Oberfläche braucht nur, wer den Server baut (das Dockerfile erledigt das selbst).
 
 Die angezeigte Versionsnummer kommt aus `ABOARD_BUILD_VERSION`, sonst aus `git describe`:
 
@@ -44,13 +45,14 @@ ABOARD_BUILD_VERSION=v1.2.3 bun run build && ABOARD_BUILD_VERSION=v1.2.3 bun run
 
 aBoard wird aus **einer** Quelle in mehrere Fassungen gebaut. Zwei Konstanten, die Vite zur Compile-Zeit einsetzt, steuern, welcher Code im Ergebnis landet; nicht benötigte Zweige entfernt der Bundler vollständig.
 
-- **`__SERVER_BUILD__`**: Code für den Mehrbenutzer-Server (REST-Anbindung, Konten, Mail, KI). In beiden Fassungen dieses Repositorys `false`; der Code liegt in `src/`, weil Server und Einzeldatei dieselben Quellen teilen.
+- **`__SERVER_BUILD__`**: Code für den Mehrbenutzer-Server (REST-Anbindung, Konten, Mail, KI). In den beiden Einzeldateien `false`, in der Server-Oberfläche `true`; der Code liegt in `src/`, weil Server und Einzeldatei dieselben Quellen teilen.
 - **`__PROJECTOR_BUILD__`**: die Op-Inbox- und Projektor-Schicht (`src/ops.js`, `src/inbox.js`, `src/diff.js` und der Projektor-Teil von `src/sync.js`).
 
 | Build-Konfiguration | Ergebnis | `__SERVER_BUILD__` | `__PROJECTOR_BUILD__` | Größenlimit |
 |---|---|---|---|---|
 | `vite.config.js` | `aboard.html` | `false` | `true` | keins |
 | `vite.config.template.js` | `aboard.template.html` | `false` | `false` | < 360000 Byte |
+| `vite.config.server.js` | `server/web/dist/` | `true` | `false` | keins |
 
 Gemeinsame Teile stehen in `vite.config.base.js`.
 
@@ -66,14 +68,15 @@ bun run test
 
 **Nie `bun test`:** Buns eigener Test-Runner kennt die Browser-Umgebung (happy-dom) nicht und meldet reihenweise Fehler wie `document is not defined`.
 
-`bun run test` läuft zweimal, einmal je Fassung:
+`bun run test` läuft dreimal, einmal je Fassung:
 
 | vitest-Konfiguration | `__PROJECTOR_BUILD__` | spiegelt | Einzelaufruf |
 |---|---|---|---|
 | `vitest.config.js` | `true` | `aboard.html` | `bun run test:standalone` |
 | `vitest.config.slim.js` | `false` | `aboard.template.html` | `bun run test:slim` |
+| `vitest.config.server-frontend.js` | `false` | Server-Oberfläche | `bun run test:server-frontend` |
 
-Die Zahl übersprungener Tests unterscheidet sich zwischen den beiden Läufen; das ist gewollt, weil Code hinter den Flags im jeweils anderen Build fehlt. Tests, die nur für den Server-Build gelten, werden in beiden Läufen übersprungen.
+Die Zahl übersprungener Tests unterscheidet sich zwischen den Läufen; das ist gewollt, weil Code hinter den Flags in den anderen Builds fehlt. Tests, die nur für den Server-Build gelten, laufen nur im dritten Lauf.
 
 Gezielt einzelne Dateien:
 
@@ -82,6 +85,16 @@ bunx vitest run --config vitest.config.js tests/<datei>.test.js
 ```
 
 Neue Testdateien nutzen für flag-abhängige Teile die Helfer aus `tests/helpers/build-flags.js` (`describeProjektor` & Co.).
+
+### Server (Go)
+
+Der Server liegt unter `server/` und hat eigene Tests, getrennt von `bun run test`:
+
+```bash
+cd server && go test ./...
+```
+
+Der Server faltet Board-Änderungen mit demselben Code wie die App (`server/fold/`, eingebettetes Bündel aus `src/ops.js`). Wer `src/ops.js` ändert, erzeugt das Bündel mit `bun run build:ops-bundle` neu. Das Server-Programm samt Oberfläche baut `server/Dockerfile`; siehe [Container](server/container.md).
 
 ## Aufbau
 

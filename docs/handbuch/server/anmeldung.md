@@ -1434,3 +1434,4 @@ grüner Healthcheck beweist also nicht, dass die Anmeldung funktioniert.
   [Rechte am Socket](#docker-composeyml)).
 - **Kalender-Abo landet auf der Anmeldeseite:** Der Pfad `/ical/calendar.ics` muss im Proxy am
   Anmeldedienst vorbeigeführt werden (siehe [Caddyfile](#caddyfile)).
+

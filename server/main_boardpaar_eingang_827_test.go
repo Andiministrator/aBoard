@@ -34,7 +34,7 @@ func TestBoardpaar827_MergeEingangUeberZweiServer(t *testing.T) {
 	}
 	abs, _, _ := innen.paar.TokenAnlegen(ctx, storage.BoardpaarTypAusgang, "push", "t")
 	abe, _, _ := aussen.paar.TokenAnlegenMit(ctx, storage.BoardpaarTypEingang, "kopien", "t", true)
-	if _, err := innen.paar.AuftragAnlegen(ctx, "b-innen", "tg", "https://innen.example/#board=b-innen", "admin"); err != nil {
+	if _, err := innen.paar.AuftragAnlegen(ctx, "b-innen", "team", "https://innen.example/#board=b-innen", "admin"); err != nil {
 		t.Fatal(err)
 	}
 	aussenID := schatten.AbgeleiteteID(skriptKennung("b-innen"))

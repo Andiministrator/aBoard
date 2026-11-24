@@ -218,7 +218,7 @@ On the server, aBoard warns if someone else has changed the board at the same ti
 
 ## Signing in and your account
 
-This section applies to a **server board** whose server manages accounts itself (built-in sign-in). You then get in with an **invitation**. Whether your server is set up this way, the person who runs it can tell you. How admins send invitations is described in [Server administration](server/administration.md#accounts-and-invitations-built-in-sign-in). The pictures below show a test server with made-up addresses (`example.org`); the user interface in them is German.
+This section applies to a **server board** whose server manages accounts itself (built-in sign-in). You then get in with an **invitation**. Whether your server is set up this way, the person who runs it can tell you. How admins send invitations is described in [Server administration](server/administration.md#accounts-and-invitations-built-in-sign-in). The pictures below show a test server with made-up addresses (`example.org`). The sign-in pages and the app follow the language of your browser; the pictures and the quoted labels come from the German interface, with an English gloss in brackets. With an English browser you see the English labels instead, for example "Awaiting approval" in the account list where the pictures show "Wartet auf Bestätigung".
 
 In short:
 

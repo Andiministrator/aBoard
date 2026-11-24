@@ -3,8 +3,9 @@
 [English](../../handbook/server/container.md) · **Deutsch**
 
 Der aBoard-Server ist ein einzelnes Go-Programm (`aboard-server`), das die
-Weboberfläche, die REST-API und eine SQLite-Datenbank in sich trägt. Ausgeliefert
-wird er als Container-Image. Dieses Kapitel beschreibt, wie man das Image
+Weboberfläche, die REST-API und eine SQLite-Datenbank in sich trägt.
+Er läuft als Container-Image, das man aus dem Repository selbst baut.
+Dieses Kapitel beschreibt, wie man das Image
 startet, wo die Daten liegen, wie man aktualisiert und was man dabei nicht
 falsch machen darf.
 
@@ -74,6 +75,7 @@ nicht, dass ein erneuter Build aus denselben Quellen denselben Digest ergibt.
 Und die Basis-Images im Dockerfile (`alpine:3`, `golang:1.27-alpine`,
 `oven/bun:1-alpine`) sind per Tag, nicht per Digest angegeben; Sicherheits-
 Updates der Basis fließen so beim nächsten Build automatisch ein.
+
 
 
 ---
@@ -231,6 +233,7 @@ Zulässig sind:
 Zusätzlich verlangt der Server in diesem Modus ein gemeinsames Geheimnis
 zwischen Proxy und aBoard (`ABOARD_FORWARD_AUTH_SECRET`); ohne es startet er
 nicht. Einzelheiten in [anmeldung.md](anmeldung.md).
+
 
 
 ---
@@ -478,3 +481,4 @@ Backup und Wiederherstellung im Einzelnen: [administration.md](administration.md
   verschlüsselten Board-Backups siehe [administration.md](administration.md).
 - **Version festnageln.** Im Betrieb einen Release-Tag mit Digest verwenden,
   nicht `latest`.
+

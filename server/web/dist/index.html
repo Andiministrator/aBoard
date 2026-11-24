@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>aBoard</title>
+  <script type="module" crossorigin src="/assets/index-BZkha2v6.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-C9bugth1.css">
+</head>
+<body>
+
+<!-- App-Daten (eingebettetes JSON, Quelle der Wahrheit → ADR-0014) -->
+<script type="application/json" id="app-data">
+{
+  "version": "2",
+  "board": {
+    "id": "aboard-server",
+    "title": "aBoard",
+    "nextDisplayId": 1,
+    "columnDefs": [],
+    "sprints": [
+      {
+        "id": "__backlog__",
+        "title": "Backlog",
+        "kind": "backlog",
+        "cards": []
+      }
+    ],
+    "templates": [],
+    "background": null,
+    "attachments": [],
+    "awaitingUser": null
+  }
+}
+</script>
+
+<!-- DOM-Container -->
+<div id="app">
+  <header id="board-header"></header>
+  <main id="board-columns"></main>
+</div>
+
+</body>
+</html>

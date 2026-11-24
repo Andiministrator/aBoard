@@ -3,8 +3,8 @@
 **English** · [Deutsch](../../handbuch/server/container.md)
 
 The aBoard server is a single Go program (`aboard-server`) that carries the web
-interface, the REST API and a SQLite database within itself. It is delivered
-as a container image. This chapter describes how to start the image,
+interface, the REST API and a SQLite database within itself. It runs as a
+container image that you build yourself from the repository. This chapter describes how to start the image,
 where the data lives, how to update and what not to get wrong along the way.
 
 > **Security principle up front:** An aBoard server without an upstream

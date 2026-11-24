@@ -23,7 +23,7 @@ func TestBoardpaarAdmin825_AuftragUndZugaenge(t *testing.T) {
 		m, p string
 		body any
 	}{
-		{http.MethodPost, "/admin/boardpaar/auftraege", map[string]string{"board_id": "b1", "ziel": "tg"}},
+		{http.MethodPost, "/admin/boardpaar/auftraege", map[string]string{"board_id": "b1", "ziel": "team"}},
 		{http.MethodDelete, "/admin/boardpaar/auftraege/x", nil},
 	} {
 		if s, _, raw := e.do(t, w.m, w.p, "owner@firma.de", w.body); s != http.StatusForbidden {
@@ -33,7 +33,7 @@ func TestBoardpaarAdmin825_AuftragUndZugaenge(t *testing.T) {
 
 	// Seite aus: kein Auftrag.
 	if s, _, raw := e.do(t, http.MethodPost, "/admin/boardpaar/auftraege", admin,
-		map[string]string{"board_id": "b1", "ziel": "tg", "innen_link_basis": "https://i.example/#board=b1"}); s != http.StatusConflict {
+		map[string]string{"board_id": "b1", "ziel": "team", "innen_link_basis": "https://i.example/#board=b1"}); s != http.StatusConflict {
 		t.Errorf("Seite aus: %d %s", s, raw)
 	}
 	if err := e.cfg.Set(ctx, api.KonfigBoardpaarSeite, "innen", false, "t"); err != nil {
@@ -41,11 +41,11 @@ func TestBoardpaarAdmin825_AuftragUndZugaenge(t *testing.T) {
 	}
 	// Ohne Adresse und ohne ABOARD_PUBLIC_BASE_URL: 400 mit Grund.
 	if s, _, raw := e.do(t, http.MethodPost, "/admin/boardpaar/auftraege", admin,
-		map[string]string{"board_id": "b1", "ziel": "tg"}); s != http.StatusBadRequest {
+		map[string]string{"board_id": "b1", "ziel": "team"}); s != http.StatusBadRequest {
 		t.Errorf("ohne Adresse: %d %s", s, raw)
 	}
 	s, m, raw := e.do(t, http.MethodPost, "/admin/boardpaar/auftraege", admin,
-		map[string]string{"board_id": "b1", "ziel": "tg", "innen_link_basis": "https://i.example/#board=b1"})
+		map[string]string{"board_id": "b1", "ziel": "team", "innen_link_basis": "https://i.example/#board=b1"})
 	if s != http.StatusCreated || m["status"] != "offen" {
 		t.Fatalf("Auftrag: %d %s", s, raw)
 	}
@@ -54,14 +54,14 @@ func TestBoardpaarAdmin825_AuftragUndZugaenge(t *testing.T) {
 		t.Error("Auftrag hat b1 nicht gekoppelt")
 	}
 	if s, _, raw := e.do(t, http.MethodPost, "/admin/boardpaar/auftraege", admin,
-		map[string]string{"board_id": "b1", "ziel": "tg", "innen_link_basis": "https://i.example/#board=b1"}); s != http.StatusConflict {
+		map[string]string{"board_id": "b1", "ziel": "team", "innen_link_basis": "https://i.example/#board=b1"}); s != http.StatusConflict {
 		t.Errorf("zweiter offener Auftrag: %d %s", s, raw)
 	}
 	for name, body := range map[string]map[string]string{
-		"Service-Board":    {"board_id": storage.ServiceBoardID, "ziel": "tg", "innen_link_basis": "https://i.example/#board=s"},
-		"unbekannt":        {"board_id": "nein", "ziel": "tg", "innen_link_basis": "https://i.example/#board=n"},
+		"Service-Board":    {"board_id": storage.ServiceBoardID, "ziel": "team", "innen_link_basis": "https://i.example/#board=s"},
+		"unbekannt":        {"board_id": "nein", "ziel": "team", "innen_link_basis": "https://i.example/#board=n"},
 		"Ziel ungültig":    {"board_id": "b2", "ziel": "a b", "innen_link_basis": "https://i.example/#board=b2"},
-		"Adresse ungültig": {"board_id": "b2", "ziel": "tg", "innen_link_basis": "http://i.example/#board=b2"},
+		"Adresse ungültig": {"board_id": "b2", "ziel": "team", "innen_link_basis": "http://i.example/#board=b2"},
 	} {
 		if s, _, raw := e.do(t, http.MethodPost, "/admin/boardpaar/auftraege", admin, body); s < 400 || s >= 500 {
 			t.Errorf("%s: %d %s", name, s, raw)
