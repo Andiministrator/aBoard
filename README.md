@@ -36,6 +36,14 @@ bun run build:template      # creates aboard.template.html
 
 `bun run build` additionally creates `aboard.html` with the op-inbox layer for shared writing with tools outside the browser. Which version suits which purpose is described under [Variants](docs/handbook/variants.md).
 
+**Server (optional, for teams):** every release also publishes a container image for `amd64` and `arm64` in the GitHub Container Registry. Use the tag of a release (`latest` only for trying out):
+
+```bash
+docker pull ghcr.io/andiministrator/aboard:<release-tag>
+```
+
+How to run it safely (login, volumes, updates) is described in the handbook chapter [Running the server in a container](docs/handbook/server/container.md).
+
 ## Documentation
 
 The **[Handbook](docs/handbook/README.md)**: [Variants](docs/handbook/variants.md) · [Installation](docs/handbook/installation.md) · [Usage](docs/handbook/usage.md) · [Development](docs/handbook/development.md).

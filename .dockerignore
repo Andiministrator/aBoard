@@ -1,0 +1,26 @@
+# Docker build context is the repository root (server/Dockerfile is a
+# multi-stage build: bun frontend, then Go with the frontend embedded).
+# This list keeps the context small without removing build inputs
+# (src/, index.html, package.json, bun.lock, vite.config*.js, server/).
+
+.git
+.github
+.gitignore
+node_modules
+dist
+aboard.html
+
+# Local data and secrets: never into the build context
+**/*.db
+**/*.sqlite
+**/.env
+**/.env.*
+**/*.key
+**/*.pem
+
+# Not needed for the build
+tmp
+tests
+docs
+**/*_test.go
+*.test

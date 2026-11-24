@@ -4,7 +4,8 @@
 
 The aBoard server is a single Go program (`aboard-server`) that carries the web
 interface, the REST API and a SQLite database within itself. It runs as a
-container image that you build yourself from the repository. This chapter describes how to start the image,
+container image: ready-made from the GitHub Container Registry (`ghcr.io`) or built
+yourself from the repository. This chapter describes how to start the image,
 where the data lives, how to update and what not to get wrong along the way.
 
 > **Security principle up front:** An aBoard server without an upstream
@@ -19,13 +20,30 @@ where the data lives, how to update and what not to get wrong along the way.
 ## Image and tags
 
 The examples in this handbook use the placeholder
-`registry.example.org/aboard`. This handbook does not assume a public registry from which the image
-could be pulled: whoever runs aBoard themselves
-builds the image from the repository (see [Building the image yourself](#building-the-image-yourself))
-and, if needed, puts it into their own registry. Then use its address instead
-of the placeholder.
+`registry.example.org/aboard`. Besides the ready-made image (below) you can build the
+image yourself from the repository (see [Building the image yourself](#building-the-image-yourself))
+and, if needed, put it into your own registry. Then use its address instead of the
+placeholder.
 
-In the examples, `v1.50.0` stands for the version of the image you built yourself.
+**Ready-made image:** Every release on GitHub produces an image at
+`ghcr.io/andiministrator/aboard`, built from exactly that release. One tag
+contains both architectures (`amd64` and `arm64`, e.g. Raspberry Pi); Docker picks
+the right one by itself.
+
+| Tag | Content |
+|---|---|
+| Release tag (e.g. `v1.66.0-140`) | One specific release. **Recommended for operation.** |
+| `latest` | The newest regular release. Pre-releases get their release tag but never `latest`. For trying out, not for operation. |
+
+If you use the ready-made image, put `ghcr.io/andiministrator/aboard` in place of the
+placeholder. If you build yourself, use the version of your own image; in the
+examples, `v1.50.0` stands for it.
+
+```bash
+docker pull ghcr.io/andiministrator/aboard:v1.66.0-140
+```
+
+Or, with a self-built image from your own registry:
 
 ```bash
 docker pull registry.example.org/aboard:v1.50.0

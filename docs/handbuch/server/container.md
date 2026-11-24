@@ -4,7 +4,8 @@
 
 Der aBoard-Server ist ein einzelnes Go-Programm (`aboard-server`), das die
 Weboberfläche, die REST-API und eine SQLite-Datenbank in sich trägt.
-Er läuft als Container-Image, das man aus dem Repository selbst baut.
+Er läuft als Container-Image: fertig aus der GitHub Container Registry
+(`ghcr.io`) oder selbst aus dem Repository gebaut.
 Dieses Kapitel beschreibt, wie man das Image
 startet, wo die Daten liegen, wie man aktualisiert und was man dabei nicht
 falsch machen darf.
@@ -21,13 +22,30 @@ falsch machen darf.
 ## Image und Tags
 
 Die Beispiele in diesem Handbuch verwenden den Platzhalter
-`registry.example.org/aboard`. Eine öffentliche Registry, aus der man das Image
-ziehen könnte, setzt dieses Handbuch nicht voraus: Wer aBoard selbst betreibt,
-baut das Image aus dem Repository (siehe [Image selbst bauen](#image-selbst-bauen))
-und legt es bei Bedarf in die eigene Registry. Setz dann deren Adresse anstelle
-des Platzhalters ein.
+`registry.example.org/aboard`. Neben dem fertigen Image (unten) kann man das Image
+aus dem Repository selbst bauen (siehe [Image selbst bauen](#image-selbst-bauen)) und
+bei Bedarf in die eigene Registry legen. Setz dann deren Adresse anstelle des
+Platzhalters ein.
 
-In den Beispielen steht `v1.50.0` für die Version des Images, das du selbst gebaut hast.
+**Fertiges Image:** Zu jedem Release auf GitHub entsteht ein Image unter
+`ghcr.io/andiministrator/aboard`, gebaut aus genau diesem Release-Stand. Ein Tag
+enthält beide Architekturen (`amd64` und `arm64`, z. B. Raspberry Pi); Docker wählt
+die passende selbst.
+
+| Tag | Inhalt |
+|---|---|
+| Release-Tag (z. B. `v1.66.0-140`) | Ein bestimmtes Release. **Empfohlen für den Betrieb.** |
+| `latest` | Das jüngste reguläre Release. Vorabversionen bekommen ihr Release-Tag, aber nie `latest`. Zum Ausprobieren, nicht für den Betrieb. |
+
+Wer das fertige Image nutzt, setzt `ghcr.io/andiministrator/aboard` anstelle des
+Platzhalters ein. Wer selbst baut, nimmt die Version des eigenen Images; in den
+Beispielen steht `v1.50.0` dafür.
+
+```bash
+docker pull ghcr.io/andiministrator/aboard:v1.66.0-140
+```
+
+Oder, bei selbst gebautem Image aus der eigenen Registry:
 
 ```bash
 docker pull registry.example.org/aboard:v1.50.0
