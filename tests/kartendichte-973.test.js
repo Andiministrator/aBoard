@@ -89,7 +89,7 @@ describe('Karte #973 — Kartendichte', () => {
       '.card-owner-badge', '.card-qa-badge'])
     /* F-2707: Den Namen blendet nur aus, wer einen Avatar hat; sonst bliebe eine leere Pille */
     expect(regeln).toMatch(/\.card-owner-badge--avatar \.card-owner-badge-label \{ display: none; \}/)
-    /* Andi 29.10.: Owner in die Label-Zeile (Fußzeile rechtsbündig daneben), Titel auf zwei Zeilen */
+    /* Wunsch des Maintainers 29.10.: Owner in die Label-Zeile (Fußzeile rechtsbündig daneben), Titel auf zwei Zeilen */
     expect(regeln).toMatch(/\.card \{[^}]*display: flex; flex-wrap: wrap/)
     expect(regeln).toMatch(/\.card-footer \{ margin: 6px 0 0 auto; \}/)
     expect(regeln).toMatch(/-webkit-line-clamp: 2/)

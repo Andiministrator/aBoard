@@ -1404,7 +1404,9 @@ createRESTPlugin = function createRESTPlugin() {
       if (!Array.isArray(items)) throw new Error('listKnownBoards: unerwartete Antwort');
       /* Karte #201: role-Feld (owner/editor/viewer) wird vom Server mitgeliefert
          wenn Forward-Auth AN ist — im Legacy-Bypass fehlt es (undefined). */
-      return items.map(b => ({ id: b.id, name: b.title, title: b.title, role: b.role, updatedAt: b.updated_at }));
+      /* Karte #1197 (ADR-0156): awaitingUser je Board, nur wenn der Server es liefert. */
+      return items.map(b => ({ id: b.id, name: b.title, title: b.title, role: b.role, updatedAt: b.updated_at,
+                               awaitingUser: b.awaiting_user ?? null }));
     },
 
     /* Karte #201, ADR-0059: Identifizierten User vom Server abfragen.

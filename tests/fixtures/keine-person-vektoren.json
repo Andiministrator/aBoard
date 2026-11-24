@@ -1,0 +1,19 @@
+[
+  { "name": "", "keinePerson": true },
+  { "name": "User", "keinePerson": true },
+  { "name": "system", "keinePerson": true },
+  { "name": "System", "keinePerson": true },
+  { "name": "agent:open-webui", "keinePerson": true },
+  { "name": "agent:recherche", "keinePerson": true },
+  { "name": "Claude", "keinePerson": true },
+  { "name": "Claude Opus", "keinePerson": true },
+  { "name": "Claude Sonnet", "keinePerson": true },
+  { "name": "Claude Haiku", "keinePerson": true },
+  { "name": "Claude Opus 5 (1M context)", "keinePerson": true },
+  { "name": "claude-opus", "keinePerson": true },
+  { "name": "Claude 3.5 Sonnet", "keinePerson": true },
+  { "name": "Claude Dupont", "keinePerson": false },
+  { "name": "Claudette", "keinePerson": false },
+  { "name": "Anna", "keinePerson": false },
+  { "name": "Bea Beispiel", "keinePerson": false }
+]

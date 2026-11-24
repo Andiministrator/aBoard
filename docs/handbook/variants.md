@@ -37,7 +37,7 @@ Fields that are only intended for working with AI agents (complexity, effort, ag
 
 Both versions can put the board into a folder: **Logo → Board Settings → "Choose folder…"**. Afterwards the state lives in that folder as `aboard-sync.json`, and aBoard regularly checks whether anything there has changed. This is useful if the board should sit next to a project and be versioned with git.
 
-In the handbook, working with a folder connection is also called **project mode**. Where a server is mentioned there, it refers to the multi-user server, which has not been published yet.
+In the handbook, working with a folder connection is also called **project mode**. Where a server is mentioned there, it refers to the multi-user server ([server chapters](README.md#server-multi-user-operation)).
 
 The folder connection requires the **File System Access API** (Chrome, Edge and other Chromium browsers). After a browser restart, the browser asks once for permission to access the folder.
 

@@ -37,7 +37,7 @@ Felder, die nur für die Zusammenarbeit mit KI-Agenten gedacht sind (Komplexitä
 
 Beide Fassungen können das Board in einen Ordner legen: **Logo → Board-Einstellungen → „Ordner wählen…“**. Danach liegt der Stand als `aboard-sync.json` in diesem Ordner, und aBoard prüft regelmäßig, ob sich dort etwas geändert hat. Das eignet sich, wenn das Board neben einem Projekt liegen und mit git versioniert werden soll.
 
-Im Handbuch heißt das Arbeiten mit Ordner-Verbindung auch **Projekt-Modus**. Wo dort von einem Server die Rede ist, geht es um den Mehrbenutzer-Server, der noch nicht veröffentlicht ist.
+Im Handbuch heißt das Arbeiten mit Ordner-Verbindung auch **Projekt-Modus**. Wo dort von einem Server die Rede ist, geht es um den Mehrbenutzer-Server ([Server-Kapitel](README.md#server-mehrbenutzer-betrieb)).
 
 Die Ordner-Verbindung braucht die **File System Access API** (Chrome, Edge und andere Chromium-Browser). Nach einem Browser-Neustart fragt der Browser einmal nach der Erlaubnis, auf den Ordner zuzugreifen.
 

@@ -1,7 +1,7 @@
 /* Zentraler Helfer für Testverzeichnisse (F-1312, Karte #646).
 
    REGEL
-   Projektregel (Andi 2026-09-21): nichts nach /tmp, jedes Projekt hat sein
+   Projektregel (2026-09-21): nichts nach /tmp, jedes Projekt hat sein
    eigenes tmp/. Tests legen ihre Wegwerf-Verzeichnisse deshalb NICHT mehr per
    `os.tmpdir()` an, sondern hier: `<repo>/tmp/testlauf/<praefix>XXXXXX`, eindeutig
    je Aufruf (mkdtemp). Das Elternverzeichnis wird bei Bedarf angelegt.

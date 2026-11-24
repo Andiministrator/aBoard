@@ -31,6 +31,7 @@ import { Storage }       from './storage.js';
 import { StoragePlugin } from './storage-plugin.js';
 import { Profile }       from './profile.js';
 import { BoardLoeschen } from './board-loeschen.js';
+import { eigeneAwaitingSchluessel } from './awaiting.js';
 
 /** Liegt ein offener modaler Dialog über der Seite (Hilfe, Karte, Einstellungen …)?
     Geschlossene tragen `aria-hidden="true"` an sich oder einem Vorfahren oder sind
@@ -48,6 +49,7 @@ export const fremderFokus = wrap => {
 };
 
 const IS_SERVER_BUILD = (typeof __SERVER_BUILD__ !== 'undefined') && (__SERVER_BUILD__ === true || __SERVER_BUILD__ === 'true');
+const IS_PROJECTOR_BUILD = (typeof __PROJECTOR_BUILD__ !== 'undefined') && (__PROJECTOR_BUILD__ === true || __PROJECTOR_BUILD__ === 'true');
 
 /* So viele zuletzt benutzte Boards stehen höchstens direkt im Menü. */
 const MAX_BOARDS = 5;
@@ -322,7 +324,8 @@ if (IS_SERVER_BUILD) {
       .sort((a, c) => (c.updatedAt || 0) - (a.updatedAt || 0)));
     /* Rollen nur gruppieren, wenn der Server sie liefert (ADR-0059). */
     const mitRollen = andere.some(b => b.role != null);
-    const eintrag = (b, gruppe, g, subtitle) => ({ id: b.id, label: b.name, event: 'sync:switch-to-board', gruppe, g, subtitle });
+    const eintrag = (b, gruppe, g, subtitle) => ({ id: b.id, label: b.name, event: 'sync:switch-to-board', gruppe, g, subtitle,
+                                                    awaitingUser: b.awaitingUser ?? null /* #1197 */ });
     return {
       server: true,
       fehler,
@@ -363,4 +366,119 @@ async function ladeDaten(board) {
   };
 }
 
-export const BoardMenu = { build };
+/* Karte #1195: Reiterleiste unter dem Kopf — die zuletzt benutzten Boards als Reiter
+   (Idee aus einem anderen Web-Portal). Ein Schnellwechsler, keine gleichzeitig geladenen
+   Boards: Klick = derselbe Wechsel wie im Menü. Reihenfolge stabil wie Browser-Tabs
+   (neue hinten); über MAX_REITER fällt der am längsten nicht benutzte heraus, nie das
+   aktuelle. × nimmt einen Reiter heraus. Unter zwei Reitern bleibt die Leiste
+   unsichtbar (eine Datei allein: keine Leiste). Je Browser in localStorage, nur Komfort.
+   Die Boardliste wird je Board höchstens alle 60 s neu geholt — renderHeader läuft oft;
+   sie enthält das aktuelle Board nicht, deshalb gilt der Zwischenspeicher nur für dasselbe Board. */
+/* Nur Server- und Claude-Code-Build: dort gibt es typisch mehrere Boards; im Solo-Template
+   (meist eine Datei, Bundle-Limit ADR-0114) fällt alles per DCE weg, CSS kommt mit dem JS. */
+let reiter = null;
+if (IS_SERVER_BUILD || IS_PROJECTOR_BUILD) {
+  const REITER_CSS = '.board-reiter{display:flex;gap:4px;padding:6px 20px 0;overflow-x:auto;flex-shrink:0;background:var(--bg);border-bottom:1px solid var(--border)}.board-reiter[hidden]{display:none}.board-reiter-tab{display:flex;align-items:center;flex-shrink:0;margin-bottom:-1px;background:var(--surface-2);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius) var(--radius) 0 0;color:var(--text-muted)}.board-reiter-tab--aktiv{background:var(--surface);color:var(--text);font-weight:600;border-bottom:1px solid var(--surface)}.board-reiter-knopf{background:none;border:0;color:inherit;font:inherit;cursor:pointer;padding:6px 12px;max-width:16em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.board-reiter-tab--aktiv .board-reiter-knopf{cursor:default}.board-reiter-zu{background:none;border:0;color:inherit;cursor:pointer;padding:0 8px 0 0;opacity:.6}.board-reiter-zu:hover,.board-reiter-zu:focus-visible{opacity:1}.board-reiter-wartet{margin-right:4px}@media (max-width:600px){.board-reiter{padding:4px 8px 0}}';
+  const MAX_REITER = 6;
+  const rKey = () => zKey().replace('aboard-recent:', 'aboard-reiter:');
+  const reiterIds = () => { try { return [].concat(JSON.parse(localStorage.getItem(rKey())) || []); } catch { return []; } };
+  const setzeReiter = l => { try { localStorage.setItem(rKey(), JSON.stringify(l)); } catch { /* nur Komfort */ } };
+  /* Sitzungs-Kritik 23.11. A-2: je Board-Schlüssel höchstens ein laufender Abruf; ein Fehlschlag
+     sperrt 60 s (wie _listeFehler im Menü), solange gilt die letzte gute Liste. */
+  const _reiterDaten = new Map(); /* key → { ts, liste } */
+  const _reiterLauf = new Map();  /* key → Promise */
+  let _reiterFehler = 0;
+
+  function holeListe(board) {
+    const key = rKey() + board.id;
+    const c = _reiterDaten.get(key);
+    const frisch = c && Date.now() - c.ts < ROLLEN_TTL_MS;
+    if (frisch || (c && Date.now() - _reiterFehler < ROLLEN_TTL_MS)) return Promise.resolve(c.liste);
+    if (Date.now() - _reiterFehler < ROLLEN_TTL_MS) return Promise.resolve([]);
+    if (!_reiterLauf.has(key)) {
+      _reiterLauf.set(key, ladeDaten(board).then(d => {
+        if (d.fehler) { _reiterFehler = Date.now(); return c ? c.liste : d.liste; }
+        _reiterDaten.set(key, { ts: Date.now(), liste: d.liste });
+        return d.liste;
+      }).finally(() => _reiterLauf.delete(key)));
+    }
+    return _reiterLauf.get(key);
+  }
+
+  /* Karte #1197 (ADR-0156): Wartet auf einem ANDEREN Board eine Frage auf mich? Dieselbe
+     Zuordnung wie der Banner (eigeneAwaitingSchluessel, Server-Regel: nur passende Personen).
+     Nur Server: GET /boards liefert awaitingUser; im Claude-Code-Build gibt es das Feld nicht. */
+  const wartetAufMich = (e, personen) => IS_SERVER_BUILD && !!e?.awaitingUser
+    && eigeneAwaitingSchluessel({ awaitingUser: e.awaitingUser }, personen, { server: true }).length > 0;
+
+  /* Sitzungs-Kritik A-1/A-3: die Leiste lebt in einem festen Halter direkt unter dem Kopf
+     (renderHeader legt ihn einmal an und verschiebt ihn nie), wird nur bei geändertem Inhalt
+     neu gebaut und gibt den Fokus an denselben bzw. den Nachbar-Reiter zurück.
+     `personen`: die eigene Person wie beim Banner (renderer.js eigenePerson), #1197. */
+  reiter = function reiter(board, halter, { personen = [] } = {}) {
+    if (!document.querySelector('style[data-aboard="board-reiter"]')) {
+      document.head.appendChild(el('style', '', REITER_CSS, { 'data-aboard': 'board-reiter' }));
+    }
+    let ids = reiterIds();
+    if (!ids.includes(board.id)) {
+      ids.push(board.id);
+      const z = zuletzt();
+      const rang = i => { const p = z.indexOf(i); return p < 0 ? 1e9 : p; };
+      while (ids.length > MAX_REITER) {
+        const weg = ids.filter(i => i !== board.id).reduce((a, b) => (rang(b) > rang(a) ? b : a));
+        ids = ids.filter(i => i !== weg);
+      }
+      setzeReiter(ids);
+    }
+    const zeige = (liste, fokusId) => {
+      if (!halter.isConnected) return; /* Kopf inzwischen weg (Testaufbau, Ansichtswechsel) */
+      const bekannt = new Map(liste.map(e => [e.id, e]));
+      const sicht = reiterIds().filter(i => i === board.id || bekannt.has(i));
+      const titel = (board.title || '').trim() || board.id;
+      const sig = JSON.stringify([board.id, titel, I18n.t('board.reiter'),
+        sicht.map(i => [i, bekannt.get(i)?.label, wartetAufMich(bekannt.get(i), personen)])]);
+      const alt = halter.firstChild;
+      if (alt && alt.dataset.sig === sig && fokusId === undefined) return;
+      const a = document.activeElement;
+      const fokus = fokusId ?? (alt && alt.contains(a) ? a.closest('.board-reiter-tab')?.dataset.id : null);
+      const nav = el('nav', 'board-reiter', null, { 'aria-label': I18n.t('board.reiter') });
+      nav.dataset.sig = sig;
+      nav.hidden = sicht.length < 2;
+      for (const id of sicht) {
+        const e = id === board.id ? null : bekannt.get(id);
+        const tab = el('div', e ? 'board-reiter-tab' : 'board-reiter-tab board-reiter-tab--aktiv');
+        tab.dataset.id = id;
+        const label = e ? e.label : titel;
+        const wartet = wartetAufMich(e, personen);
+        const wText = wartet ? I18n.t('board.reiter.wartet') : '';
+        const knopf = el('button', 'board-reiter-knopf', label, { type: 'button',
+          title: (e?.subtitle || label) + (wartet ? ' — ' + wText : '') });
+        if (e) knopf.addEventListener('click', () => EventBus.emit(e.event, { boardId: id }));
+        else knopf.setAttribute('aria-current', 'page');
+        tab.appendChild(knopf);
+        /* #1197, Klasse 340: Zeichen neben dem Knopf (lange Namen kürzt der Knopf ab); der Name
+           des Knopfs beginnt mit dem sichtbaren Board-Namen und sagt den Zustand mit an. */
+        if (wartet) {
+          knopf.setAttribute('aria-label', `${label}, ${wText}`);
+          tab.appendChild(el('span', 'board-reiter-wartet', '💬', { 'aria-hidden': 'true', title: wText }));
+        }
+        if (e) {
+          const zuText = I18n.t('board.reiter.close', label);
+          const zu = el('button', 'board-reiter-zu', '×', { type: 'button', 'aria-label': zuText, title: zuText });
+          zu.addEventListener('click', () => {
+            const i = sicht.indexOf(id);
+            setzeReiter(reiterIds().filter(x => x !== id));
+            zeige(liste, sicht[i + 1] ?? sicht[i - 1] ?? board.id);
+          });
+          tab.appendChild(zu);
+        }
+        nav.appendChild(tab);
+      }
+      halter.replaceChildren(nav);
+      if (fokus && !nav.hidden) [...nav.children].find(t => t.dataset.id === fokus)?.firstChild.focus();
+    };
+    holeListe(board).then(liste => zeige(liste));
+  };
+}
+
+export const BoardMenu = { build, reiter };

@@ -19,7 +19,7 @@ Die Idee stammt von [Nullboard](https://github.com/apankrat/nullboard) von Alex 
 
 ## Was in diesem Repository liegt
 
-Dieses Repository ist ein **öffentlicher Abzug** des Projekts. Es enthält die Board-App (Quellcode, Build, Tests) und das Nutzerhandbuch. Der optionale Mehrbenutzer-Server folgt später. Die Entwicklung selbst läuft in einem internen Repository; Kommentare im Code verweisen deshalb gelegentlich auf Entscheidungen (`ADR-…`), Befunde (`F-…`) oder Karten (`#…`), die hier nicht beiliegen.
+Dieses Repository ist ein **öffentlicher Abzug** des Projekts. Es enthält die Board-App (Quellcode, Build, Tests), den optionalen Mehrbenutzer-Server (Go, unter `server/`) und das Handbuch. Die Entwicklung selbst läuft in einem internen Repository; Kommentare im Code verweisen deshalb gelegentlich auf Entscheidungen (`ADR-…`), Befunde (`F-…`), Karten (`#…`) oder interne Dokumente und Werkzeuge (`docs/betrieb.md`, `knowledge/`, `tools/`, `framework/`), die hier nicht beiliegen.
 
 ## Schnellstart
 

@@ -104,8 +104,11 @@ describe('Karte #1183 — CSS', () => {
   }
 
   it('jedes Element mit border-radius 50 % steht in der Kreis-Ausnahme für „eckig“', () => {
-    const ausnahme = css.match(/\[data-corners="square"\] :is\(([^)]*)\) \{ border-radius: 50% !important/)[1]
-      .split(',').map(s => s.trim()).sort()
+    const ausnahme = [
+      ...css.match(/\[data-corners="square"\] :is\(([^)]*)\) \{ border-radius: 50% !important/)[1].split(','),
+      /* Pille bleibt Pille (Sitzungs-Kritik 23.11. A B-2) */
+      ...[...css.matchAll(/\[data-corners="square"\] (\.[\w-]+) \{ border-radius: 999px !important/g)].map(m => m[1]),
+    ].map(s => s.trim()).sort()
     const kreise = [...css.matchAll(/(^|\})\s*([^{}]+)\{[^}]*border-radius:\s*(50%|999px);/g)]
       .map(m => m[2].replace(/\/\*[\s\S]*?\*\//g, '').trim()).sort()
     expect(ausnahme).toEqual(kreise)

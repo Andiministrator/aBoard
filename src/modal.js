@@ -1055,7 +1055,7 @@ export const Modal = (() => {
     if (target) {
       const a = el('a', { cls: 'link-target', href: `#card-${target.card.displayId ?? ''}` });
       const idStr = target.card.displayId != null ? `#${target.card.displayId} ` : '';
-      a.textContent = `${idStr}${target.card.title}`;
+      a.textContent = `${idStr}${Model.anzeigeTitel(target.card, I18n.t)}`;  /* F-3112 */
       /* Klick: Modal-Close würde sonst die ungespeicherten Edits verwerfen — wir
          erlauben den Hash-Sprung trotzdem, weil der Nutzer den Verweis explizit klickt.
          Save-Action vor dem Folgen: nicht notwendig, da Hash-Wechsel die aktuelle Karte
@@ -1087,7 +1087,7 @@ export const Modal = (() => {
     removeBtn.textContent = '×';
     removeBtn.addEventListener('click', () => {
       const isBlocker = link.type === 'blocks' || link.type === 'blocked-by';
-      const targetTitle = target?.card?.title || I18n.t('link.unknown-target');
+      const targetTitle = (target?.card && Model.anzeigeTitel(target.card, I18n.t)) || I18n.t('link.unknown-target');
       if (isBlocker && !confirm(I18n.t('link.confirm-remove-blocker', targetTitle))) return;
       EventBus.emit('card:link-remove', {
         sourceId: currentCard.id, targetId: link.targetId, type: link.type,
@@ -1185,6 +1185,8 @@ export const Modal = (() => {
     board?.sprints?.forEach(sprint => {
       (sprint.cards || []).forEach(card => {
         if (card.id === currentCard.id) return;
+        /* F-3112: Meta-Karten bekommen keine Verweise (ADR-0036) — gar nicht erst anbieten. */
+        if (card.kind === 'sprint-meta') return;
         /* Kritik K-2 (Karte #826): Ein Verweis ist doppelt persistiert (ADR-0032)
            und änderte die Spiegelkarte mit — der Server wiese das ab. */
         if (IS_SERVER_BUILD && spiegelGebunden(card, sprint.id)) return;
@@ -3568,9 +3570,7 @@ export const Modal = (() => {
 
     for (const id of Object.values(BERUEHRT_FELDER)) delete overlay.querySelector(id)?.dataset.beruehrt;
     /* F-3110: Meta-Karten-Titel in der Oberflächensprache (nur Anzeige, gespeichert wird er nie) */
-    overlay.querySelector('#modal-title').value      = card.kind === 'sprint-meta'
-      && card.title === Model.META_TITEL?.[card.metaType]
-      ? I18n.t('meta.title.' + card.metaType) : card.title;
+    overlay.querySelector('#modal-title').value      = Model.anzeigeTitel(card, I18n.t);
     /* Verify V-2 (F-1947): wie complexity — „normal“, „P1“, „high“ aus Konsumenten-Boards. */
     /* Kritiker Sprint 88 (F-1963): `''` zeigt „mittel“ (vergleichsWert hält es beim
        Schliessen als unverändert), 0/false sind Fremdwerte — kein `||`. */
@@ -4540,7 +4540,7 @@ export const Modal = (() => {
 
   function fuelleSchaetzfelder(card) {
     const sel = overlay.querySelector('#modal-complexity');
-    /* Kritiker M-1: Auch Zahlen (1/2/3 in linux, framework), 0 und Wahrheitswerte
+    /* Kritiker M-1: Auch Zahlen (1/2/3 aus fremden Boards), 0 und Wahrheitswerte
        sind fremde Werte. Ein <select> kennt nur Text — der Rohwert bleibt deshalb
        wie bei effort als JSON am Feld und kommt zurück, solange die Fremd-Option
        gewählt ist. Kein `|| ''`: das machte aus 0 einen leeren Wert. */

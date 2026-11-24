@@ -3,7 +3,7 @@
 /**
  * Karte #450 — der Transportweg von Karten-Anhängen im Server-Modus.
  *
- * Andis Meldung aus dem Produktivbetrieb: Bild an eine Karte anhängen →
+ * Meldung aus dem Produktivbetrieb: Bild an eine Karte anhängen →
  * „Speichern fehlgeschlagen", nach dem Reload ist der Anhang weg;
  * Beschreibungsänderungen gehen. Die Ursache war kein Fehler im
  * Attachment-Code, sondern ein nie benutzter: `createRESTAttachmentBackend`

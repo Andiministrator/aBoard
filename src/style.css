@@ -84,7 +84,8 @@
    data-corners/-font/-accent an <html>. Voreinstellung: square, system, teal. Akzentwerte: AA ≥ 5:1, geprüft in tests/darstellung-1183.test.js. */
 [data-corners="square"] *, [data-corners="square"] ::before, [data-corners="square"] ::after { border-radius: 0 !important; }
 /* Kreise bleiben rund — neue Kreise hier ergänzen (Server-CSS stattdessen mit eigenem !important, s. .board-header-avatar) */
-[data-corners="square"] :is(.identity-avatar, .card-assignee-avatar, .sprint-archived-pill) { border-radius: 50% !important; }
+[data-corners="square"] :is(.identity-avatar, .card-assignee-avatar) { border-radius: 50% !important; }
+[data-corners="square"] .sprint-archived-pill { border-radius: 999px !important; } /* Pille, keine Ellipse */
 [data-font="serif"] { --font: Georgia, Cambria, 'Times New Roman', serif; }
 [data-font="mono"]  { --font: ui-monospace, Consolas, Menlo, monospace; }
 :is([data-font="serif"], [data-font="mono"]) :is(button, input, select, textarea) { font-family: inherit; }

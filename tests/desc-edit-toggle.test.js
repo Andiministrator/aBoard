@@ -4,7 +4,7 @@
  * ADR-0076 — Beschreibungs-Pane: expliziter „Bearbeiten"-Button statt
  * Klick-auf-Block (revidiert ADR-0029 NUR für den desc-Pane).
  *
- * #267 (Andi-Report 2026-05-19): Der Toggle ist ein Modus-SCHALTER und
+ * #267 (Meldung 2026-05-19): Der Toggle ist ein Modus-SCHALTER und
  * lebt in der `.desc-toolbar` (innerhalb `.modal-desc-section`), NICHT
  * mehr IN `#desc-pane` (dem WYSIWYG-Editor). Im Lese-Modus trägt die
  * Section NICHT `.desc-section-editing` (CSS blendet dann die

@@ -103,3 +103,59 @@ describe('F-3110 — Meta-Karten-Titel', () => {
     expect(karte.title).toBe('📋 Sprint-Start')
   })
 })
+
+/* F-3112 (Karte #1192): außerhalb von Karte und Karten-Fenster — Verweise und Suche. */
+import { addLink } from '../src/links.js'
+import { Search }  from '../src/search.js'
+
+describe('F-3112 — Meta-Karten in Verweisen und Suche', () => {
+  const start = () => Model.createSprintMetaCard('start', 1, 'col-backlog', false)
+  const normal = (links = []) => ({ ...Model.createCard('Normale Karte', 'col-backlog', 3), links })
+
+  it('Model.anzeigeTitel übersetzt nur den unveränderten Vorgabetitel einer Meta-Karte', () => {
+    expect(Model.anzeigeTitel(start(), I18n.t)).toBe('📋 Sprint start')
+    expect(Model.anzeigeTitel({ ...start(), title: 'Eigen' }, I18n.t)).toBe('Eigen')
+    expect(Model.anzeigeTitel({ title: '📋 Sprint-Start', metaType: 'start' }, I18n.t)).toBe('📋 Sprint-Start')
+    expect(Model.anzeigeTitel(start())).toBe('📋 Sprint-Start')
+  })
+
+  it('addLink lehnt Meta-Karten als Quelle und Ziel ab (ADR-0036)', () => {
+    const m = start(), n = normal()
+    const board = { sprints: [{ id: 's-1', cards: [m, n] }] }
+    expect(addLink(board, n.id, m.id, 'related')).toBe(false)
+    expect(addLink(board, m.id, n.id, 'related')).toBe(false)
+    expect(n.links).toEqual([])
+  })
+
+  it('die Verweis-Auswahl bietet keine Meta-Karten an', () => {
+    const m = start(), n = normal(), z = { ...Model.createCard('Ziel', 'col-backlog', 4), links: [] }
+    zeichne([m, n, z])
+    EventBus.emit('card:edit', n)
+    document.querySelector('#link-add-btn').click()
+    const zeilen = [...document.querySelectorAll('.link-picker-row')].map(r => r.textContent)
+    expect(zeilen.some(t => t.includes('#4 Ziel'))).toBe(true)
+    expect(zeilen.some(t => t.includes('📋'))).toBe(false)
+  })
+
+  it('ein Alt-Verweis auf eine Meta-Karte zeigt deren übersetzten Titel', () => {
+    const m = start()
+    const n = normal([{ targetId: m.id, type: 'related', created: '2026-11-23' }])
+    zeichne([m, n])
+    EventBus.emit('card:edit', n)
+    expect(document.querySelector('.link-target')?.textContent).toBe('#1 📋 Sprint start')
+  })
+
+  it('die Suche findet eine Meta-Karte über ihren übersetzten Titel', () => {
+    vi.useFakeTimers()
+    try {
+      Search.setQuery('sprint start')
+      vi.advanceTimersByTime(200)
+      expect(Search.matches(start())).toBe(true)
+      expect(Search.matches(normal())).toBe(false)
+      expect(Search.matches({ ...Model.createCard('📋 Sprint-Start (Text)', 'col-backlog', 5) })).toBe(false)
+    } finally {
+      Search.clear()
+      vi.useRealTimers()
+    }
+  })
+})

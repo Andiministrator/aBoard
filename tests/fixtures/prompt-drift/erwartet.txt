@@ -1,0 +1,31 @@
+# Karte #4711: Karte mit Randfaellen
+
+## Beschreibung
+
+Erste Zeile.
+
+Zweiter Absatz mit `code` und einem Umlaut: Grösse.
+
+## Kommentare
+
+- [2026-09-01 andi]: Kommentar mit
+  Zeilenumbruch
+- [2026-09-02]: Kommentar ohne Autor
+- [claude]: Kommentar ohne Datum
+
+## Verweise
+
+- blocked-by: #12 "Zielkarte A" — Kurzfassung von A
+- related: #12 "Zielkarte A" — Kurzfassung von A
+- related: "Zielkarte B ohne Nummer"
+
+## Agent-Kontext
+
+## Relevante Dateien
+- src/llm-pii.js:342
+
+## Aktivität
+
+- [2026-09-01T10:00:00.000Z andi] column-moved: col-ready → col-in-arbeit
+- [2026-09-02T10:00:00.000Z] field-updated: false → true
+- [claude] owner-changed:  → Claude Opus

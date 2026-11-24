@@ -7,9 +7,13 @@
     "dev": "vite",
     "build": "vite build --config vite.config.js && cp dist/index.html aboard.html",
     "build:template": "vite build --config vite.config.template.js && cp dist-template/index.html aboard.template.html",
-    "test": "vitest run && vitest run --config vitest.config.slim.js",
+    "test": "vitest run && vitest run --config vitest.config.slim.js && vitest run --config vitest.config.server-frontend.js",
     "test:standalone": "vitest run",
-    "test:slim": "vitest run --config vitest.config.slim.js"
+    "test:slim": "vitest run --config vitest.config.slim.js",
+    "test:server-frontend": "vitest run --config vitest.config.server-frontend.js",
+    "build:server-frontend": "vite build --config vite.config.server.js",
+    "build:ops-bundle": "bun build server/fold/eintrag.js --format=iife --target=browser --outfile=server/fold/ops.bundle.js",
+    "build:server": "vite build --config vite.config.server.js && rm -rf server/web/dist && mkdir -p server/web/dist && cp -r dist/server-frontend/. server/web/dist/"
   },
   "license": "Apache-2.0",
   "devDependencies": {

@@ -88,7 +88,7 @@ describe('Karte #774 — fremde Schätzskalen überleben das Modal', () => {
     expect(spy.mock.calls[0][0].effort).toBe(2)
   })
 
-  /* Kritiker M-1: Zahlen (linux, framework), 0 und Wahrheitswerte sind ebenfalls
+  /* Kritiker M-1: Zahlen (aus fremden Boards), 0 und Wahrheitswerte sind ebenfalls
      fremde Werte — ein <select> liefert nur Text, `|| ''` machte aus 0 einen
      leeren Wert. Typ muss erhalten bleiben, nicht nur der Anschein. */
   it.each([[2], [1], [0], [true], [['a']], ['klein']])('complexity %j überlebt Öffnen und Schliessen mit Typ', (wert) => {

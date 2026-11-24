@@ -1,0 +1,3881 @@
+{
+ "herkunft": {
+  "repo": "aBoard",
+  "commit": "Entwurf, wird beim Uebernehmen durch das Partnerprojekt gesetzt"
+ },
+ "stand": "Entwurf aBoard 2026-10-11 (Karte #809, F-2017) - noch nicht vom Partnerprojekt abgenommen",
+ "hinweis": "Gemeinsame Testvektoren der Titelbehandlung (T16, ADR-0140 'Titel, zweite Schicht'). Zwei Arten von Vektoren, unterschieden am Schluessel. (1) 'erwartet': Behandlung. eingabe.titel ist der ROHE Titel einer Karte, eingabe.vertraulich der Wert des Vertraulich-Schalters der Karte (im Board: 'confidential'); fehlt der Schluessel, ist der Schalter nicht gesetzt. Vertraulich gilt fail-closed: nur 'nicht gesetzt' und das echte false sind nicht vertraulich, jeder andere Wert (true, null, Text, Zahl, Liste, Objekt) ist vertraulich. erwartet ist der Titel, der in den Schatten kommt, oder null (vertraulich). Reihenfolge: unsichtbare Zeichen (Unicode Cf) entfernen, NFKC, Muster verpackter Daten pruefen, auf den Zeichenvorrat filtern, Muster erneut pruefen, jeden Lauf von Leerzeichen zu EINEM zusammenziehen und die Raender trimmen, auf 80 Zeichen (Unicode-Zeichen, gezaehlt nach NFKC, Filter und Zusammenziehen) kuerzen und erneut trimmen. Die Musterpruefung liegt VOR dem Kuerzen (ein Muster hinter Zeichen 80 zaehlt). Nach NFKC und Filter ist das gewoehnliche Leerzeichen U+0020 der einzige Leerraum: NBSP, U+2000-U+200A, U+202F, U+205F und U+3000 macht NFKC zu U+0020; Tab, LF, VT, FF, CR, U+0085, U+1680, U+2028 und U+2029 entfernt der Filter; U+180E ist Cf und faellt schon vorher weg. In der ERSTEN Musterpruefung (Wort ohne Leerzeichen laenger als 24 Zeichen) trennt ein Wort, was Go unicode.IsSpace ist, gemessen nach Cf-Entfernung und NFKC: U+0009-U+000D, U+0020, U+0085, U+00A0, U+1680, U+2000-U+200A, U+2028, U+2029, U+202F, U+205F, U+3000 - und ausdruecklich NICHT U+001C-U+001F (Python isspace() und re \\s zaehlen die als Leerraum, Go nicht; sie trennen kein Wort). Im Ergebnis stehen deshalb nie zwei Leerzeichen hintereinander und keines am Rand. Ersatztext 'Interne Karte (Titel im Board)'. Zeichenvorrat: A-Z, a-z, Latin-1-Buchstaben U+00C0-U+00FF ausser U+00D7 und U+00F7, Ziffern, Leerzeichen und . , : ; - (Halbgeviert) / & ( ) + ' ! ? Muster: Wort ohne Leerzeichen laenger als 24 Zeichen, mehr als 12 Ziffern insgesamt, '://', 'www.' (ohne Gross/Klein), '@', mehr als 16 Hex-Zeichen am Stueck. (2) 'ablehnung': Eingang. eingabe.titel und eingabe.vertraulich stehen so in einem Schatten, den das Skript schickt (titel = bereits behandelter Titel oder null, vertraulich = JSON-Wert); der Eingang muss die ganze Liste ablehnen, und die Fehlermeldung nennt das Feld aus 'ablehnung'. Jeder 'erwartet'-Titel muss zusaetzlich vom Eingang unveraendert angenommen werden (Fixpunkt), und jeder ROHE Titel, der sich von 'erwartet' unterscheidet (nicht vertraulich), muss vom Eingang mit 422 am Feld titel abgelehnt werden (der Eingang saeubert nie). Auslegung: Ziffer ist Unicode Nd (Go unicode.IsDigit; Python str.isdecimal() bzw. re \\d ohne ASCII-Flag, NICHT isdigit()). Latin-1-Buchstaben sind U+00C0-U+00FF ausser U+00D7 und U+00F7 (Ae, Eth, Thorn, sz, thorn eingeschlossen). Die Roboter-Marke (U+1F916) laeuft ueber das Feld vonAgent und steht NIE im Titel; ein Titel mit Marke wird vom Eingang abgelehnt. Ein einzelnes Surrogat (JSON \\ud800 ohne Gegenstueck) gilt als U+FFFD und faellt wie jedes Zeichen ausserhalb des Vorrats weg. Die Reihenfolge Zusammenziehen vor Kuerzen ist festgelegt: 80 zaehlt den zusammengezogenen Text. 'quelle' nennt die Regel, die der Vektor belegt. FELDER (Absprache Board-Paar 11.10.2026, Ziffer 5): Ein Vektor prueft genau ein Feld. Der optionale Schluessel 'feld' ('titel' | 'spalte' | 'bearbeiter') sagt welches; fehlt er, ist es 'titel' (alle Vektoren oben). feld 'spalte': eingabe.spalte ist der ROHE Spaltenname (Ausgang: Titel einer Spalte aus columnDefs); 'erwartet' ist der Name, wie er in den Schatten kommt: dieselbe Behandlung wie der Titel (gleicher Leerraum, gleiche Musterpruefung vor dem Kuerzen), aber auf hoechstens 40 Zeichen. Bleibt nichts uebrig oder greift ein Muster, ist der Wert der LEERE Text (nie der Ersatztext, die Spalte bleibt leer). Der leere Text ist am Eingang erlaubt. 'ablehnung' ist 'spalte'. Der Eingang nimmt nur den leeren Text oder einen Fixpunkt der Behandlung (hoechstens 40) an. feld 'bearbeiter': eingabe.bearbeiter ist die ROHE Liste der Namen (Karte: owner und assignees, Termin: personen); 'erwartet' ist die Liste, die der Ausgang in den Schatten schreibt, wenn JEDER Name der Eingabe dem Board bekannt ist (ob ein Name in board.identities oder bei den Claude-Modellen steht, ist Sache des Ausgangs und nicht Teil dieser Vektoren). Je Name: trimmen; leere Namen entfallen; Namen mit '@' oder dem Anfang 'external:' (ohne Gross/Klein, nach dem Trimmen) entfallen; dann dieselbe Behandlung wie der Titel mit hoechstens 60 Zeichen (Ueberlaenge wird GEKUERZT, nicht abgelehnt); greift ein Muster oder bleibt nichts uebrig, ENTFAELLT der Name (er wird nie ersetzt); ist der behandelte Name 'external:'-/'@'-haltig (z. B. Soft Hyphen im Wort external, vollbreites at), entfaellt er ebenfalls. Die Reihenfolge bleibt; es gelten hoechstens 10 Namen (die ersten 10 gueltigen). Doppelte Namen nach der Behandlung faellt der Ausgang zu einem zusammen: das ERSTE Vorkommen bleibt, die Reihenfolge der uebrigen bleibt, und ein Doppel zaehlt nicht gegen die Grenze von 10 (die ersten 10 VERSCHIEDENEN gueltigen Namen). Verglichen wird NACH der Behandlung (zwei Namen, die erst nach Leerraum-Lauf, NFKC, Soft Hyphen usw. gleich sind, sind ein Doppel); der Vergleich unterscheidet Gross/Klein (der Ausgang loest einen Namen vorher gegen die Identitaeten des Boards auf, das ist nicht Teil dieser Vektoren). Der Eingang prueft Doppel NICHT und nimmt eine Liste mit exaktem Doppel an (gemessen); deshalb gibt es dafuer keinen Ablehnungs-Vektor, und die Gegenrichtung 'rohe Liste ungleich erwartet muss abgelehnt werden' gilt fuer Vektoren, deren Liste sich nur durch exakte Doppel von 'erwartet' unterscheidet, NICHT (der Eingang darf sie annehmen; das Push-Skript sendet nie Doppel) - aber nur bis zu 10 Eintraegen: eine Liste mit mehr als 10 Eintraegen lehnt der Eingang weiter ab, auch wenn sie nur durch exakte Doppel von 'erwartet' abweicht. Am Eingang gilt je Name: Fixpunkt der Behandlung (hoechstens 60), kein '@', kein 'external:'; ein einziger verletzter Name, mehr als 10 Namen, ein leerer Name oder ein Eintrag, der kein Text ist, lehnt die ganze Liste ab ('ablehnung' ist 'bearbeiter'; die Meldung beginnt mit 'bearbeiter:' oder 'bearbeiter[<index>]:'). Ist die rohe Liste einer 'erwartet'-Liste nicht gleich, muss der Eingang sie ablehnen (Gegenrichtung).",
+ "quellen": [
+  "normal",
+  "trim",
+  "leer",
+  "NFKC",
+  "unsichtbar",
+  "zeichenvorrat",
+  "3a-Satzzeichen",
+  "verpackt",
+  "max80",
+  "leerraum",
+  "vertraulich",
+  "spalte",
+  "max40",
+  "bearbeiter",
+  "max60",
+  "eingang"
+ ],
+ "ersatztext": "Interne Karte (Titel im Board)",
+ "vektoren": [
+  {
+   "name": "normaler Titel",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Angebot pr\u00fcfen"
+   },
+   "erwartet": "Angebot pr\u00fcfen"
+  },
+  {
+   "name": "Umlaute und scharfes s",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "\u00c4pfel, \u00d6l und \u00dcberma\u00df: Stra\u00dfe"
+   },
+   "erwartet": "\u00c4pfel, \u00d6l und \u00dcberma\u00df: Stra\u00dfe"
+  },
+  {
+   "name": "Latin-1-Akzente",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Caf\u00e9 Cr\u00e8me br\u00fbl\u00e9e \u00e0 la \u00d1and\u00fa"
+   },
+   "erwartet": "Caf\u00e9 Cr\u00e8me br\u00fbl\u00e9e \u00e0 la \u00d1and\u00fa"
+  },
+  {
+   "name": "Latin-1 Randzeichen \u00c6 \u00d8 \u00fe \u00ff",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "\u00c6sir \u00d8rsted \u00feing \u00ff"
+   },
+   "erwartet": "\u00c6sir \u00d8rsted \u00feing \u00ff"
+  },
+  {
+   "name": "Ziffern bis zw\u00f6lf",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Rechnung 123456789012"
+   },
+   "erwartet": "Rechnung 123456789012"
+  },
+  {
+   "name": "Datum und Telefon",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Termin 2026-10-11 Tel 12"
+   },
+   "erwartet": "Termin 2026-10-11 Tel 12"
+  },
+  {
+   "name": "Domainname ohne www und ohne Schema",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Siehe example.com/pfad"
+   },
+   "erwartet": "Siehe example.com/pfad"
+  },
+  {
+   "name": "Ersatztext selbst bleibt",
+   "quelle": "normal",
+   "eingabe": {
+    "titel": "Interne Karte (Titel im Board)"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Leerzeichen au\u00dfen werden entfernt",
+   "quelle": "trim",
+   "eingabe": {
+    "titel": "   Titel   "
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "gesch\u00fctztes Leerzeichen wird Leerzeichen und entf\u00e4llt au\u00dfen",
+   "quelle": "trim",
+   "eingabe": {
+    "titel": "\u00a0Titel\u00a0"
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "ideographisches Leerzeichen wird Leerzeichen",
+   "quelle": "trim",
+   "eingabe": {
+    "titel": "A\u3000B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "leerer Titel",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": ""
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "nur Leerzeichen",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "     "
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "nur unsichtbare Zeichen",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "\u200b\u200d\ufeff"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "nur kyrillisch: nichts \u00fcbrig",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "\u041f\u0440\u0438\u0432\u0435\u0442"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "nur CJK: nichts \u00fcbrig",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "\u65e5\u672c\u8a9e\u306e\u30bf\u30a4\u30c8\u30eb"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "nur Emoji: nichts \u00fcbrig",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "\ud83d\ude80\ud83c\udf89"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Emoji-Familie mit ZWJ",
+   "quelle": "leer",
+   "eingabe": {
+    "titel": "\ud83d\udc68\u200d\ud83d\udc69\u200d\ud83d\udc67"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Vollbreite Buchstaben",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\uff21\uff22\uff23 \uff34\uff49\uff54\uff45\uff4c"
+   },
+   "erwartet": "ABC Titel"
+  },
+  {
+   "name": "Vollbreite Ziffern und Klammern",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\uff08Test\uff09 \uff11\uff12\uff13"
+   },
+   "erwartet": "(Test) 123"
+  },
+  {
+   "name": "Vollbreites kaufm\u00e4nnisches Und",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\uff32\uff06\uff24"
+   },
+   "erwartet": "R&D"
+  },
+  {
+   "name": "Ligatur fi",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\ufb01le"
+   },
+   "erwartet": "file"
+  },
+  {
+   "name": "Ligatur ffi und fl",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\ufb03ce \ufb02ow"
+   },
+   "erwartet": "ffice flow"
+  },
+  {
+   "name": "hochgestellte Ziffer",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "m\u00b2"
+   },
+   "erwartet": "m2"
+  },
+  {
+   "name": "tiefgestellte Ziffer",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "H\u2082O"
+   },
+   "erwartet": "H2O"
+  },
+  {
+   "name": "eingekreiste Ziffer",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\u2461 Schritt"
+   },
+   "erwartet": "2 Schritt"
+  },
+  {
+   "name": "r\u00f6mische Ziffer als ein Zeichen",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Kapitel \u216b"
+   },
+   "erwartet": "Kapitel XII"
+  },
+  {
+   "name": "Auslassungszeichen wird drei Punkte",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Wird fortgesetzt\u2026"
+   },
+   "erwartet": "Wird fortgesetzt..."
+  },
+  {
+   "name": "doppeltes Ausrufezeichen als ein Zeichen",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Achtung\u203c"
+   },
+   "erwartet": "Achtung!!"
+  },
+  {
+   "name": "Fragezeichen-Ausrufezeichen als ein Zeichen",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Echt\u2049"
+   },
+   "erwartet": "Echt!?"
+  },
+  {
+   "name": "Nummernzeichen wird No",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\u2116 5"
+   },
+   "erwartet": "No 5"
+  },
+  {
+   "name": "Trademark wird TM",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Pro\u2122"
+   },
+   "erwartet": "ProTM"
+  },
+  {
+   "name": "Grad Celsius: Gradzeichen f\u00e4llt weg",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "20\u2103"
+   },
+   "erwartet": "20C"
+  },
+  {
+   "name": "Mikro-Zeichen wird Griechisch und f\u00e4llt weg",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "5\u00b5m"
+   },
+   "erwartet": "5m"
+  },
+  {
+   "name": "ordinales a wird a",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "1\u00aa"
+   },
+   "erwartet": "1a"
+  },
+  {
+   "name": "Bruch \u00bd wird 1, Bruchstrich, 2; der Bruchstrich f\u00e4llt weg",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\u00bd Liter"
+   },
+   "erwartet": "12 Liter"
+  },
+  {
+   "name": "zerlegtes \u00e4 wird zusammengesetzt",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "A\u0308pfel"
+   },
+   "erwartet": "\u00c4pfel"
+  },
+  {
+   "name": "zerlegtes \u00e9 wird zusammengesetzt",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "Cafe\u0301"
+   },
+   "erwartet": "Caf\u00e9"
+  },
+  {
+   "name": "gesch\u00fctzter Bindestrich U+2011 f\u00e4llt weg",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "A\u2011B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Minuszeichen U+2212 f\u00e4llt weg",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "A\u2212B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Vollbreites at ergibt Muster verpackter Daten",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "mail\uff20firma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Vollbreites www. ergibt Muster verpackter Daten",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\uff57\uff57\uff57\uff0efirma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Vollbreiter Doppelpunkt-Schr\u00e4gstrich ergibt ://",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "http\uff1a\uff0f\uff0fx"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "dreizehn eingekreiste Ziffern ergeben mehr als zw\u00f6lf Ziffern",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\u2460\u2461\u2462\u2463\u2464\u2465\u2466\u2467\u2468\u2460\u2460\u2460\u2460"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "ZWSP mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u200bcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "ZWNJ mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u200ccd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "ZWJ mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u200dcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "LRM mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u200ecd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "RLM mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u200fcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "Word Joiner mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u2060cd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "BOM mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\ufeffcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "Soft Hyphen mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u00adcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "LRE mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u202acd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "RLE mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u202bcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "PDF mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u202ccd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "LRO mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u202dcd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "RLO mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u202ecd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "LRI mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u2066cd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "RLI mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u2067cd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "FSI mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u2068cd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "PDI mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u2069cd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "Arabic Letter Mark mitten im Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ab\u061ccd"
+   },
+   "erwartet": "Abcd"
+  },
+  {
+   "name": "Bidi-Umkehr RLO um Text",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "\u202eRechnung\u202c"
+   },
+   "erwartet": "Rechnung"
+  },
+  {
+   "name": "unsichtbare Zeichen zwischen w und w. ergeben www.",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "w\u200bw\u200dw.firma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Soft Hyphen im at-Muster",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "a\u00ad@\u200bb"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "ZWSP zwischen Leerzeichen und Wort",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Ein\u200b Titel"
+   },
+   "erwartet": "Ein Titel"
+  },
+  {
+   "name": "Cf-Zeichen verhindert Zusammensetzung (Soft Hyphen vor Umlaut-Trema)",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "A\u00ad\u0308pfel"
+   },
+   "erwartet": "\u00c4pfel"
+  },
+  {
+   "name": "CGJ (Mn, kein Cf) trennt das Muster erst vor dem Filtern: zweite Musterpr\u00fcfung",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "ww\u034fw.firma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Cf-Zeichen verl\u00e4ngern die Laufl\u00e4nge der ersten Musterpr\u00fcfung (Soft Hyphen im langen Wort)",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "Donaudampf\u00adschiff\u00adfahrts\u00ad Ende"
+   },
+   "erwartet": "Donaudampfschifffahrts Ende"
+  },
+  {
+   "name": "Tag-Zeichen U+E0041 f\u00e4llt weg",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "A\udb40\udc41B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "kyrillisch gemischt",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u041f\u0440\u0438\u0432\u0435\u0442 Welt"
+   },
+   "erwartet": "Welt"
+  },
+  {
+   "name": "kyrillisch im Wort",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Pr\u0438ma"
+   },
+   "erwartet": "Prma"
+  },
+  {
+   "name": "griechisch",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Alpha \u0391\u03bb\u03c6\u03b1"
+   },
+   "erwartet": "Alpha"
+  },
+  {
+   "name": "CJK gemischt",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Test \u65e5\u672c\u8a9e"
+   },
+   "erwartet": "Test"
+  },
+  {
+   "name": "arabisch",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Titel \u0645\u0631\u062d\u0628\u0627"
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "Emoji am Ende",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Release \ud83d\ude80"
+   },
+   "erwartet": "Release"
+  },
+  {
+   "name": "Emoji am Anfang",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u2705 Erledigt"
+   },
+   "erwartet": "Erledigt"
+  },
+  {
+   "name": "Emoji mit Variantenselektor",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Warnung \u26a0\ufe0f"
+   },
+   "erwartet": "Warnung"
+  },
+  {
+   "name": "Latin Extended-A ist nicht im Vorrat",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u0141\u00f3d\u017a"
+   },
+   "erwartet": "\u00f3d"
+  },
+  {
+   "name": "Latin Extended-A \u017d \u010c",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u017dlu\u0165ou\u010dk\u00fd \u010cech"
+   },
+   "erwartet": "luouk\u00fd ech"
+  },
+  {
+   "name": "Malzeichen und Geteilt-Zeichen",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "3 \u00d7 4 \u00f7 2"
+   },
+   "erwartet": "3 4 2"
+  },
+  {
+   "name": "Copyright-Zeichen",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A \u00a9 B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Paragraphenzeichen",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u00a7 5"
+   },
+   "erwartet": "5"
+  },
+  {
+   "name": "umgekehrtes Fragezeichen",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u00bfQu\u00e9?"
+   },
+   "erwartet": "Qu\u00e9?"
+  },
+  {
+   "name": "Tabulator wird entfernt",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\tB"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Zeilenumbruch wird entfernt",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\nB"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Steuerzeichen NUL wird entfernt",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u0000B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Eszett-Gro\u00dfbuchstabe U+1E9E ist nicht im Vorrat",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "STRA\u1e9eE"
+   },
+   "erwartet": "STRAE"
+  },
+  {
+   "name": "Roboter-Emoji am Anfang f\u00e4llt weg, die Marke steht nie im Titel",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\ud83e\udd16 Titel"
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "C1-Steuerzeichen U+0085 f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u0085B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "C1-Steuerzeichen U+0080 f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u0080B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "DEL f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u007fB"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Wagenr\u00fccklauf f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\rB"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "nur Wagenr\u00fccklauf: nichts \u00fcbrig",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\r"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Zeilentrenner U+2028 f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u2028B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Absatztrenner U+2029 f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "A\u2029B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "mathematische Buchstaben werden durch NFKC lateinisch",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "\ud835\udc00\ud835\udc01\ud835\udc02"
+   },
+   "erwartet": "ABC"
+  },
+  {
+   "name": "kombinierendes Zeichen ohne Pr\u00e4komposit f\u00e4llt weg",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "Q\u0308Q"
+   },
+   "erwartet": "QQ"
+  },
+  {
+   "name": "kleines At-Zeichen U+FE6B wird durch NFKC zu At",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "a\ufe6bb"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Latin-1 \u00d0 \u00de \u00df \u00fe \u00c6 sind im Vorrat",
+   "quelle": "zeichenvorrat",
+   "eingabe": {
+    "titel": "\u00d0 \u00de \u00df \u00fe \u00c6"
+   },
+   "erwartet": "\u00d0 \u00de \u00df \u00fe \u00c6"
+  },
+  {
+   "name": "hochgestellte 2 und 3 werden durch NFKC Ziffern",
+   "quelle": "NFKC",
+   "eingabe": {
+    "titel": "x\u00b2\u00b3"
+   },
+   "erwartet": "x23"
+  },
+  {
+   "name": "Ziffer ist Unicode Nd: dreizehn arabisch-indische Ziffern z\u00e4hlen",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669\u0660\u0661\u0662 Titel"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "zw\u00f6lf arabisch-indische Ziffern z\u00e4hlen als Ziffern, fallen dann weg",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669\u0660\u0661 Titel"
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "dreizehn \u00e4thiopische Ziffern sind keine Nd (Kategorie No) und fallen weg",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "\u1369\u136a\u136b\u136c\u136d\u136e\u136f\u1370\u1371\u1372\u1373\u1374\u1375 Titel"
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "einzelnes Surrogat gilt als U+FFFD und f\u00e4llt weg",
+   "quelle": "unsichtbar",
+   "eingabe": {
+    "titel": "A\ud800B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Tabulator trennt W\u00f6rter der ersten Musterpr\u00fcfung (Go unicode.IsSpace)",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\t\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416 X"
+   },
+   "erwartet": "X"
+  },
+  {
+   "name": "U+001C trennt W\u00f6rter NICHT (Python isspace ja, Go nein): Lauf \u00fcber 24",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u001c\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416\u0416 X"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "alle erlaubten Satzzeichen",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "A. B, C: D; E - F \u2013 G / H & I (J) K + L ' M ! N ?"
+   },
+   "erwartet": "A. B, C: D; E - F \u2013 G / H & I (J) K + L ' M ! N ?"
+  },
+  {
+   "name": "Gedankenstrich (Halbgeviert) bleibt",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Plan \u2013 Teil 2"
+   },
+   "erwartet": "Plan \u2013 Teil 2"
+  },
+  {
+   "name": "langer Gedankenstrich f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Plan \u2014 Teil 2"
+   },
+   "erwartet": "Plan Teil 2"
+  },
+  {
+   "name": "Raute f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Karte #809"
+   },
+   "erwartet": "Karte 809"
+  },
+  {
+   "name": "Anf\u00fchrungszeichen fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Er sagte \"Hallo\""
+   },
+   "erwartet": "Er sagte Hallo"
+  },
+  {
+   "name": "typografische Anf\u00fchrungszeichen fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "\u201eHallo\u201c"
+   },
+   "erwartet": "Hallo"
+  },
+  {
+   "name": "typografischer Apostroph f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Andi\u2019s Plan"
+   },
+   "erwartet": "Andis Plan"
+  },
+  {
+   "name": "gerader Apostroph bleibt",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "Andi's Plan"
+   },
+   "erwartet": "Andi's Plan"
+  },
+  {
+   "name": "Prozent f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "100% Abdeckung"
+   },
+   "erwartet": "100 Abdeckung"
+  },
+  {
+   "name": "Unterstrich f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "a_b c_d"
+   },
+   "erwartet": "ab cd"
+  },
+  {
+   "name": "Gleichheitszeichen und Sternchen fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "x = 5 * 3"
+   },
+   "erwartet": "x 5 3"
+  },
+  {
+   "name": "Dollar und Euro fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "5 $ und 6 \u20ac"
+   },
+   "erwartet": "5 und 6"
+  },
+  {
+   "name": "spitze und eckige Klammern fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "<a> [b] {c}"
+   },
+   "erwartet": "a b c"
+  },
+  {
+   "name": "Senkrechter Strich, Tilde, Zirkumflex, Gravis fallen weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "a|b ~c ^d `e"
+   },
+   "erwartet": "ab c d e"
+  },
+  {
+   "name": "Backslash f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "a\\b"
+   },
+   "erwartet": "ab"
+  },
+  {
+   "name": "Gradzeichen f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "20\u00b0C"
+   },
+   "erwartet": "20C"
+  },
+  {
+   "name": "Mittelpunkt f\u00e4llt weg",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "A\u00b7B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "C++ und C-Raute",
+   "quelle": "3a-Satzzeichen",
+   "eingabe": {
+    "titel": "C++ & C#"
+   },
+   "erwartet": "C++ & C"
+  },
+  {
+   "name": "24 Zeichen am St\u00fcck sind erlaubt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQQQQQQQQQQQQ"
+   },
+   "erwartet": "QQQQQQQQQQQQQQQQQQQQQQQQ"
+  },
+  {
+   "name": "25 Zeichen am St\u00fcck sind verpackt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQQQQQQQQQQQQQ"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "zwei W\u00f6rter mit je 24 Zeichen",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQQQQQQQQQQQQ RRRRRRRRRRRRRRRRRRRRRRRR"
+   },
+   "erwartet": "QQQQQQQQQQQQQQQQQQQQQQQQ RRRRRRRRRRRRRRRRRRRRRRRR"
+  },
+  {
+   "name": "Base64-artiges Wort",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QWxhZGRpbjpvcGVuIHNlc2FtZQ"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Base64 mit Auff\u00fcllung",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQQQQQQQQQQQQ=="
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "langer Dateipfad ohne Leerzeichen",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "foo.bar.baz.example.org/pfad/lang"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "zw\u00f6lf Ziffern verteilt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "1 2 3 4 5 6 7 8 9 0 1 2"
+   },
+   "erwartet": "1 2 3 4 5 6 7 8 9 0 1 2"
+  },
+  {
+   "name": "dreizehn Ziffern am St\u00fcck",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "1234567890123"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "dreizehn Ziffern verteilt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "1 2 3 4 5 6 7 8 9 0 1 2 3"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Ziffern \u00fcber mehrere W\u00f6rter summiert",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "Nr 123456 und 1234567"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "16 Hex-Zeichen am St\u00fcck sind erlaubt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "abcdef0123456789"
+   },
+   "erwartet": "abcdef0123456789"
+  },
+  {
+   "name": "17 Hex-Zeichen am St\u00fcck sind verpackt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "abcdef0123456789a"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "17 Hex-Zeichen gro\u00df",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "ABCDEF0123456789A"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Hex-Lauf nach Doppelpunkt",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "x:deadbeefdeadbeefdeadbeef"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "zwei Hex-L\u00e4ufe mit Leerzeichen",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "deadbeef deadbeef deadbeef"
+   },
+   "erwartet": "deadbeef deadbeef deadbeef"
+  },
+  {
+   "name": "Schema ://",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "http://beispiel"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Schema :// gro\u00dfgeschrieben",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "HTTPS://Beispiel"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "www. am Wortanfang",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "www.firma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "www. gro\u00dfgeschrieben",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "WWW.Firma"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "www. mitten im Satz",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "Siehe www.firma bitte"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "E-Mail-Adresse",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "a@b"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Klammeraffe mit Leerzeichen",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "Mail @ B\u00fcro"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Muster entsteht erst nach dem Filtern (Tabulator trennt vorher)",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQ\tQQQQQQQQQQQQQ"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Hex-Muster entsteht erst nach dem Filtern",
+   "quelle": "verpackt",
+   "eingabe": {
+    "titel": "abcdef01\tabcdef012"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "79 Zeichen",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+  },
+  {
+   "name": "80 Zeichen",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "81 Zeichen werden auf 80 gek\u00fcrzt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektpl"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "200 Zeichen werden auf 80 gek\u00fcrzt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "Schnitt trifft ein Leerzeichen: danach getrimmt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt Rest"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+  },
+  {
+   "name": "80 Umlaute-Zeichen z\u00e4hlen als 80 Zeichen, nicht als Bytes",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "\u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerlic"
+   },
+   "erwartet": "\u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerliches \u00c4rgerlic"
+  },
+  {
+   "name": "Ligatur: 80 Zeichen roh, 81 nach NFKC, wird auf 80 gek\u00fcrzt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Proje\ufb01ktplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+   },
+   "erwartet": "Projefiktplan Projektplan Projektplan Projektplan Projektplan Projektplan Projek"
+  },
+  {
+   "name": "Ligatur: 79 Zeichen roh, 80 nach NFKC, bleibt ganz",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Proje\ufb01tplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+   },
+   "erwartet": "Projefitplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+  },
+  {
+   "name": "unsichtbare Zeichen z\u00e4hlen nicht zur L\u00e4nge",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Proj\u200b\u200b\u200b\u200b\u200b\u200b\u200b\u200b\u200b\u200bektplan Projektplan Projektplan Projektp"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "gefilterte Emoji z\u00e4hlen nicht zur L\u00e4nge",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Proj\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80\ud83d\ude80ektplan Projektplan Projektplan Projektp"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "81 Zeichen, davon eines au\u00dferhalb des Vorrats: 80 bleiben",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Proj\u0416ektplan Projektplan Projektplan Projektp"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp"
+  },
+  {
+   "name": "Muster erst hinter Zeichen 80 wird noch erkannt (Pr\u00fcfung vor dem K\u00fcrzen)",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp www.x"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "Hex-Lauf erst hinter Zeichen 80 wird noch erkannt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektp abcdef0123456789a"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "dreizehnte Ziffer hinter Zeichen 80 wird noch gez\u00e4hlt",
+   "quelle": "max80",
+   "eingabe": {
+    "titel": "1 2 3 4 5 6 7 8 9 0 1 2 x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x 3"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "zwei Leerzeichen werden eines",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A  B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "f\u00fcnf Leerzeichen werden eines",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A     B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Leerzeichen-L\u00e4ufe mehrfach",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A  B   C    D"
+   },
+   "erwartet": "A B C D"
+  },
+  {
+   "name": "zwei gesch\u00fctzte Leerzeichen werden eines",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u00a0\u00a0B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "gesch\u00fctztes plus gew\u00f6hnliches Leerzeichen werden eines",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u00a0 B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Geviert U+2003 wird Leerzeichen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u2003B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "U+2000 bis U+200A werden je ein Leerzeichen und ziehen sich zusammen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200aB"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "schmales gesch\u00fctztes Leerzeichen U+202F wird Leerzeichen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u202fB"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "zwei ideographische Leerzeichen werden eines",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u3000\u3000B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Tabulator zwischen Leerzeichen: Filter entfernt ihn, der Lauf zieht sich zusammen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \t B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Zeilenumbruch zwischen Leerzeichen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \n B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "U+2028 zwischen Leerzeichen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \u2028 B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Leerzeichen am Rand nach gemischtem Leerraum",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "\u00a0 \u3000Titel\u2003 "
+   },
+   "erwartet": "Titel"
+  },
+  {
+   "name": "Filter l\u00e4sst Leerzeichen zusammensto\u00dfen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \u0416 B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "nur Leerraum verschiedener Art ergibt den Ersatztext",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": " \u00a0\u3000\t"
+   },
+   "erwartet": "Interne Karte (Titel im Board)"
+  },
+  {
+   "name": "mittleres mathematisches Leerzeichen U+205F wird Leerzeichen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u205fB"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Ogham-Leerzeichen U+1680 f\u00e4llt weg (Filter)",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u1680B"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Ogham-Leerzeichen zwischen Leerzeichen: Lauf zieht sich zusammen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \u1680 B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "vertikaler Tabulator und Seitenvorschub fallen weg",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A \u000b\f B"
+   },
+   "erwartet": "A B"
+  },
+  {
+   "name": "Mongolischer Vokaltrenner U+180E (Cf) f\u00e4llt weg",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "A\u180eB"
+   },
+   "erwartet": "AB"
+  },
+  {
+   "name": "Z\u00e4hlung nach dem Zusammenziehen: 83 Zeichen roh, 79 danach, bleibt ganz",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "Plan     Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Pr"
+   },
+   "erwartet": "Plan Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Pr"
+  },
+  {
+   "name": "Zusammenziehen vor dem K\u00fcrzen, danach erneut trimmen",
+   "quelle": "leerraum",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt   Rest"
+   },
+   "erwartet": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projekt"
+  },
+  {
+   "name": "Schalter fehlt: Titel bleibt",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Offener Titel"
+   },
+   "erwartet": "Offener Titel"
+  },
+  {
+   "name": "Schalter false: Titel bleibt",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Offener Titel",
+    "vertraulich": false
+   },
+   "erwartet": "Offener Titel"
+  },
+  {
+   "name": "Schalter true: kein Titel",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": true
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter null: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": null
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter Text \"false\": vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": "false"
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter Text \"true\": vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": "true"
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter leerer Text: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": ""
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter Zahl 0: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": 0
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter Zahl 1: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": 1
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter leere Liste: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": []
+   },
+   "erwartet": null
+  },
+  {
+   "name": "Schalter leeres Objekt: vertraulich",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": {}
+   },
+   "erwartet": null
+  },
+  {
+   "name": "vertraulich mit Muster-Titel: kein Titel, kein Ersatztext",
+   "quelle": "vertraulich",
+   "eingabe": {
+    "titel": "a@b",
+    "vertraulich": true
+   },
+   "erwartet": null
+  },
+  {
+   "name": "kyrillischer Titel wurde nicht behandelt",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "\u041f\u0440\u0438\u0432\u0435\u0442",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Emoji wurde nicht behandelt",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Release \ud83d\ude80",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Leerzeichen am Rand",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": " Titel",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Leerzeichen am Ende",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Titel ",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel nicht NFKC-normalisiert",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "\ufb01le",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit ZWSP",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Ab\u200bcd",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Soft Hyphen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Ab\u00adcd",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Klammeraffe",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "a@b",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit www.",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "www.firma",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit ://",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "http://x",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit 25 Zeichen am St\u00fcck",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "QQQQQQQQQQQQQQQQQQQQQQQQQ",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit 13 Ziffern",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "1234567890123",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit 17 Hex-Zeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "abcdef0123456789a",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit 81 Zeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Projektplan Projektplan Projektplan Projektplan Projektplan Projektplan Projektpl",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Rautezeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Karte #809",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit zwei Leerzeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "A  B",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit gesch\u00fctztem Leerzeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "A\u00a0B",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Tabulator",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "A\tB",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Zeilenumbruch",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "A\nB",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Roboter-Marke: sie steht nie im Titel",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "\ud83e\udd16 Titel",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel mit Roboter-Marke ohne Leerzeichen",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "\ud83e\udd16Titel",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "leerer Titel wurde nicht zum Ersatztext",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "",
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel null bei vertraulich false",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": null,
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel als Zahl",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": 5,
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel als Liste",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": [
+     "x"
+    ],
+    "vertraulich": false
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Titel gesetzt bei vertraulich true",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Geheimer Titel",
+    "vertraulich": true
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Ersatztext bei vertraulich true",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Interne Karte (Titel im Board)",
+    "vertraulich": true
+   },
+   "ablehnung": "titel"
+  },
+  {
+   "name": "Schalter als Text \"false\"",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Titel",
+    "vertraulich": "false"
+   },
+   "ablehnung": "vertraulich"
+  },
+  {
+   "name": "Schalter als Zahl 0",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Titel",
+    "vertraulich": 0
+   },
+   "ablehnung": "vertraulich"
+  },
+  {
+   "name": "Schalter null",
+   "quelle": "eingang",
+   "eingabe": {
+    "titel": "Titel",
+    "vertraulich": null
+   },
+   "ablehnung": "vertraulich"
+  },
+  {
+   "name": "Spalte: normaler Name",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "In Arbeit"
+   },
+   "erwartet": "In Arbeit"
+  },
+  {
+   "name": "Spalte: Backlog",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Backlog"
+   },
+   "erwartet": "Backlog"
+  },
+  {
+   "name": "Spalte: Umlaute und Satzzeichen",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u00c4rger & \u00d6l: (neu)!"
+   },
+   "erwartet": "\u00c4rger & \u00d6l: (neu)!"
+  },
+  {
+   "name": "Spalte: leerer Name bleibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": ""
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: nur Leerzeichen ergibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "     "
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Leerzeichen-Lauf wird eines",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Zu    pr\u00fcfen"
+   },
+   "erwartet": "Zu pr\u00fcfen"
+  },
+  {
+   "name": "Spalte: mehrere L\u00e4ufe",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A  B   C"
+   },
+   "erwartet": "A B C"
+  },
+  {
+   "name": "Spalte: Rand-Leerzeichen",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "   Ready   "
+   },
+   "erwartet": "Ready"
+  },
+  {
+   "name": "Spalte: gesch\u00fctztes Leerzeichen am Rand und in der Mitte",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u00a0Zu\u00a0\u00a0tun\u00a0"
+   },
+   "erwartet": "Zu tun"
+  },
+  {
+   "name": "Spalte: ideographisches Leerzeichen",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Zu\u3000tun"
+   },
+   "erwartet": "Zu tun"
+  },
+  {
+   "name": "Spalte: Tabulator f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Zu\ttun"
+   },
+   "erwartet": "Zutun"
+  },
+  {
+   "name": "Spalte: Tabulator zwischen Leerzeichen",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Zu \t tun"
+   },
+   "erwartet": "Zu tun"
+  },
+  {
+   "name": "Spalte: Zeilenumbruch f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Zu\ntun"
+   },
+   "erwartet": "Zutun"
+  },
+  {
+   "name": "Spalte: ZWSP f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Er\u200bledigt"
+   },
+   "erwartet": "Erledigt"
+  },
+  {
+   "name": "Spalte: Soft Hyphen f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Er\u00adledigt"
+   },
+   "erwartet": "Erledigt"
+  },
+  {
+   "name": "Spalte: BOM und Bidi-Zeichen fallen weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\ufeff\u202eReview\u202c"
+   },
+   "erwartet": "Review"
+  },
+  {
+   "name": "Spalte: nur unsichtbare Zeichen ergibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u200b\ufeff"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: NFKC: vollbreite Buchstaben",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\uff22\uff41\uff43\uff4b\uff4c\uff4f\uff47"
+   },
+   "erwartet": "Backlog"
+  },
+  {
+   "name": "Spalte: NFKC: Ligatur",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\ufb01nal"
+   },
+   "erwartet": "final"
+  },
+  {
+   "name": "Spalte: NFKC: zerlegtes \u00e4",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A\u0308rger"
+   },
+   "erwartet": "\u00c4rger"
+  },
+  {
+   "name": "Spalte: kyrillisch ergibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u041f\u0440\u0438\u0432\u0435\u0442"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: kyrillisch gemischt",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u0414\u043e\u0441\u043a\u0430 Board"
+   },
+   "erwartet": "Board"
+  },
+  {
+   "name": "Spalte: CJK ergibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u65e5\u672c\u8a9e"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: arabisch gemischt",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Spalte \u0645\u0631\u062d\u0628\u0627"
+   },
+   "erwartet": "Spalte"
+  },
+  {
+   "name": "Spalte: Emoji am Ende",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Fertig \ud83d\ude80"
+   },
+   "erwartet": "Fertig"
+  },
+  {
+   "name": "Spalte: Emoji ergibt leer",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\ud83d\ude80\ud83c\udf89"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Raute f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Phase #2"
+   },
+   "erwartet": "Phase 2"
+  },
+  {
+   "name": "Spalte: Anf\u00fchrungszeichen fallen weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\"Doing\""
+   },
+   "erwartet": "Doing"
+  },
+  {
+   "name": "Spalte: Unterstrich f\u00e4llt weg",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "to_do"
+   },
+   "erwartet": "todo"
+  },
+  {
+   "name": "Spalte: 39 Zeichen",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdef"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcdef"
+  },
+  {
+   "name": "Spalte: 40 Zeichen",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefg"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcdefg"
+  },
+  {
+   "name": "Spalte: 41 Zeichen werden auf 40 gek\u00fcrzt",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefgh"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcdefg"
+  },
+  {
+   "name": "Spalte: 100 Zeichen werden auf 40 gek\u00fcrzt",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij A"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcdefg"
+  },
+  {
+   "name": "Spalte: Schnitt trifft ein Leerzeichen: danach getrimmt",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdef Rest"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcdef"
+  },
+  {
+   "name": "Spalte: Z\u00e4hlung nach dem Zusammenziehen: 44 Zeichen roh, 40 danach, bleibt ganz",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcde     x"
+   },
+   "erwartet": "Abcdefghij Abcdefghij Abcdefghij Abcde x"
+  },
+  {
+   "name": "Spalte: Z\u00e4hlung nach NFKC: Ligatur macht aus 40 Zeichen 41",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcde\ufb01fghij Abcdefghij Abcdefghij Abcdefg"
+   },
+   "erwartet": "Abcdefifghij Abcdefghij Abcdefghij Abcde"
+  },
+  {
+   "name": "Spalte: Muster hinter Zeichen 40 wird noch erkannt",
+   "quelle": "max40",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefg www.x"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster: www.",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "www.firma"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster: Klammeraffe",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "a@b"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster: ://",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "http://x"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster: 25 Zeichen am St\u00fcck",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "QQQQQQQQQQQQQQQQQQQQQQQQQ"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: 24 Zeichen am St\u00fcck sind erlaubt",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "QQQQQQQQQQQQQQQQQQQQQQQQ"
+   },
+   "erwartet": "QQQQQQQQQQQQQQQQQQQQQQQQ"
+  },
+  {
+   "name": "Spalte: Muster: dreizehn Ziffern",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "1234567890123"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: zw\u00f6lf Ziffern sind erlaubt",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "123456789012"
+   },
+   "erwartet": "123456789012"
+  },
+  {
+   "name": "Spalte: Muster: 17 Hex-Zeichen",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "abcdef0123456789a"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: 16 Hex-Zeichen sind erlaubt",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "abcdef0123456789"
+   },
+   "erwartet": "abcdef0123456789"
+  },
+  {
+   "name": "Spalte: Muster entsteht erst nach dem Filtern",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "QQQQQQQQQQQQQ\tQQQQQQQQQQQQQ"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster durch vollbreites at",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "mail\uff20firma"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte: Muster durch unsichtbare Zeichen: w ZWSP w ZWJ w.",
+   "quelle": "spalte",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "w\u200bw\u200dw.firma"
+   },
+   "erwartet": ""
+  },
+  {
+   "name": "Spalte (Eingang): kyrillisch wurde nicht behandelt",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\u041f\u0440\u0438\u0432\u0435\u0442"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Emoji wurde nicht behandelt",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Fertig \ud83d\ude80"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Leerzeichen am Anfang",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": " Backlog"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Leerzeichen am Ende",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Backlog "
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): zwei Leerzeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A  B"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): gesch\u00fctztes Leerzeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A\u00a0B"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): ideographisches Leerzeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A\u3000B"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Tabulator",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "A\tB"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): ZWSP",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Er\u200bledigt"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Soft Hyphen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Er\u00adledigt"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): nicht NFKC-normalisiert",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "\ufb01nal"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): 41 Zeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefgh"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): 100 Zeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij A"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Klammeraffe",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "a@b"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): www.",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "www.firma"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): ://",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "http://x"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): 25 Zeichen am St\u00fcck",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "QQQQQQQQQQQQQQQQQQQQQQQQQ"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): dreizehn Ziffern",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "1234567890123"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): 17 Hex-Zeichen",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "abcdef0123456789a"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Raute",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": "Phase #2"
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): null statt Text",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": null
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Zahl statt Text",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": 5
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Spalte (Eingang): Liste statt Text",
+   "quelle": "eingang",
+   "feld": "spalte",
+   "eingabe": {
+    "spalte": [
+     "Backlog"
+    ]
+   },
+   "ablehnung": "spalte"
+  },
+  {
+   "name": "Bearbeiter: normaler Name",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: zwei Namen, Reihenfolge bleibt",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Zoe Weiss",
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Zoe Weiss",
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Claude-Modell",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Claude Opus"
+    ]
+   },
+   "erwartet": [
+    "Claude Opus"
+   ]
+  },
+  {
+   "name": "Bearbeiter: leere Liste",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": []
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Liste mit leerem Eintrag",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "",
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Liste nur mit leeren Eintr\u00e4gen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "",
+     "   "
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Leerzeichen-Lauf wird eines",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna    Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Rand-Leerzeichen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "   Anna Berg   "
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: gesch\u00fctztes Leerzeichen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\u00a0\u00a0Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: ideographisches Leerzeichen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\u3000Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Geviert U+2003",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\u2003Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Tabulator f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\tBerg"
+    ]
+   },
+   "erwartet": [
+    "AnnaBerg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: ZWSP f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "An\u200bna"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Soft Hyphen f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "An\u00adna"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Bidi-Umkehr f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u202eAnna\u202c"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: NFKC: vollbreite Buchstaben",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\uff21\uff4e\uff4e\uff41 \uff22\uff45\uff52\uff47"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: NFKC: zerlegtes \u00e4",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Ja\u0308ger"
+    ]
+   },
+   "erwartet": [
+    "J\u00e4ger"
+   ]
+  },
+  {
+   "name": "Bearbeiter: kyrillisch ergibt: Name f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u0418\u0432\u0430\u043d"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: kyrillisch gemischt",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u0418\u0432\u0430\u043d Ivan"
+    ]
+   },
+   "erwartet": [
+    "Ivan"
+   ]
+  },
+  {
+   "name": "Bearbeiter: CJK: Name f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u65e5\u672c\u8a9e"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Emoji am Ende",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna \ud83d\ude80"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: nur Emoji: Name f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\ud83d\ude80"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Latin-1-Akzente",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Jos\u00e9 \u00d1and\u00fa"
+    ]
+   },
+   "erwartet": [
+    "Jos\u00e9 \u00d1and\u00fa"
+   ]
+  },
+  {
+   "name": "Bearbeiter: 59 Zeichen",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcd"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcd"
+   ]
+  },
+  {
+   "name": "Bearbeiter: 60 Zeichen",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+   ]
+  },
+  {
+   "name": "Bearbeiter: 61 Zeichen werden auf 60 gek\u00fcrzt",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdef"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+   ]
+  },
+  {
+   "name": "Bearbeiter: 200 Zeichen werden auf 60 gek\u00fcrzt",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Ab"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Schnitt trifft ein Leerzeichen: danach getrimmt",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcd Rest"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcd"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Muster hinter Zeichen 60 wird noch erkannt: Name f\u00e4llt weg",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde www.x",
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Klammeraffe: Name f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "anna@berg.de"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Klammeraffe neben g\u00fcltigem Namen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "a@b",
+     "Zoe Weiss"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg",
+    "Zoe Weiss"
+   ]
+  },
+  {
+   "name": "Bearbeiter: vollbreites at (NFKC) f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\uff20Berg"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: kleines At-Zeichen U+FE6B f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\ufe6bBerg"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external: f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "external:bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: External: gro\u00dfgeschrieben f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "External:Bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: EXTERNAL: f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "EXTERNAL:Bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external: mit Leerzeichen davor f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "  external:bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external: mit gesch\u00fctztem Leerzeichen davor f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u00a0external:bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external: erst nach dem S\u00e4ubern (Soft Hyphen) f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "ex\u00adternal:Bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external: erst nach dem S\u00e4ubern (ZWSP, vollbreit) f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "ex\u200b\uff54\uff45\uff52\uff4e\uff41\uff4c:Bob"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: external ohne Doppelpunkt bleibt",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "external Bob"
+    ]
+   },
+   "erwartet": [
+    "external Bob"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Name enth\u00e4lt external: nicht am Anfang",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Bob external:x"
+    ]
+   },
+   "erwartet": [
+    "Bob external:x"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Muster: 25 Zeichen am St\u00fcck",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "QQQQQQQQQQQQQQQQQQQQQQQQQ"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: 24 Zeichen am St\u00fcck sind erlaubt",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "QQQQQQQQQQQQQQQQQQQQQQQQ"
+    ]
+   },
+   "erwartet": [
+    "QQQQQQQQQQQQQQQQQQQQQQQQ"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Muster: dreizehn Ziffern",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "1234567890123"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Muster: 17 Hex-Zeichen",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "abcdef0123456789a"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Muster: www.",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "www.firma"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Muster: ://",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "http://x"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Muster entsteht erst nach dem Filtern",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "QQQQQQQQQQQQQ\tQQQQQQQQQQQQQ"
+    ]
+   },
+   "erwartet": []
+  },
+  {
+   "name": "Bearbeiter: Raute f\u00e4llt weg",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Team #2"
+    ]
+   },
+   "erwartet": [
+    "Team 2"
+   ]
+  },
+  {
+   "name": "Bearbeiter: zehn Namen bleiben",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter: elf Namen: die ersten zehn",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9",
+     "Person 10"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter: ung\u00fcltige Namen z\u00e4hlen nicht gegen die Grenze zehn",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "a@b",
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter: exaktes Doppel: nur das erste bleibt",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (Leerzeichen-Lauf)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "Anna    Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (Rand-Leerzeichen)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "  Anna Berg  "
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (gesch\u00fctztes Leerzeichen)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "Anna\u00a0Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (NFKC vollbreit)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "\uff21\uff4e\uff4e\uff41 \uff22\uff45\uff52\uff47"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (Soft Hyphen)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna",
+     "An\u00adna"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel erst nach dem S\u00e4ubern gleich (ZWSP)",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna",
+     "An\u200bna"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel: die rohe Form des ersten Vorkommens ist egal, es bleibt die behandelte",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "An\u00adna",
+     "Anna"
+    ]
+   },
+   "erwartet": [
+    "Anna"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel in der Mitte: Reihenfolge des ersten Vorkommens",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "Zoe Weiss",
+     "Zoe  Weiss"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg",
+    "Zoe Weiss"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel am Ende: Reihenfolge des ersten Vorkommens",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Zoe Weiss",
+     "Anna Berg",
+     "Zoe Weiss"
+    ]
+   },
+   "erwartet": [
+    "Zoe Weiss",
+    "Anna Berg"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel am Anfang wiederholt: Reihenfolge des ersten Vorkommens",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "Anna Berg",
+     "Zoe Weiss",
+     "Anna Berg"
+    ]
+   },
+   "erwartet": [
+    "Anna Berg",
+    "Zoe Weiss"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel nach dem K\u00fcrzen auf 60 Zeichen",
+   "quelle": "max60",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdef",
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+    ]
+   },
+   "erwartet": [
+    "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcde"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel z\u00e4hlen nicht gegen die Grenze zehn",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9",
+     "Person 0",
+     "Person 10"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter: elf Eintr\u00e4ge mit einem Doppel: zehn verschiedene bleiben",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter: Doppel nach dem S\u00e4ubern z\u00e4hlen nicht gegen die Grenze zehn",
+   "quelle": "bearbeiter",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person\u00a00",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9"
+    ]
+   },
+   "erwartet": [
+    "Person 0",
+    "Person 1",
+    "Person 2",
+    "Person 3",
+    "Person 4",
+    "Person 5",
+    "Person 6",
+    "Person 7",
+    "Person 8",
+    "Person 9"
+   ]
+  },
+  {
+   "name": "Bearbeiter (Eingang): normale Liste mit einem unbehandelten Namen (kyrillisch)",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     "\u0418\u0432\u0430\u043d"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): kyrillischer Name",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\u0418\u0432\u0430\u043d"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Emoji im Namen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna \ud83d\ude80"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Leerzeichen am Anfang",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     " Anna Berg"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Leerzeichen am Ende",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg "
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): zwei Leerzeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna  Berg"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): gesch\u00fctztes Leerzeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\u00a0Berg"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): ideographisches Leerzeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\u3000Berg"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Tabulator",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna\tBerg"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): ZWSP",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "An\u200bna"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Soft Hyphen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "An\u00adna"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): nicht NFKC-normalisiert",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "\uff21\uff4e\uff4e\uff41"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): 61 Zeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdefghij Abcdef"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Klammeraffe",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "anna@berg.de"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): external:",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "external:bob"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): External: gro\u00dfgeschrieben",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "External:Bob"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): external: mit Leerzeichen davor",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     " external:bob"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): external: mit Soft Hyphen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "ex\u00adternal:Bob"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): www.",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "www.firma"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): 25 Zeichen am St\u00fcck",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "QQQQQQQQQQQQQQQQQQQQQQQQQ"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): dreizehn Ziffern",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "1234567890123"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): 17 Hex-Zeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "abcdef0123456789a"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): leerer Eintrag",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     ""
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Eintrag nur Leerzeichen",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "   "
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): leerer Eintrag neben g\u00fcltigem",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Anna Berg",
+     ""
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Eintrag null",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     null
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Eintrag Zahl",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     5
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Eintrag Liste",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     [
+      "Anna Berg"
+     ]
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): elf Eintr\u00e4ge",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": [
+     "Person 0",
+     "Person 1",
+     "Person 2",
+     "Person 3",
+     "Person 4",
+     "Person 5",
+     "Person 6",
+     "Person 7",
+     "Person 8",
+     "Person 9",
+     "Person 10"
+    ]
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Liste null",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": null
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Text statt Liste",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": "Anna Berg"
+   },
+   "ablehnung": "bearbeiter"
+  },
+  {
+   "name": "Bearbeiter (Eingang): Objekt statt Liste",
+   "quelle": "eingang",
+   "feld": "bearbeiter",
+   "eingabe": {
+    "bearbeiter": {
+     "a": "Anna Berg"
+    }
+   },
+   "ablehnung": "bearbeiter"
+  }
+ ]
+}

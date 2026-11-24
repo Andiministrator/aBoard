@@ -1,0 +1,18 @@
+# Testdateien und temporäre Build-Artefakte vom Docker-Build-Kontext ausschließen
+*_test.go
+*.test
+
+# Lokale Entwicklungs-Daten (falls vorhanden)
+*.db
+*.sqlite
+
+# Credentials und private Schlüssel — niemals ins Image bündeln
+.env
+.env.*
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+secrets/
+credentials/

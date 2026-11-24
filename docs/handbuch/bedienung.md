@@ -29,6 +29,8 @@ Welche Variante du vor dir hast, erklärt [Varianten](varianten.md).
 
 Unten in der Seitenleiste steht die Version von aBoard.
 
+**Darstellung:** Kästen sind von Haus aus **eckig**. Unter Benutzer-Einstellungen stellst du Ecken (abgerundet oder eckig), Schrift (System, Serif, Monospace) und Akzentfarbe (Petrol, Blau, Grün, Violett, Graphit) ein. Die Auswahl wirkt sofort als Vorschau; „Abbrechen“ nimmt sie zurück. Sie gilt für dieses Gerät und diesen Browser, nicht für alle am Board.
+
 ## Spalten
 
 Ein frisches Board hat vier Spalten: **Backlog → Ready → In Arbeit → Erledigt**.
@@ -174,6 +176,8 @@ Nur auf dem Server zusätzlich:
 
 Ein Klick auf den Board-Titel im Kopf öffnet ein Menü mit dem aktuellen und den zuletzt benutzten Boards; „Alle Boards anzeigen…“ zeigt die volle Liste. Der Stift ✎ neben dem Titel benennt das Board um. Auf dem Server gibt es dort außerdem „Neues Board“.
 
+**Reiter:** Wer mehrere Boards nutzt, sieht unter dem Kopf eine Reiterleiste mit den zuletzt benutzten Boards, höchstens sechs. Ein Klick auf einen Reiter wechselt das Board; das aktuelle ist hervorgehoben. Neue Boards kommen hinten dazu, und bei mehr als sechs fällt das am längsten nicht benutzte heraus. Das × an einem Reiter nimmt ihn aus der Leiste, das Board selbst bleibt. Die Leiste merkt sich jeder Browser für sich. Mit nur einem Board erscheint sie nicht. Es gibt sie auf dem Server und im Claude-Code-Modus, nicht im einzelnen Datei-Board (Vorlage `aboard.template.html`). Auf dem Server zeigt ein Reiter ein **💬**, wenn Claude auf diesem Board auf deine Antwort wartet; die Frage selbst steht im Banner, sobald du das Board öffnest. Der Reiter wird höchstens einmal je Minute aufgefrischt.
+
 Auf einem **Server-Board** öffnet „Alle Boards anzeigen…“ die **Board-Übersicht**: alle Boards, die du sehen darfst, als Kacheln mit Hintergrundbild, getrennt nach „Eigene“ und „Mit mir geteilt“. Jede Kachel nennt Rolle, Änderungsdatum und die Board-ID, die sich per Knopf kopieren lässt. Freigeben lässt sich ein Board in den Board-Einstellungen im Abschnitt „Freigabe“.
 
 ## Tastatur
@@ -207,7 +211,7 @@ Manchmal liegt im Browser noch eine ältere Zwischenkopie, also ein Zwischenstan
 
 - **Einzeldatei:** Beim Öffnen erscheint der Hinweis „Nicht gespeicherte Änderungen der letzten Session gefunden.“ mit den Knöpfen „Laden“ und „Verwerfen“.
 - **Mit verbundenem Projektordner:** Maßgeblich ist der Stand im Projektordner. Ist dort ein Board, verschwindet die alte Browser-Kopie still, ohne Meldung. Nur wenn die Projektdatei gerade nicht lesbar ist oder fehlt, erscheint der Hinweis „Der Projektordner konnte gerade nicht gelesen werden. Im Browser liegt noch eine ältere Zwischenkopie — sie bleibt erhalten; maßgeblich ist weiter der Projektordner.“ mit dem Knopf „Alles klar“.
-- **Projektordner bekannt, aber noch nicht freigegeben:** Dann erscheint nur der Hinweis zur Freigabe des Projektordners mit „Erlauben“. Die Browser-Kopie bleibt dabei unangetastet. Antwortet der Browser auf die Freigabe nicht, steht dort „Der Browser antwortet nicht auf die Freigabe des Projektordners. Wähle den Ordner bitte neu.“ mit dem Knopf „Ordner neu wählen“.
+- **Projektordner bekannt, aber noch nicht freigegeben:** Dann erscheint nur der Hinweis zur Freigabe des Projektordners mit „Erlauben“. Bis zur Freigabe bleibt das Board leer; die Browser-Kopie bleibt dabei unangetastet. Das Banner verschwindet erst, wenn der Ordner verbunden ist. Antwortet der Browser auf die Freigabe nicht, steht dort „Der Browser antwortet nicht auf die Freigabe des Projektordners. Wähle den Ordner bitte neu.“ mit dem Knopf „Ordner neu wählen“.
 
 Auf dem Server warnt aBoard, wenn jemand anderes das Board gleichzeitig geändert hat, und lässt dich wählen: eigene Version behalten oder die des Servers laden.
 

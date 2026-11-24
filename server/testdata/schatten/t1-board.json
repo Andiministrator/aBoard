@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "board": {
+    "id": "b-intern",
+    "title": "Team intern",
+    "columnDefs": [
+      { "id": "col-backlog", "title": "Backlog" },
+      { "id": "col-in-arbeit", "title": "In Arbeit" },
+      { "id": "col-erledigt", "title": "Erledigt" }
+    ],
+    "identities": [
+      { "id": "u1", "kind": "user", "label": "Erika Muster", "email": "erika@example.org" },
+      { "id": "identity-claude-opus", "kind": "claude-opus", "label": "Claude Opus" }
+    ],
+    "sprints": [
+      {
+        "id": "s1", "title": "Sprint 1", "kind": "sprint",
+        "cards": [
+          {
+            "id": "k-1", "displayId": 12, "title": "Angebot Müller prüfen", "columnId": "col-in-arbeit",
+            "priority": "hoch", "dueDate": "2026-10-14", "dueTime": "09:30",
+            "owner": "erika muster", "assignees": ["Claude Opus", "external:kunde@example.org", "andi@example.org"],
+            "description": "GEHEIM-BESCHREIBUNG Preis 4711 Euro",
+            "comments": [{ "id": "c1", "author": "Erika", "text": "GEHEIM-KOMMENTAR", "created": "2026-10-09" }],
+            "attachments": [{ "id": "a1", "name": "GEHEIM-ANHANG.pdf" }],
+            "labels": ["GEHEIM-LABEL"],
+            "agentContext": "GEHEIM-AGENTKONTEXT",
+            "activity": [{ "ts": "2026-10-09", "actor": "Erika", "type": "GEHEIM-VERLAUF" }],
+            "links": [{ "type": "related", "targetId": "k-2" }]
+          },
+          {
+            "id": "k-2", "displayId": 13, "title": "Vertrauliche Kündigung Schmidt", "columnId": "col-backlog",
+            "confidential": true, "priority": "mittel", "startDate": "2026-10-20", "dueDate": "2026-10-21",
+            "owner": "Erika Muster"
+          },
+          {
+            "id": "k-3", "displayId": 14, "title": "Erledigte Karte", "columnId": "col-erledigt",
+            "priority": "unbekannt", "titelVonAgent": true
+          },
+          { "id": "k-4", "displayId": 15, "title": "Archivierte Karte", "columnId": "col-erledigt", "archived": true },
+          { "id": "k-meta", "displayId": 16, "title": "📋 Sprint-Start", "kind": "sprint-meta", "metaType": "start", "columnId": "col-erledigt" }
+        ]
+      },
+      {
+        "id": "s-alt", "title": "Sprint 0", "kind": "sprint", "archived": true,
+        "cards": [ { "id": "k-alt", "displayId": 3, "title": "Karte in archivierter Lane", "columnId": "col-erledigt" } ]
+      }
+    ],
+    "termine": [
+      { "id": "t-1", "titel": "Messe Köln", "datum": "2026-10-15", "von": "10:00", "bis": "11:00",
+        "ort": "GEHEIM-ORT", "beschreibung": "GEHEIM-TERMINBESCHREIBUNG", "personen": ["Erika Muster"], "vonAgent": true },
+      { "id": "t-2", "titel": "Termin zur vertraulichen Karte", "datum": "2026-10-16", "karteId": "k-2" },
+      { "id": "t-3", "titel": "Termin zur archivierten Karte", "datum": "2026-10-17", "karteId": "k-4" }
+    ]
+  }
+}

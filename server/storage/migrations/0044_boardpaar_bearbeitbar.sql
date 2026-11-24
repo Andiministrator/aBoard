@@ -1,0 +1,22 @@
+-- aBoard server schema, version 44 — Schalter „bearbeitbar“ je Kopie-Board
+-- (ADR-0141 Nachtrag #836, Betreiberanfrage 18.10.2026).
+--
+-- boardpaar_aussen.bearbeitbar: Darf auf dieser externen Kopie außen
+-- bearbeitet werden? Nur bedeutsam bei kopie = 1. Wirksam ist der Rückweg auf
+-- einem Board nur, wenn boardpaar.rueckweg = an UND bearbeitbar = 1; sonst gilt
+-- für dieses Board der Schreibschutz aus Schritt 2b (Spiegel nur lesbar).
+--
+-- Voreinstellung 0, auch für bestehende Zeilen (fail-closed): Bisher konnte
+-- außen bearbeitet werden, sobald der Server-Schalter an war; neu muss jedes
+-- Board ausdrücklich freigegeben werden — vom Skript (Feld `bearbeitbar` an
+-- POST /agent/boardpaar/boards und PUT /agent/boardpaar/spiegel/{board}) oder
+-- im Admin-Reiter „Board-Paar“.
+--
+-- Abschalten ändert keinen Bestand: Das Journal bleibt, wie es ist.
+--
+-- Kein Down; Rückweg nur über das Backup von vorher (F-1237). Eine
+-- Vorversion, die man mit ABOARD_SCHEMA_NEUER_ZULASSEN=1 trotzdem startet,
+-- ignoriert die Spalte und lässt wieder jede Kopie bearbeiten, sobald der
+-- Server-Schalter an ist.
+
+ALTER TABLE boardpaar_aussen ADD COLUMN bearbeitbar INTEGER NOT NULL DEFAULT 0 CHECK (bearbeitbar IN (0, 1));

@@ -3640,6 +3640,10 @@ if (IS_PROJECTOR_BUILD) {
    keine Übernahme; der Block fällt dort per DCE weg. */
 if (IS_PROJECTOR_BUILD || IS_SERVER_BUILD) {
   Object.assign(DE, {
+    /* Karte #1195: Reiterleiste der zuletzt benutzten Boards (nicht im Solo-Template). */
+    'board.reiter':          'Zuletzt benutzte Boards',
+    'board.reiter.close':    n => `Reiter „${n}“ schließen`,
+    'board.reiter.wartet':   'wartet auf deine Antwort', /* #1197 */
     /* Karte #606 (ADR-0130 §1): Übernahme einer Karte durch eine Sitzung. */
     'claim.badge':           (wer) => `🔒 ${wer}`,
     'claim.badge.verwaist':  '⌛ verwaist',
@@ -3655,6 +3659,10 @@ if (IS_PROJECTOR_BUILD || IS_SERVER_BUILD) {
     'claim.fehlgeschlagen':  'Übernahme konnte nicht aufgehoben werden — keine Verbindung zum Board-Speicher (Server bzw. verbundenes Board-Verzeichnis)',
   });
   Object.assign(EN, {
+    /* Card #1195: tab bar of recently used boards (not in the solo template). */
+    'board.reiter':          'Recently used boards',
+    'board.reiter.close':    n => `Close tab “${n}”`,
+    'board.reiter.wartet':   'waiting for your reply', /* #1197 */
     /* Card #606 (ADR-0130 §1): a session has claimed the card. */
     'claim.badge':           (wer) => `🔒 ${wer}`,
     'claim.badge.verwaist':  '⌛ orphaned',

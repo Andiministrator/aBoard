@@ -154,7 +154,9 @@ describe('F-3106 — Frist beim Wiederherstellen des Ordner-Handles', () => {
     expect(banner).toMatch(/haengt \? 'sync\.pick-again' : 'sync\.grant-permission'/);
     expect(banner).toMatch(/haengt \? 'sync:pick-directory' : 'sync:request-permission'/);
     /* Verify B2: das Banner bleibt bis zur echten Verbindung stehen */
-    expect(banner).toMatch(/if \(!haengt\) banner\.remove\(\)/);
+    /* Sitzungs-Kritik 23.11. A B-1: auch „Erlauben“ entfernt das Banner nicht beim Klick */
+    const klick = banner.slice(banner.indexOf("btn.addEventListener('click'"), banner.indexOf('const weg'));
+    expect(klick).not.toMatch(/banner\.remove\(\)/);
     expect(banner).toMatch(/EventBus\.on\('config:project-changed', weg\)/);
   });
 });

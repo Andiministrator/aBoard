@@ -1,0 +1,156 @@
+[
+ {
+  "name": "leer",
+  "beschreibung": "",
+  "punkte": []
+ },
+ {
+  "name": "zwei Punkte",
+  "beschreibung": "Text\n- [ ] Angebot prüfen\n- [x] Termin",
+  "punkte": [
+   {
+    "text": "Angebot prüfen",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 1
+   },
+   {
+    "text": "Termin",
+    "vorkommen": 1,
+    "erledigt": true,
+    "zeile": 2
+   }
+  ]
+ },
+ {
+  "name": "großes X",
+  "beschreibung": "- [X] fertig",
+  "punkte": [
+   {
+    "text": "fertig",
+    "vorkommen": 1,
+    "erledigt": true,
+    "zeile": 0
+   }
+  ]
+ },
+ {
+  "name": "doppelter Text",
+  "beschreibung": "- [ ] a\n- [x] a\n- [ ] b",
+  "punkte": [
+   {
+    "text": "a",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 0
+   },
+   {
+    "text": "a",
+    "vorkommen": 2,
+    "erledigt": true,
+    "zeile": 1
+   },
+   {
+    "text": "b",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 2
+   }
+  ]
+ },
+ {
+  "name": "Code-Zaun",
+  "beschreibung": "```\n- [ ] im Code\n```\n- [ ] draußen",
+  "punkte": [
+   {
+    "text": "draußen",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 3
+   }
+  ]
+ },
+ {
+  "name": "Tilde-Zaun schließt nicht mit Backticks",
+  "beschreibung": "~~~\n```\n- [ ] drin\n~~~\n- [ ] raus",
+  "punkte": [
+   {
+    "text": "raus",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 4
+   }
+  ]
+ },
+ {
+  "name": "eingerückt und Stern zählen nicht",
+  "beschreibung": "  - [ ] eingerückt\n* [ ] stern\n-  [ ] zwei Leer\n- [] ohne\n- [ ]ohne Leer",
+  "punkte": []
+ },
+ {
+  "name": "CRLF",
+  "beschreibung": "- [ ] eins\r\n- [x] zwei\r\n",
+  "punkte": [
+   {
+    "text": "eins",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 0
+   },
+   {
+    "text": "zwei",
+    "vorkommen": 1,
+    "erledigt": true,
+    "zeile": 1
+   }
+  ]
+ },
+ {
+  "name": "leerer Text",
+  "beschreibung": "- [ ] ",
+  "punkte": [
+   {
+    "text": "",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 0
+   }
+  ]
+ },
+ {
+  "name": "Leerzeichen am Ende gehören zum Text",
+  "beschreibung": "- [ ] a \n- [ ] a",
+  "punkte": [
+   {
+    "text": "a ",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 0
+   },
+   {
+    "text": "a",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 1
+   }
+  ]
+ },
+ {
+  "name": "CR und U+2028 mitten in der Zeile",
+  "beschreibung": "- [ ] a\rb\n- [x] c d",
+  "punkte": [
+   {
+    "text": "a\rb",
+    "vorkommen": 1,
+    "erledigt": false,
+    "zeile": 0
+   },
+   {
+    "text": "c d",
+    "vorkommen": 1,
+    "erledigt": true,
+    "zeile": 1
+   }
+  ]
+ }
+]

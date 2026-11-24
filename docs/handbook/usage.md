@@ -29,6 +29,8 @@ Which variant you have in front of you is explained in [Variants](variants.md).
 
 At the bottom of the sidebar is the version of aBoard.
 
+**Appearance:** boxes are **square** by default. In User Settings you choose corners (rounded or square), font (system, serif, monospace) and accent color (teal, blue, green, violet, graphite). The choice shows immediately as a preview; "Cancel" undoes it. It applies to this device and browser, not to everyone on the board.
+
 ## Columns
 
 A fresh board has four columns: **Backlog → Ready → In Arbeit → Erledigt**. The default titles are German in every interface language (*In Arbeit* = in progress, *Erledigt* = done); click a title to rename it.
@@ -174,6 +176,8 @@ Additionally, on the server only:
 
 A click on the board title in the header opens a menu with the current and the most recently used boards; "Show all boards…" shows the full list. The pencil ✎ next to the title renames the board. On the server there is also "New board" there.
 
+**Tabs:** If you use several boards, a tab bar below the header shows the most recently used ones, at most six. A click on a tab switches the board; the current one is highlighted. New boards are added at the end; beyond six, the one unused for the longest time drops out. The × on a tab removes it from the bar, the board itself stays. Each browser remembers its own bar. With only one board the bar does not appear. It exists on the server and in Claude Code mode, not in the single-file board (template `aboard.template.html`). On the server a tab shows **💬** when Claude is waiting for your reply on that board; the question itself appears in the banner once you open the board. The tab is refreshed at most once a minute.
+
 On a **server board**, "Show all boards…" opens the **board overview**: all boards you may see, as tiles with a background image, separated into "My boards" and "Shared with me". Each tile shows role, modification date and the board ID, which can be copied with a button. A board can be shared in the Board Settings in the "Sharing" section.
 
 ## Keyboard
@@ -207,7 +211,7 @@ Sometimes an older interim copy is still stored in the browser, that is, a worki
 
 - **Single file:** When you open it, the notice "Unsaved changes from the last session found." appears, with the buttons "Load" and "Discard".
 - **With a connected project folder:** The project folder is authoritative. If a board is there, the old browser copy disappears silently, without a message. Only if the project file cannot be read at the moment or is missing does the notice appear: "The project folder could not be read just now. An older interim copy is still in the browser — it is kept; the project folder remains authoritative." with the button "Got it".
-- **Project folder known but not yet permitted:** Then only the notice about permission for the project folder appears, with "Allow". The browser copy is left untouched. If the browser does not answer the permission request, the notice reads "The browser does not answer the permission request for the project folder. Please choose the folder again." with the button "Choose folder again".
+- **Project folder known but not yet permitted:** Then only the notice about permission for the project folder appears, with "Allow". Until permission is granted the board stays empty; the browser copy is left untouched. The notice disappears only once the folder is connected. If the browser does not answer the permission request, the notice reads "The browser does not answer the permission request for the project folder. Please choose the folder again." with the button "Choose folder again".
 
 On the server, aBoard warns if someone else has changed the board at the same time, and lets you choose: keep your own version or load the server's.
 

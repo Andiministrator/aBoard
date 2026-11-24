@@ -448,7 +448,11 @@ async function openDocViewer(opts) {
    zeigt rohes HTML als Text, deshalb vorher entfernen; Code-Zäune bleiben unberührt. */
 export function ohneHtmlKommentare(text) {
   return text.split(/(^ {0,3}(?:```|~~~)[\s\S]*?^ {0,3}(?:```|~~~)[^\n]*$)/m)
-    .map((teil, i) => (i % 2 ? teil : teil.replace(/^[ \t]*<!--[\s\S]*?-->[ \t]*\n?|<!--[\s\S]*?-->/gm, '')))
+    /* Sitzungs-Kritik 23.11. A B-4: Inline-Code (`<!-- … -->` als Zitat) bleibt stehen. Ein
+       Durchlauf von links: was zuerst beginnt, gewinnt — ein Kommentar mit Backticks darin
+       wird ganz entfernt, eine Code-Spanne mit `<!--` bleibt ganz stehen. */
+    .map((teil, i) => (i % 2 ? teil
+      : teil.replace(/(`[^`\n]*`)|^[ \t]*<!--[\s\S]*?-->[ \t]*\n?|<!--[\s\S]*?-->/gm, (m, code) => code ?? '')))
     .join('');
 }
 

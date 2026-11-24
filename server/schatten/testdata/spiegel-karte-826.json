@@ -1,0 +1,72 @@
+{
+  "board": {
+    "columnDefs": [
+      {
+        "color": null,
+        "id": "col-ready",
+        "spiegel": {
+          "id": "col-ready"
+        },
+        "title": "Ready"
+      }
+    ],
+    "id": "kopie",
+    "nextDisplayId": 8,
+    "sprints": [
+      {
+        "archived": false,
+        "cards": [
+          {
+            "activity": [],
+            "archived": false,
+            "assignees": [
+              "Anna"
+            ],
+            "attachments": [],
+            "blocked": false,
+            "columnId": "col-ready",
+            "comments": [
+              {
+                "author": "Andi",
+                "created": "2026-10-01",
+                "edited": "2026-10-03",
+                "herkunft": "innen",
+                "id": "c1",
+                "text": "t"
+              }
+            ],
+            "coverAttachmentId": null,
+            "critical": true,
+            "description": "- [ ] eins",
+            "displayId": 7,
+            "dueDate": null,
+            "id": "11111111-2222-5333-8444-555555555555",
+            "labels": [
+              "a"
+            ],
+            "links": [],
+            "owner": "Gerd",
+            "priority": "mittel",
+            "project_id": null,
+            "recurrence": null,
+            "spiegel": {
+              "id": "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "anhaenge": 1
+            },
+            "startDate": "2026-10-01",
+            "startTime": "09:30",
+            "title": "Probe"
+          }
+        ],
+        "id": "__backlog__",
+        "kind": "backlog",
+        "spiegel": {
+          "id": "__backlog__"
+        },
+        "title": "Backlog"
+      }
+    ],
+    "title": "Kopie"
+  },
+  "version": "2"
+}

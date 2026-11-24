@@ -21,7 +21,7 @@ The documentation is available in English and German.
 
 ## What is in this repository
 
-This repository is a **public extract** of the project. It contains the board app (source code, build, tests) and the user handbook. The optional multi-user server will follow later. Development itself takes place in an internal repository; comments in the code therefore occasionally refer to decisions (`ADR-…`), findings (`F-…`) or cards (`#…`) that are not included here.
+This repository is a **public extract** of the project. It contains the board app (source code, build, tests), the optional multi-user server (Go, under `server/`) and the handbook. Development itself takes place in an internal repository; comments in the code therefore occasionally refer to decisions (`ADR-…`), findings (`F-…`), cards (`#…`) or internal documents and tools (`docs/betrieb.md`, `knowledge/`, `tools/`, `framework/`) that are not included here.
 
 ## Quick start
 

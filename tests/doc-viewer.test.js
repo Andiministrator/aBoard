@@ -200,3 +200,11 @@ describe('F-3109 — HTML-Kommentare im Dokumentationsleser', () => {
     ].join('\n'))
   })
 })
+
+describe('F-3109 Nacharbeit (Sitzungs-Kritik 23.11. A B-4) — Inline-Code bleibt', () => {
+  it('ein zitierter Kommentar in Backticks bleibt, ein Kommentar mit Backticks darin verschwindet ganz', async () => {
+    const { ohneHtmlKommentare } = await import('../src/sidebar.js')
+    expect(ohneHtmlKommentare('Marke `<!-- abzug:aus -->` im Satz')).toBe('Marke `<!-- abzug:aus -->` im Satz')
+    expect(ohneHtmlKommentare('A\n<!-- abzug:nur\nmit `code` drin\n-->\nB')).toBe('A\nB')
+  })
+})

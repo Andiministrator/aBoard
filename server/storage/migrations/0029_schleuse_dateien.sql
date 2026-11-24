@@ -1,0 +1,24 @@
+-- aBoard server schema, version 29 — Ausgangsschleuse, Dateien (S4)
+-- (ADR-0134 §5; Karte #687).
+--
+-- Neue Spalte am Auftragsdatensatz (schleuse_auftraege, Migration 0027):
+--
+--   - bilder: JSON-Array der gewählten Bilder, je {id, mime, bytes, sha256,
+--     freigegeben} (schleuse.BildEintrag). sha256 und bytes gelten für die
+--     BEREINIGTE Fassung (neu kodiert, ohne Metadaten) — genau das, was
+--     hinausgeht. Kein Inhalt, kein Dateiname: Die Bytes liest der Versand
+--     frisch aus dem Anhangsspeicher und vergleicht sie mit sha256; der Name
+--     kann Personenbezug tragen und steht ohnehin an der Karte (ADR-0134 §5:
+--     „kopiert nichts dauerhaft“).
+--
+-- Text- und PDF-Dateien brauchen keine Spalte: Ihr extrahierter Text steht
+-- pseudonymisiert im Auszug (text), welche es waren, in teile.dateien.
+--
+-- text_sha256 ist seit dieser Version der Hash des AUFTRAGS
+-- (schleuse.AuszugHash): ohne freigegebenes Bild wie bisher der SHA-256 des
+-- Texts — bestehende Zeilen bleiben gültig —, mit Bildern ein SHA-256 über
+-- den Text-Hash und die Hashes der freigegebenen Bilder. Die Spalte behält
+-- ihren Namen, weil Freigabe und Versand sie in SQL vergleichen
+-- (freigabe_sha256 = text_sha256).
+
+ALTER TABLE schleuse_auftraege ADD COLUMN bilder TEXT NOT NULL DEFAULT '[]';

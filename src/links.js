@@ -63,6 +63,8 @@ export function addLink(board, sourceId, targetId, type) {
   const src = findCardById(board, sourceId);
   const tgt = findCardById(board, targetId);
   if (!src || !tgt) return false;
+  /* F-3112: Meta-Karten tragen keine Verweise (ADR-0036) — weder als Quelle noch als Ziel. */
+  if (src.card.kind === 'sprint-meta' || tgt.card.kind === 'sprint-meta') return false;
 
   const inv = inverseType(type);
   let changed = false;

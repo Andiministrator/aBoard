@@ -1,0 +1,102 @@
+{
+  "_hinweis": "F-400: gemeinsame Eingabe fuer tests/prompt-drift.test.js (JS) und server/llm/prompt_drift_test.go (Go). Beide Seiten bauen denselben Prompt; driftet eine, faellt genau ein Test. Wer ein Feld ergaenzt, ergaenzt es hier UND in beiden Implementierungen — genau das ist der Zweck.",
+  "includeFields": [
+    "description",
+    "comments",
+    "links",
+    "agentContext",
+    "activity",
+    "nicht-erlaubtes-feld"
+  ],
+  "card": {
+    "id": "card-fixture-1",
+    "displayId": 4711,
+    "title": "  Karte mit Randfaellen  ",
+    "description": "Erste Zeile.\n\nZweiter Absatz mit `code` und einem Umlaut: Grösse.\n\n\n",
+    "comments": [
+      {
+        "id": "c1",
+        "author": "andi",
+        "text": "Kommentar mit\nZeilenumbruch",
+        "created": "2026-09-01"
+      },
+      {
+        "id": "c2",
+        "author": "",
+        "text": "Kommentar ohne Autor",
+        "created": "2026-09-02"
+      },
+      {
+        "id": "c3",
+        "author": "claude",
+        "text": "   ",
+        "created": "2026-09-03"
+      },
+      {
+        "id": "c4",
+        "author": "claude",
+        "text": "Kommentar ohne Datum",
+        "created": ""
+      }
+    ],
+    "links": [
+      {
+        "type": "related",
+        "targetId": "card-b"
+      },
+      {
+        "type": "blocked-by",
+        "targetId": "card-a"
+      },
+      {
+        "type": "related",
+        "targetId": "card-a"
+      },
+      {
+        "type": "kaputt-ohne-ziel"
+      }
+    ],
+    "agentContext": "## Relevante Dateien\n- src/llm-pii.js:342\n",
+    "activity": [
+      {
+        "ts": "2026-09-01T10:00:00.000Z",
+        "actor": "andi",
+        "action": "column-moved",
+        "from": "col-ready",
+        "to": "col-in-arbeit"
+      },
+      {
+        "ts": "2026-09-02T10:00:00.000Z",
+        "actor": "",
+        "action": "field-updated",
+        "field": "qa",
+        "from": "false",
+        "to": "true"
+      },
+      {
+        "ts": "",
+        "actor": "claude",
+        "action": "owner-changed",
+        "from": "",
+        "to": "Claude Opus"
+      },
+      {
+        "ts": "2026-09-03T10:00:00.000Z",
+        "actor": "andi",
+        "action": ""
+      }
+    ]
+  },
+  "refsByID": {
+    "card-a": {
+      "displayId": 12,
+      "title": "Zielkarte A",
+      "snippet": "Kurzfassung von A"
+    },
+    "card-b": {
+      "displayId": 0,
+      "title": "Zielkarte B ohne Nummer",
+      "snippet": ""
+    }
+  }
+}

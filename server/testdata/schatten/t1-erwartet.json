@@ -1,0 +1,7 @@
+[
+  {"id":"k-1","art":"karte","nr":12,"titel":"Angebot Müller prüfen","vertraulich":false,"spalte":"In Arbeit","prioritaet":"hoch","startDatum":null,"startZeit":null,"endeDatum":"2026-10-14","endeZeit":"09:30","bearbeiter":["Erika Muster","Claude Opus"],"vonAgent":false},
+  {"id":"k-2","art":"karte","nr":13,"titel":null,"vertraulich":true,"spalte":"Backlog","prioritaet":"mittel","startDatum":"2026-10-20","startZeit":null,"endeDatum":"2026-10-21","endeZeit":null,"bearbeiter":["Erika Muster"],"vonAgent":false},
+  {"id":"k-3","art":"karte","nr":14,"titel":"Erledigte Karte","vertraulich":false,"spalte":"Erledigt","prioritaet":"","startDatum":null,"startZeit":null,"endeDatum":null,"endeZeit":null,"bearbeiter":[],"vonAgent":true},
+  {"id":"t-1","art":"termin","titel":"Messe Köln","vertraulich":false,"startDatum":"2026-10-15","startZeit":"10:00","endeDatum":"2026-10-15","endeZeit":"11:00","bearbeiter":["Erika Muster"],"vonAgent":true},
+  {"id":"t-2","art":"termin","titel":null,"vertraulich":true,"startDatum":"2026-10-16","startZeit":null,"endeDatum":null,"endeZeit":null,"bearbeiter":[],"vonAgent":false}
+]

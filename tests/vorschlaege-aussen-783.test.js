@@ -28,13 +28,13 @@ async function ruhig() { for (let i = 0; i < 8; i++) await ruhe(); }
 
 const BOESE = '<img src=x onerror="window.__xss=1">**fett**';
 const V1 = {
-  id: 'v1', art: 'kommentar', artText: 'Kommentar', agent: 'agent:gerd', fuer: 'Anna', hash: 'h1',
+  id: 'v1', art: 'kommentar', artText: 'Kommentar', agent: 'agent:assistent', fuer: 'Anna', hash: 'h1',
   angelegt: '2026-10-11T10:00:00Z', laeuftAb: '2026-10-12T10:00:00Z',
   karte: { displayId: 5, titel: 'Im Sprint' }, karteFehlt: false,
   felder: [{ schluessel: 'text', name: 'Kommentar', wert: BOESE }],
 };
 const V2 = {
-  id: 'v2', art: 'karte.loeschen', agent: 'agent:gerd', fuer: '', hash: 'h2', laeuftAb: '2026-10-12T10:00:00Z',
+  id: 'v2', art: 'karte.loeschen', agent: 'agent:assistent', fuer: '', hash: 'h2', laeuftAb: '2026-10-12T10:00:00Z',
   karte: null, karteFehlt: true, felder: [{ schluessel: 'wirkung-loeschen', name: 'Wirkung', wert: 'Die Karte wird gelöscht.' }],
 };
 const V3 = { ...V1, id: 'v3', hash: 'h3', zugangAktiv: false };
@@ -91,7 +91,7 @@ describeServer('#783 Band „Vorschläge“', () => {
     expect(bereich().previousElementSibling.id).toBe('board-header');
     const e = eintraege();
     expect(e).toHaveLength(2);
-    expect(e[0].textContent).toContain('agent:gerd');
+    expect(e[0].textContent).toContain('agent:assistent');
     expect(e[0].textContent).toContain('laut Agent gefragt für Anna');
     expect(e[0].textContent).toContain('Karte #5 „Im Sprint“');
     const dd = e[0].querySelector('.vsl-felder dd');

@@ -344,7 +344,7 @@ describe('Karten-Cover — Schema-Erwartungen (NICHT die Migration)', () => {
 // ─────────────────────────────────────────────────────────────────────────
 
 describe('Cover-Thumbnail (Karte #467)', () => {
-  /* Andis Beobachtung war eine Wartezeit, kein fehlendes Bild. Ein Test, der
+  /* Die Beobachtung aus dem Betrieb war eine Wartezeit, kein fehlendes Bild. Ein Test, der
      nur zusichert, dass irgendwann ein Hintergrundbild dasteht, wäre deshalb
      auch ohne den Fix grün — der asynchrone Weg tut das seit Karte #173.
      Zugesichert wird hier, dass das Bild OHNE jedes `await` steht UND dass

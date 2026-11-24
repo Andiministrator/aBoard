@@ -5,7 +5,7 @@
  *
  * Anlass: Admin-Dialog → Backup, Feld „Board-ID“ leer (der Platzhalter
  * „default“ sah aus wie ein Wert). „Jetzt sichern“ tat NICHTS (`if (!id)
- * return;`), Andi hielt das Backup für erledigt, es gab keine Datei.
+ * return;`), der Nutzer hielt das Backup für erledigt, es gab keine Datei.
  *
  * Geprüft: der Abbruchfall (Pflichtfeld leer), je ein Erfolgs- und Fehlerfall
  * der Backup-Aktionen, Abbruch einer Rückfrage, und die Rückmeldung im

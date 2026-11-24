@@ -2,6 +2,14 @@ export const Model = (() => {
   /* Gespeicherter Titel der Sprint-Meta-Karten (Daten, nicht Anzeige — die übersetzt
      renderer.js/modal.js, F-3110). */
   const META_TITEL = Object.freeze({ start: '📋 Sprint-Start', end: '🏁 Sprint-Abschluss' });
+  /* F-3112 (Karte #1192): Anzeige-Titel einer Karte — für Meta-Karten mit unverändertem
+     Vorgabetitel die Übersetzung, sonst der gespeicherte Titel. Die Übersetzung reicht der
+     Aufrufer als `t` herein (I18n.t): model.js bleibt ohne Importe, Werkzeuge laden es. */
+  function anzeigeTitel(card, t) {
+    const vorgabe = card?.kind === 'sprint-meta' ? META_TITEL[card.metaType] : undefined;
+    if (vorgabe && card.title === vorgabe && typeof t === 'function') return t('meta.title.' + card.metaType);
+    return card?.title ?? '';
+  }
   function newId() { return crypto.randomUUID(); }
   function now()   { return new Date().toISOString().slice(0, 10); }
 
@@ -222,5 +230,5 @@ export const Model = (() => {
     return true;
   }
 
-  return { META_TITEL, newId, now, createCard, createSprintMetaCard, createTemplate, assignDisplayId, createColumnDef, createDefaultColumnDefs, createSprint, createBacklogSprint, createBoard, verschiebeSwimlane, darfArchiviertWerden };
+  return { META_TITEL, anzeigeTitel, newId, now, createCard, createSprintMetaCard, createTemplate, assignDisplayId, createColumnDef, createDefaultColumnDefs, createSprint, createBacklogSprint, createBoard, verschiebeSwimlane, darfArchiviertWerden };
 })();

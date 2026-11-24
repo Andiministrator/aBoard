@@ -1,0 +1,31 @@
+-- aBoard server schema, version 4 — Email-Normalisierungs-Backfill (F-260, Karte #211).
+-- Quelle: Finding F-260 (Security-Hotfix v1.20.1).
+--
+-- Problem: bis v1.20.0 wurden ACL-/User-Emails ohne Normalisierung gespeichert
+-- (bestenfalls TrimSpace, nie ToLower). Ein Bestands-Eintrag `Owner@X.de` würde
+-- vom jetzt normalisierten Code-Lookup (`owner@x.de`) NICHT mehr getroffen
+-- → Owner-Lockout. Dieser Backfill bringt bestehende Rows in dieselbe
+-- kanonische Form, die der Code (storage.NormalizeEmail) ab jetzt erzeugt:
+-- lower(trim(...)).
+--
+-- Idempotent: ein zweiter Lauf über bereits normalisierte Rows ist ein No-op
+-- (lower(trim(x)) == x für bereits normalisierte x). Die Migration läuft ohnehin
+-- nur, wenn user_version < 4 (migrations.go: BEGIN IMMEDIATE + Versions-Gate,
+-- F-191). Im No-Auth-Modus sind acl/users leer → 0 betroffene Rows.
+--
+-- Hinweis zu Kollisionen: theoretisch könnten zwei Rows wie `A@x.de` und
+-- `a@x.de` nach lower() kollidieren (acl-PK (board_id,user_email) bzw.
+-- users.email UNIQUE). In der Praxis ist das im bisherigen Single-User-/
+-- Bootstrap-Betrieb (ACL praktisch ungenutzt, ADR-0059 §2) ausgeschlossen;
+-- ein UPDATE, das eine UNIQUE/PK-Verletzung auslöst, würde die gesamte
+-- Migrations-Transaktion sauber zurückrollen (fail-loud, kein stiller
+-- Datenverlust) — der korrekte konservative Ausgang für diesen seltenen Fall.
+--
+-- Bewusst KEIN COLLATE-NOCASE-Table-Rebuild: ein create-copy-drop-rename nur
+-- für Case-Insensitivität wäre für SQLite ein riskanter Eingriff in eine
+-- Autorisierungstabelle (FK acl.board_id, PK-Semantik). Code-seitige
+-- Normalisierung (storage.NormalizeEmail an JEDER Schreib-/Lookup-Stelle) plus
+-- dieser Backfill ist der robuste, ausreichende Fix (F-260 §Migrations-Strategie).
+
+UPDATE acl   SET user_email = lower(trim(user_email)) WHERE user_email <> lower(trim(user_email));
+UPDATE users SET email      = lower(trim(email))      WHERE email      <> lower(trim(email));

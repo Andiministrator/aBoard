@@ -177,7 +177,7 @@ describe('has() — feature.attachmentLimits', () => {
        Board-State (kein `feature.fsaVolumeAttachments`, F-194) und geht bei
        jedem Speichern gegen `MaxBodyBytes = 10 MB`. Ohne das Flag stieg
        `checkUpload` dort sofort mit `{ok:true}` aus — der Nutzer bekam statt
-       einer Erklaerung ein „Speichern fehlgeschlagen" (Andi-Meldung, #450).
+       einer Erklaerung ein „Speichern fehlgeschlagen" (Meldung, #450).
        Wird der Upload auf das REST-Plugin umgestellt (Punkt 1 der Karte),
        gehoert diese Zeile erneut geprueft. */
     expect(Profile.has('feature.attachmentLimits', 'server')).toBe(true)

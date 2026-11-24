@@ -654,6 +654,20 @@ if (IS_SERVER_BUILD) {
     return parts.join('\n\n');
   }
 
+  /* F-3102 (Karte #1176): Input-Satz je Million Tokens passend zur Prompt-Länge.
+     `entry.Staffel` (optional, aus GET /llm/pricing) gilt, wenn der Prompt
+     MEHR als `UeberPromptTokens` Tokens hat — gleiche Regel wie der Server
+     (server/llm/pricing.go, PricingEntry.Satz). Fehlt das Feld (älterer
+     Server), gilt der Grundsatz. */
+  function _inputSatz(entry, tokens) {
+    const st = entry && entry.Staffel;
+    if (st && typeof st.UeberPromptTokens === 'number' && tokens > st.UeberPromptTokens
+        && typeof st.InputPerMillionUSD === 'number') {
+      return st.InputPerMillionUSD;
+    }
+    return entry ? entry.InputPerMillionUSD : 0;
+  }
+
   async function _refreshEstimate(panel) {
     const gen = _renderGen;
     const provSel = panel.querySelector('#llm-provider-sel');
@@ -673,7 +687,7 @@ if (IS_SERVER_BUILD) {
     const entry = pricing && pricing[provSel.value] && pricing[provSel.value][modelSel.value];
     let text;
     if (entry && (entry.InputPerMillionUSD || entry.OutputPerMillionUSD)) {
-      const cost = (tokens / 1_000_000) * entry.InputPerMillionUSD;
+      const cost = (tokens / 1_000_000) * _inputSatz(entry, tokens);
       text = I18n.t('llm.send.estimate', tokens, cost);
     } else {
       text = I18n.t('llm.send.estimate-no-price', tokens);
@@ -727,7 +741,7 @@ if (IS_SERVER_BUILD) {
     if (entry && entry.InputPerMillionUSD) {
       const ctxText = _buildContextPreview(sendCard, includeFields);
       const tokens = estimateTokens((systemPrompt || '') + '\n' + ctxText);
-      const estCost = (tokens / 1_000_000) * entry.InputPerMillionUSD;
+      const estCost = (tokens / 1_000_000) * _inputSatz(entry, tokens);
       if (estCost >= COST_CONFIRM_USD) {
         if (!confirm(I18n.t('llm.send.confirm-expensive', estCost))) return;
       }
@@ -2485,7 +2499,7 @@ if (IS_SERVER_BUILD) {
     /* Public API */
     build, render, hasAnyKey, invalidateKeysCache, estimateTokens, stopPolling,
     /* Test-/Debug-Hooks (nicht für Produktivpfade nutzen) */
-    _buildContextPreview, _errorText, _streamErrorText, _populateModels,
+    _buildContextPreview, _errorText, _streamErrorText, _populateModels, _inputSatz,
     _resetCachesForTest() { _keysCache = null; _pricingCache = null; },
     /* Karte #570 (K-B1/K-B2): Anbieter-Beschriftung und Modellliste bei
        umgestelltem „openai“. */

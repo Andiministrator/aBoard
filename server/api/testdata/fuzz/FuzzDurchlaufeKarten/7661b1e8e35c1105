@@ -1,0 +1,2 @@
+go test fuzz v1
+[]byte("{\"board\":{\"sprints\":[{\"cards\":[{\"\x80\":[]}]}]}}")

@@ -1,5 +1,5 @@
 /* vorschlaege-aussen.js — Vorschläge des internen Agenten auf dem externen
-   Board (Karte #783, ADR-0140 §8, linux ADR-0048 3a/9.6).
+   Board (Karte #783, ADR-0140 §8, Vertrag Push-Skript 3a/9.6).
 
    Nur im Server-Build und nur auf einer Instanz mit boardpaar.seite = aussen:
    Das Modul holt `GET /boards/{id}/vorschlaege` und zeigt offene Vorschläge
@@ -9,7 +9,7 @@
 
    Alle Texte des Vorschlags stammen von einem Agenten, der fremde Dokumente
    gelesen haben kann: Sie werden ausschließlich als Text gesetzt
-   (textContent), nie als Markdown oder HTML (linux K-3). Bestätigt wird mit
+   (textContent), nie als Markdown oder HTML. Bestätigt wird mit
    dem Hash, den der Server zur angezeigten Fassung geliefert hat — hat sich
    der Vorschlag dazwischen geändert, lehnt der Server mit 409 ab.
 

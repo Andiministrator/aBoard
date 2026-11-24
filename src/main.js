@@ -1722,7 +1722,10 @@ EventBus.on('sync:pick-directory', async () => {
   }
 
   /* Datei existiert nicht → Nutzer fragen: leeres Board oder aktuelle Daten? */
-  const wantEmpty = confirm(I18n.t('sync.confirm-empty'));
+  /* Sitzungs-Kritik 23.11. A B-1: Kam der Nutzer über „Ordner neu wählen“ aus dem
+     Freigabe-Zweig, liegt noch kein Board im State — dann gibt es keine „aktuellen
+     Daten“, die übernommen werden könnten: leeres Board ohne Rückfrage. */
+  const wantEmpty = !State.get()?.board || confirm(I18n.t('sync.confirm-empty'));
   if (wantEmpty) {
     BulkSelect.clearAll(); /* wie board:open */
     State.set({ version: '2', board: Model.createBoard(document.title || 'Board') });
@@ -2594,19 +2597,17 @@ function showPermissionBanner(haengt = false) {
   btn.className = 'btn btn-primary';
   btn.textContent = I18n.t(haengt ? 'sync.pick-again' : 'sync.grant-permission');
   btn.addEventListener('click', async () => {
-    /* Verify B2: bei „neu wählen“ bleibt das Banner stehen, bis der Ordner wirklich verbunden ist —
-       ein abgebrochener Dialog oder ein zurückgenommener Wechsel ließ sonst keinen Weg zurück. */
-    if (!haengt) banner.remove();
     EventBus.emit(haengt ? 'sync:pick-directory' : 'sync:request-permission');
   });
-  if (haengt) {
-    const weg = () => {
-      if (Sync.isPermissionNeeded()) return;
-      banner.remove();
-      EventBus.off('config:project-changed', weg);
-    };
-    EventBus.on('config:project-changed', weg);
-  }
+  /* Verify B2 / Sitzungs-Kritik 23.11. A B-1: Das Banner bleibt stehen, bis der Ordner
+     wirklich verbunden ist (beide Erfolgswege melden config:project-changed) — bei
+     Ablehnung, abgebrochenem Dialog oder zurückgenommenem Wechsel bleibt der Weg sichtbar. */
+  const weg = () => {
+    if (Sync.isPermissionNeeded()) return;
+    banner.remove();
+    EventBus.off('config:project-changed', weg);
+  };
+  EventBus.on('config:project-changed', weg);
   banner.appendChild(msg);
   banner.appendChild(btn);
   document.body.prepend(banner);

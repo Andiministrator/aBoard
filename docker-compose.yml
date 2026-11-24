@@ -1,0 +1,91 @@
+services:
+  aboard-server:
+    build:
+      # Build-Kontext ist das REPO-ROOT, NICHT server/ (server/Dockerfile
+      # Stage 1 braucht die Frontend-Quellen aus dem Wurzelverzeichnis, siehe
+      # Kommentar dort). So baut `docker compose build` lokal denselben
+      # Container wie die CI.
+      context: .
+      dockerfile: server/Dockerfile
+      args:
+        VERSION: "${ABOARD_VERSION:-dev}"
+    image: "aboard-server:${ABOARD_VERSION:-dev}"
+    ports:
+      # Nur auf der Loopback-Schnittstelle des Rechners veröffentlicht: Ohne
+      # vorgeschaltete Anmeldung hat der Server keinen Zugangsschutz, jeder,
+      # der den Port erreicht, darf alles. Wer ihn im Netz anbieten will,
+      # setzt einen Reverse-Proxy mit Anmeldung davor, siehe
+      # docs/handbuch/server/anmeldung.md.
+      - "127.0.0.1:${ABOARD_PORT:-8080}:8080"
+    environment:
+      ABOARD_DB: /data/db/aboard.db
+      ABOARD_ATTACHMENTS_DIR: /data/attachments
+      ABOARD_ADDR: ":8080"
+      # ABOARD_ATTACHMENT_MAX_BYTES: 52428800  # 50 MB (Standard)
+    volumes:
+      - db-data:/data/db
+      - attachments:/data/attachments
+      - backups:/data/backups
+    restart: unless-stopped
+    # Das Image läuft als Benutzer 10001:10001. Volumes aus einer älteren,
+    # als root laufenden Version gehören root — Umstellung in
+    # docs/handbuch/server/container.md, Abschnitt „Rootless: Benutzer 10001“.
+    # Der Server braucht beim Beenden bis zu 30 s; Dockers Standard von 10 s
+    # würde ihn mitten im Herunterfahren abbrechen. 40 s lassen Reserve.
+    stop_grace_period: 40s
+
+  # Optionaler Backup-Dienst.
+  # Standardmäßig deaktiviert (profiles: [backup]) — nur starten wenn explizit
+  # angegeben: docker compose --profile backup up
+  #
+  # Beispiel-Aufruf des Backup-Commands:
+  #   aboard-server backup --out /data/backups --keep-daily 7 --keep-weekly 4
+  #
+  # Für einen echten Cron-Container kann z. B. "mcuadros/ofelia" oder ein
+  # minimales Alpine-Image mit crond genutzt werden. Dieses Beispiel verwendet
+  # das aboard-server-Image selbst mit einem einfachen Shell-Loop.
+  aboard-backup:
+    image: "aboard-server:${ABOARD_VERSION:-dev}"
+    profiles:
+      - backup
+    environment:
+      ABOARD_DB: /data/db/aboard.db
+      ABOARD_ATTACHMENTS_DIR: /data/attachments
+      ABOARD_BACKUP_DIR: /data/backups
+      ABOARD_KEEP_DAILY: "${ABOARD_KEEP_DAILY:-7}"
+      ABOARD_KEEP_WEEKLY: "${ABOARD_KEEP_WEEKLY:-4}"
+    # :ro reicht, solange der Server-Container läuft (dann liegen -wal/-shm
+    # daneben); bei gestopptem Server scheitert der Lauf laut („unable to open
+    # database file“) und kommt in der nächsten Stunde nach (F-1861).
+    volumes:
+      - db-data:/data/db:ro
+      - attachments:/data/attachments:ro
+      - backups:/data/backups
+    # Stündliche Prüfung; tägliches Backup falls noch kein heutiges Archiv existiert.
+    # aboard-server backup --out /data/backups erstellt "aboard-YYYY-MM-DD.tar.gz"
+    # und überschreibt es bei erneutem Lauf am gleichen Tag nicht (Dateiname bleibt gleich).
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          /usr/local/bin/aboard-server backup \
+            --out "$${ABOARD_BACKUP_DIR}" \
+            --keep-daily "$${ABOARD_KEEP_DAILY}" \
+            --keep-weekly "$${ABOARD_KEEP_WEEKLY}" \
+          || echo "Backup fehlgeschlagen — nächster Versuch in 1h"
+          sleep 3600
+        done
+    # Der Sidecar erbt den HEALTHCHECK des Images,
+    # prüft damit aber einen Server, der in seinem Netz-Namespace nicht läuft,
+    # und stünde dauerhaft auf „unhealthy“.
+    healthcheck:
+      disable: true
+    restart: unless-stopped
+    depends_on:
+      - aboard-server
+
+volumes:
+  db-data:
+  attachments:
+  backups:

@@ -208,8 +208,7 @@ export const Renderer = (() => {
      Angezeigt wird er in der Oberflächensprache — nur solange er der vorgegebene ist; die Daten
      bleiben unverändert (Meta-Karten speichern ihren Titel nie zurück, ADR-0036). */
   function metaTitel(card) {
-    const vorgabe = Model.META_TITEL?.[card.metaType];
-    return vorgabe && card.title === vorgabe ? I18n.t('meta.title.' + card.metaType) : card.title;
+    return Model.anzeigeTitel({ ...card, kind: 'sprint-meta' }, I18n.t);
   }
 
   function renderSprintMetaCard(card) {
@@ -1862,6 +1861,16 @@ export const Renderer = (() => {
        Umbenennen daneben (board-menu.js). Das Inline-Umbenennen bleibt hier. */
     const title = BoardMenu.build(board, { onRename: startRename });
     header.appendChild(title);
+    /* Karte #1195: Reiterleiste direkt unter dem Kopf (eigener Behälter, der Kopf wird geleert). */
+    if (IS_SERVER_BUILD || IS_PROJECTOR_BUILD) {
+      let halter = document.getElementById('board-reiter-halter');
+      if (!halter && header.parentNode) {
+        halter = el('div');
+        halter.id = 'board-reiter-halter';
+        header.parentNode.insertBefore(halter, header.nextSibling);
+      }
+      if (halter) BoardMenu.reiter(board, halter, { personen: eigenePerson() }); /* #1197 */
+    }
     if (rename) startRename(title, rename);
 
     function startRename(wrapEl, alt) {
@@ -2215,6 +2224,10 @@ export const Renderer = (() => {
       _serverIdentitaet = id;
       const b = State.get()?.board;
       if (b) renderAwaitingBanner(b);
+      /* #1197, Kritik 24.11. A-1: auch der Reiter ordnet „wartet auf dich“ über die
+         Person zu — ohne Neuzeichnen fehlte das 💬 bis zum nächsten renderHeader. */
+      const halter = document.getElementById('board-reiter-halter');
+      if (b && halter && BoardMenu.reiter) BoardMenu.reiter(b, halter, { personen: eigenePerson() });
     }).catch(() => { _identitaetLaedt = false; });
   }
 

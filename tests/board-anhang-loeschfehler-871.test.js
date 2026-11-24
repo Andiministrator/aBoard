@@ -12,7 +12,7 @@
  * Purge-Route ist für die Board-Ablage seit Karte #443 bewusst gesperrt,
  * `DeleteBoard` greift erst beim Löschen des ganzen Boards.
  *
- * DIE ENTSCHEIDUNG (Andi, 2026-08-29): keine neue Purge-Route, sondern der
+ * DIE ENTSCHEIDUNG (Maintainer, 2026-08-29): keine neue Purge-Route, sondern der
  * Fehler wird sichtbar. Eintrag bleibt stehen, Nutzer bekommt eine Meldung.
  *
  * WAS HIER GEPRÜFT WIRD — in zwei Ebenen, weil der Defekt aus zwei Hälften

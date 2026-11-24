@@ -1,4 +1,6 @@
 /* Such-Modul — UI-only, wird nicht persistiert (analog filter.js) */
+import { Model } from './model.js';
+import { I18n }  from './i18n.js';
 
 export const Search = (() => {
   let query = '';
@@ -52,6 +54,8 @@ export const Search = (() => {
     if (!query) return true;
     const q = query.toLowerCase();
     if ((card.title ?? '').toLowerCase().includes(q)) return true;
+    /* F-3112: Meta-Karten (sprint-meta) zeigen ihren Titel übersetzt — der zählt auch. */
+    if (card.kind === 'sprint-meta' && Model.anzeigeTitel(card, I18n.t).toLowerCase().includes(q)) return true;
     if ((card.description ?? '').toLowerCase().includes(q)) return true;
     if (Array.isArray(card.comments)) {
       for (const c of card.comments) {

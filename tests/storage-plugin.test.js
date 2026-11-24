@@ -935,7 +935,17 @@ describe.skipIf(!hasRESTPlugin)('Storage-Plugin — REST-Implementierung (Karte 
       json: () => Promise.resolve([{ id: 'b-1', title: 'Eins', updated_at: 1 }]),
     }))
     const list = await plugin.listKnownBoards()
-    expect(list).toEqual([{ id: 'b-1', name: 'Eins', title: 'Eins', updatedAt: 1 }])
+    expect(list).toEqual([{ id: 'b-1', name: 'Eins', title: 'Eins', updatedAt: 1, awaitingUser: null }])
+  })
+
+  it('listKnownBoards() reicht awaiting_user als awaitingUser durch (#1197, ADR-0156)', async () => {
+    const aw = { Anna: { question: 'Q?', since: '2026-11-23T10:00:00Z' } }
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: true, status: 200,
+      json: () => Promise.resolve([{ id: 'b-1', title: 'Eins', updated_at: 1, awaiting_user: aw }]),
+    }))
+    const [b] = await plugin.listKnownBoards()
+    expect(b.awaitingUser).toEqual(aw)
   })
 
   it('listKnownBoards() wirft bei Netzwerkfehler (F-1440: nicht mehr still [])', async () => {
