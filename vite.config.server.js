@@ -4,7 +4,7 @@
 import { defineConfig } from 'vite'
 import { sharedBuild, appVersion, emptyAppDataPlugin, i18nSchluesselEinmal } from './vite.config.base.js'
 
-/* F-249/ADR-0052: index.html trägt im #app-data das interne aBoard-Dev-Board
+/* F-249/ADR-0052: index.html trägt im #app-data ein Demo-Board für den Dev-Server
  * (ADR-0014 Source-of-Truth des Standalone-Builds). Im Server-Build ist die
  * Quelle der Wahrheit die REST-API/SQLite — das eingebettete Board MUSS leer
  * sein, sonst liefert jede frische Server-Instanz unser Dev-Board aus

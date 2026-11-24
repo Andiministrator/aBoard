@@ -2,7 +2,7 @@
 
 [English](../handbook/usage.md) · **Deutsch**
 
-Dieses Kapitel erklärt die Arbeit mit dem Board im Alltag: Spalten, Karten, Swimlanes, Filter, Kalender und Tastatur. Einige Funktionen gibt es nur mit dem Mehrbenutzer-Server, der noch nicht veröffentlicht ist; das steht jeweils dabei.
+Dieses Kapitel erklärt die Arbeit mit dem Board im Alltag: Spalten, Karten, Swimlanes, Filter, Kalender, Tastatur und die Anmeldung am Server. Einige Funktionen gibt es nur mit dem Mehrbenutzer-Server; das steht jeweils dabei.
 
 Welche Variante du vor dir hast, erklärt [Varianten](varianten.md).
 
@@ -11,6 +11,7 @@ Welche Variante du vor dir hast, erklärt [Varianten](varianten.md).
 - aBoard zeigt ein **Kanban-Board**: Spalten mit Karten, die Aufgaben darstellen. Die Spalten bilden den Status ab, von links nach rechts.
 - Als **Einzeldatei** ist aBoard eine einzige HTML-Datei: Doppelklick, im Browser öffnen, fertig. **Speichern** schreibt das Board in diese Datei.
 - Mit einer **Ordner-Verbindung** liegt das Board als `aboard-sync.json` in einem Ordner. Du fasst die Datei dann nie von Hand an und hältst **nur einen Browser-Tab** mit dem Board offen.
+- Auf einem **Server-Board** arbeitet ihr im Browser unter der Adresse des Servers; Änderungen anderer erscheinen von selbst. Wie du dich anmeldest und ein Konto bekommst, steht in [Anmelden und Konto](#anmelden-und-konto).
 - Was du selbst steuerst: Karten in die richtige Spalte legen, Flags setzen, Fälligkeiten eintragen.
 
 ## Der Bildschirm
@@ -215,6 +216,203 @@ Manchmal liegt im Browser noch eine ältere Zwischenkopie, also ein Zwischenstan
 
 Auf dem Server warnt aBoard, wenn jemand anderes das Board gleichzeitig geändert hat, und lässt dich wählen: eigene Version behalten oder die des Servers laden.
 
+## Anmelden und Konto
+
+Dieser Abschnitt gilt für ein **Server-Board**, wenn der Server Konten selbst verwaltet (eingebaute Anmeldung). Dann kommst du mit einer **Einladung** herein. Ob dein Server so eingerichtet ist, sagt dir die Person, die ihn betreibt. Wie du Einladungen als Admin verschickst, steht in [Server verwalten](server/administration.md#konten-und-einladungen-eingebaute-anmeldung). Die Bilder unten zeigen einen Testserver mit erfundenen Adressen (`example.org`).
+
+Kurz gesagt:
+
+1. Ein Admin lädt deine E-Mail-Adresse ein und schickt dir einen **Link**.
+2. Du öffnest den Link und wählst, wie du dich künftig anmeldest: mit **Passwort und Authenticator-App** oder über einen **Anbieter** wie Google.
+3. Ein Admin **bestätigt** deinen Zugang. Danach kannst du dich anmelden.
+
+Es gibt keine Selbstregistrierung. Ohne Einladung kommst du nicht herein.
+
+### Einladung annehmen und den Weg wählen
+
+Der Link sieht aus wie `https://board.example.org/einladung/…` (die Adresse deines Servers) und gilt **sieben Tage** und **nur einmal**. Gib ihn niemandem weiter: Wer ihn zuerst einlöst, bekommt den Zugang. Ist er abgelaufen oder schon benutzt, zeigt die Seite „Link nicht gültig“. Dann bitte den Admin um einen neuen Link.
+
+Die Seite nennt oben die Adresse, für die die Einladung gilt, und bietet je nach Server einen oder mehrere Wege an:
+
+![Die Einladungsseite: „Einladung für anna@example.org. Wähle, wie du dich künftig anmeldest.“ Darunter zwei Felder für das Passwort, der Knopf „Passwort und Zwei-Faktor einrichten“ und der Link „Mit Google anmelden“.](bilder/konto/01-einladung-weg-waehlen.png)
+
+- **Passwort und Zwei-Faktor einrichten:** Du denkst dir ein Passwort aus und richtest eine Authenticator-App auf deinem Handy ein. Das ist der Weg, den dieser Abschnitt Schritt für Schritt beschreibt.
+- **Mit Google anmelden** (oder ein anderer Anbieter, etwa „Firmen-Konto“): Du meldest dich dort mit deinem bestehenden Konto an. Ein Passwort und eine App bei aBoard brauchst du dann nicht. Klicke auf den Link, melde dich beim Anbieter an und folge den Hinweisen. Der Server verbindet dein Anbieter-Konto mit der Einladung, auch wenn der Anbieter eine andere E-Mail-Adresse meldet; der Admin sieht diese Adresse vor der Bestätigung. Gehört dein Anbieter-Konto hier schon zu einem anderen Zugang, löst die Seite nicht ein; frag dann den Admin.
+
+Zeigt die Seite nur einen Weg, nimmst du den.
+
+### Passwort setzen
+
+1. Tippe ein **Passwort** ein, mindestens **12 Zeichen**. Ein langer Satz aus mehreren Wörtern ist gut zu merken und schwer zu erraten. Ein Passwortmanager darf es sich merken.
+2. Tippe es ein zweites Mal ins Feld „Passwort wiederholen“.
+3. Klicke auf **Passwort und Zwei-Faktor einrichten**.
+
+![Dieselbe Seite mit ausgefüllten Passwortfeldern.](bilder/konto/02-passwort-gesetzt.png)
+
+Stimmen die beiden Eingaben nicht überein oder ist das Passwort zu kurz, sagt die Seite es dir, und du tippst neu.
+
+### Authenticator-App einrichten
+
+Eine **Authenticator-App** ist ein kleines Programm auf dem Handy. Sie zeigt alle 30 Sekunden einen neuen sechsstelligen Code. Du brauchst den Code bei jeder Anmeldung zusätzlich zum Passwort. So kommt niemand mit deinem Passwort allein in dein Konto.
+
+Es gibt viele solche Apps, zum Beispiel Aegis Authenticator, 2FAS, Google Authenticator oder Microsoft Authenticator. Jede, die „zeitbasierte Codes (TOTP)“ kann, funktioniert. Installiere eine aus dem App-Store deines Handys, falls du noch keine hast.
+
+Die Seite „Authenticator-App einrichten“ zeigt einen **QR-Code** und darunter den zugehörigen **Schlüssel**:
+
+![Die Seite „Authenticator-App einrichten“ mit einem QR-Code zum Scannen, darunter einem Schlüssel aus Buchstaben und Ziffern, dem Link „In der Authenticator-App öffnen“ und einem Feld „Code aus der App“.](bilder/konto/03-authenticator-einrichten.png)
+
+1. Öffne die App und lege einen **neuen Eintrag** an („Konto hinzufügen“, meist ein Plus-Zeichen).
+2. Am einfachsten **scannst du den QR-Code** oben auf der Seite mit der Kamera der App. Klappt das nicht (etwa weil du die Seite auf dem Handy selbst offen hast), gib stattdessen den **Schlüssel** von der Seite von Hand ein. Die Gruppen aus vier Zeichen sind nur zum besseren Lesen; die meisten Apps nehmen den Schlüssel mit oder ohne Leerzeichen. Als Name passt „aBoard“. Alles andere lässt du, wie die App es vorschlägt.
+3. Öffnest du die Seite **auf dem Handy selbst**, geht es auch mit einem Tipp auf **In der Authenticator-App öffnen**. Auf dem Rechner geht dieser Link nicht; dort tippst du den Schlüssel ab.
+4. Die App zeigt jetzt einen sechsstelligen Code für „aBoard“. Tippe ihn ins Feld **Code aus der App** und klicke auf **Einrichten abschließen**.
+
+![Das Feld „Code aus der App“ ist ausgefüllt.](bilder/konto/04-authenticator-code.png)
+
+Erst mit einem richtigen Code ist die Einrichtung fertig. Sagt die Seite „Der Code stimmt nicht“, warte, bis die App einen neuen Code zeigt, und prüfe die **Uhrzeit deines Handys**: Die Codes hängen an der Uhr und gehen falsch, wenn sie nicht stimmt (am besten „automatisch“ einstellen). Dauert es länger als eine Viertelstunde, ist die Einrichtung abgelaufen. Öffne dann den Einladungslink noch einmal.
+
+### Wiederherstellungscodes: dein Notausgang
+
+Nach dem richtigen Code zeigt die Seite **zehn Wiederherstellungscodes**:
+
+![Die Seite „Zugang eingerichtet“ mit der Liste der zehn Wiederherstellungscodes, jeder in der Form xxxx-xxxx-xxxx.](bilder/konto/05-wiederherstellungscodes.png)
+
+- Ein Wiederherstellungscode ersetzt **einmal** den App-Code. Du brauchst ihn, wenn dein Handy nicht da ist. Jeder Code gilt **nur einmal**.
+- Die Seite zeigt sie **nur jetzt**. Später gibt es sie nicht noch einmal.
+- **Bewahre sie so auf, dass sie nicht mit dem Handy verloren gehen:** ausgedruckt in einer Schublade oder in deinem Passwortmanager. Mach **kein Foto**, das in einer Cloud landet, und schick sie dir nicht selbst per Mail oder Chat. Wer die Codes und dein Passwort hat, kommt in dein Konto.
+
+Ob du schon jetzt hereinkommst, hängt vom Admin ab. Zeigt die Seite „Dein Zugang ist eingerichtet. Du kannst dich jetzt anmelden.“, bist du freigeschaltet (das gilt für die allererste Person auf einem neuen Server). Sonst steht dort:
+
+![Die Seite „Zugang eingerichtet“ mit dem Satz „Dein Zugang ist eingerichtet und wartet auf die Bestätigung durch den Admin.“ und den Wiederherstellungscodes.](bilder/konto/08-zugang-eingerichtet-wartet.png)
+
+In diesem Fall gib dem Admin Bescheid, dass du fertig bist. Solange er nicht bestätigt hat, kommst du nicht herein:
+
+![Die Seite „Wartet auf Bestätigung“: „Dein Zugang ist eingerichtet und wartet auf die Bestätigung durch den Admin.“](bilder/konto/09-wartet-auf-bestaetigung.png)
+
+Diese Seite siehst du auch, wenn du dich in der Zwischenzeit anmeldest. Sie ist kein Fehler.
+
+### Anmelden: Passwort und Code
+
+Öffne die Adresse deines Boards. Hast du noch keine gültige Sitzung, landest du von selbst auf der Anmeldeseite.
+
+![Die Anmeldeseite: aBoard-Logo, die Felder „E-Mail-Adresse“ und „Passwort“, der Knopf „Anmelden“, darunter nach „oder“ der Knopf „Mit Google anmelden“.](bilder/konto/06-anmeldeseite.png)
+
+1. Gib deine **E-Mail-Adresse** (die der Einladung) und dein **Passwort** ein, klicke auf **Anmelden**.
+2. Es folgt eine zweite Seite „Anmelden“ mit dem Feld „Code“. Gib den **sechsstelligen Code aus der Authenticator-App** ein. Ein Code gilt nur einmal: Hast du ihn gerade benutzt, warte auf den nächsten.
+3. Klicke auf **Anmelden**. Du bist drin und siehst dein Board.
+
+![Die zweite Anmeldeseite mit dem Feld „Code“ und dem Hinweis: „Gib den sechsstelligen Code aus deiner Authenticator-App ein, oder einen Wiederherstellungscode.“](bilder/konto/07-code-eingeben.png)
+
+Ist dein Browser auf Englisch eingestellt, erscheinen die Anmeldeseiten auf Englisch; die hier zitierten Texte lauten dann sinngemäß gleich.
+
+Ist das Handy nicht zur Hand, tippst du in dasselbe Feld einen **Wiederherstellungscode**. Er ist danach verbraucht. Streiche ihn auf deiner Liste durch.
+
+Was dir unterwegs begegnen kann:
+
+| Meldung | Was sie heißt, was du tust |
+|---|---|
+| „E-Mail-Adresse oder Passwort stimmt nicht.“ | Tippfehler oder falsches Passwort. Aus Sicherheitsgründen sagt die Seite nicht, was von beidem falsch war. |
+| „Zu viele Versuche. Bitte … Sekunden warten …“ | Warte die genannte Zeit und versuche es noch einmal. Die Wartezeit wächst mit jedem Fehlversuch für diese Adresse. |
+| „Zu viele Fehlversuche von diesem Anschluss. Bitte in … Minuten erneut versuchen.“ | Von deinem Internetanschluss aus gab es fünf falsche Eingaben innerhalb von 15 Minuten (von dir oder von anderen am selben Anschluss, etwa im selben Büro-Netz). Dann ist die Anmeldung von diesem Anschluss aus für einige Minuten gesperrt. Warte die genannte Zeit ab oder melde dich von einem anderen Netz aus an (zum Beispiel per Mobilfunk). |
+| „Der Code stimmt nicht oder wurde schon benutzt.“ | Warte auf den nächsten Code der App und gib ihn ein. Prüfe die Uhr des Handys. |
+| „Zu viele falsche Codes. Bitte noch einmal mit dem Passwort anmelden.“ | Nach mehreren falschen Codes beginnt die Anmeldung wieder beim Passwort. |
+| „Die Anmeldung ist abgelaufen.“ | Du hast zu lange gebraucht. Melde dich noch einmal an. |
+| „Wartet auf Bestätigung“ | Der Admin hat dich noch nicht bestätigt. Frag ihn. |
+| „Kein Zugang“ | Dein Konto ist gesperrt oder nicht freigeschaltet. Frag den Admin. |
+
+### Anmelden über Google oder einen anderen Anbieter
+
+Bietet der Server einen Anbieter an, steht auf der Anmeldeseite ein Link wie **Mit Google anmelden** (oder „Mit Firmen-Konto anmelden“). Klicke darauf und melde dich beim Anbieter an. Hast du dort schon eine Sitzung, kann es ohne weitere Eingabe zurück ins Board gehen. Ein Passwort oder einen Code von aBoard brauchst du auf diesem Weg nicht; den zweiten Faktor regelt dein Anbieter.
+
+Das klappt nur mit dem Anbieter-Konto, das bei der Einladung verbunden wurde (oder wenn der Admin deine Adresse vorab freigegeben hat). Ein beliebiges anderes Google-Konto kommt nicht herein.
+
+### Handy weg oder Passwort vergessen
+
+aBoard schickt dir **keine** „Passwort vergessen“-Mail. Das ist Absicht: Niemand soll sich über ein fremdes Postfach hereinmogeln können. Stattdessen setzt der Admin dein Konto zurück:
+
+- **Handy verloren, neues Handy oder App gelöscht:** Mit einem **Wiederherstellungscode** kommst du noch einmal herein. Danach richtest du die App in den [Konto-Einstellungen](#konto-einstellungen-selbst-ändern) selbst neu ein. Hast du auch keinen Wiederherstellungscode mehr, bitte den Admin, dein Konto zurückzusetzen.
+- **Passwort vergessen:** Bitte den Admin, dein Konto zurückzusetzen. (Das Passwort *ändern* kannst du selbst, solange du es noch kennst.)
+- **Zurücksetzen** verwirft Passwort, Authenticator-App und Wiederherstellungscodes. Du bekommst vom Admin einen **neuen Einladungslink**. Die Seite sagt dann „Dein Zugang … wurde zurückgesetzt. Wähle, wie du dich künftig anmeldest.“ Du gehst die Schritte von oben noch einmal durch, mit einem neuen Passwort, einem neuen Eintrag in der App und neuen Wiederherstellungscodes. Danach **wartet dein Konto wieder auf die Bestätigung** des Admins, wie beim ersten Mal. Melde dich beim Admin, wenn du fertig bist.
+- Hast du **alles** verloren (Handy, Codes, Passwort), ist der Weg derselbe: Admin fragen.
+
+Die Seite „Die Zwei-Faktor-Anmeldung dieses Zugangs ist nicht lesbar“ oder „Zwei-Faktor fehlt“ bedeutet, dass der Admin das Konto zurücksetzen muss.
+
+### Konto-Einstellungen: selbst ändern
+
+Wenn dein Server die Anmeldung selbst verwaltet, findest du im Menü (Klick auf das **Logo**) den Eintrag **Konto-Einstellungen**. Dort änderst du ohne Admin:
+
+- **Einen weiteren Anmeldeweg verknüpfen**, zum Beispiel Google zusätzlich zum Passwort, und einen Weg wieder **lösen**.
+- Dein **Passwort ändern**.
+- Die **Authenticator-App neu einrichten** (neues Handy) und **neue Wiederherstellungscodes** erzeugen.
+- **Andere Sitzungen beenden**, etwa wenn du dich irgendwo nicht abgemeldet hast.
+- Ein **eigenes Passwort mit Authenticator-App anlegen**, wenn du dich bisher nur über Google o. Ä. anmeldest — nur, wenn der Betreiber das auf deinem Server eingeschaltet hat.
+
+**Bestätigung.** Hast du ein Passwort, steht oben im Dialog ein Feld „Bestätigung“: Dort gibst du dein **aktuelles Passwort** und einen **Code aus deiner App** (oder einen Wiederherstellungscode) ein. Das gilt für jede Änderung darunter, damit niemand mit einem offen gelassenen Rechner dein Konto umbauen kann. Ein Code gilt nur einmal: Nach einer Änderung wartest du auf den nächsten Code in der App (etwa 30 Sekunden). Mehrere falsche Eingaben sperren die Konto-Einstellungen für 15 Minuten; die normale Anmeldung bleibt davon unberührt. Ob du ein Passwort hast, zeigt dir der Dialog: Dann steht oben das Feld „Bestätigung“.
+
+![Der Abschnitt „Bestätigung“ mit dem Hinweis, dass alle Änderungen das aktuelle Passwort und einen Code brauchen, darunter die Felder „Aktuelles Passwort“ (ausgefüllt, verdeckt) und „Code aus der App“ (hier mit einem Wiederherstellungscode).](bilder/konto/17-konto-bestaetigung.png)
+
+**Bestätigung ohne Passwort: neu anmelden.** Meldest du dich nur über Google oder einen anderen Anbieter an, hast du kein Passwort zum Bestätigen. Eine offene Sitzung allein reicht für Änderungen nicht, sonst könnte jemand mit deinem offen gelassenen Rechner dein Konto übernehmen. Stattdessen bestätigst du, indem du dich **beim Anbieter noch einmal anmeldest**:
+
+1. Klicke auf die Änderung, die du willst (zum Beispiel **Lösen**, **Verknüpfen** oder **Passwort mit zweitem Faktor anlegen**). Direkt beim angeklickten Knopf erscheint ein farbig hervorgehobener Kasten „Für … melde dich erst neu an“ mit dem Knopf **Erst bei Google neu anmelden** (bzw. deinem Anbieter).
+2. Klicke darauf. Wähle beim Anbieter **dasselbe Konto**, mit dem du in aBoard angemeldet bist, und melde dich an. Manche Anbieter fragen dabei neu nach dem Passwort; Google tut das meist nicht, wenn du dort schon angemeldet bist.
+3. Danach bist du zurück in aBoard, der Dialog öffnet sich und sagt „Du hast dich neu angemeldet“. Klicke im Kasten bei deiner Änderung auf **Jetzt ausführen**.
+
+Die Bestätigung gilt **5 Minuten**, **einmal** und **nur für die Änderung, die du gewählt hast**. Meldest du dich beim Anbieter mit einem anderen Konto an oder dauert es zu lange, sagt der Dialog „nicht anerkannt“, und es ändert sich nichts. Das passiert auch, wenn deine letzte echte Anmeldung beim Anbieter schon länger zurückliegt (bei Google häufig, weil Google nicht neu nach dem Passwort fragt): Melde dich dann beim Anbieter ab (bei Google zum Beispiel auf accounts.google.com), dort wieder an und versuche es danach erneut. Sagt der Dialog stattdessen „Dein Anmeldedienst bestätigt keine frische Anmeldung“, liefert dein Anbieter diese Bestätigung nicht (bei Google ohne verifizierte App üblich). Ab- und wieder anmelden hilft dann nicht; frag die Person, die den Server betreibt: Sie kann die Bestätigung mit `ABOARD_OIDC_REAUTH_FALLBACK` erlauben. Sagt der Dialog „Die Anmeldung beim Anbieter gehört nicht zu diesem Vorgang“, hilft Ab- und Anmelden ebenfalls nicht: Beginne die Bestätigung neu und folge dem Weg zum Anbieter in einem einzigen Fenster. Bist du bei keinem eingerichteten Anbieter verknüpft, geht ein Wechsel nur über die Verwaltung: Frag den Admin oder den Betreiber.
+
+![Der Abschnitt „Anmeldewege“: „Passwort mit zweitem Faktor — eingerichtet“ und „Google — nicht verknüpft“ mit dem Knopf „Google verknüpfen“.](bilder/konto/16-konto-anmeldewege.png)
+
+**Einen Anmeldeweg verknüpfen.** Klicke bei dem Anbieter auf **Verknüpfen**. Du wirst zum Anbieter weitergeleitet und wählst dort das Konto aus. Danach landest du wieder in aBoard, und der Dialog sagt dir, ob es geklappt hat. Ohne Passwort meldest du dich vorher einmal neu an (siehe oben). Ein Anbieter-Konto kann zu **einer** Person gehören; gehört es schon jemand anderem, wird nichts verknüpft. Hast du bei diesem Anbieter schon ein Konto verknüpft, **ersetzt** das neue das bisherige (so wechselst du dein Google-Konto). Danach endet die Anmeldung auf allen anderen Geräten; du bleibst hier angemeldet. Das ist die Antwort auf „Ich habe ein neues Google-Konto“: neues Konto verknüpfen, fertig.
+
+**Einen Anmeldeweg lösen.** Klicke auf **Lösen**. Dein **letzter** Anmeldeweg lässt sich nie lösen, sonst kämst du nicht mehr herein. Auch das Lösen beendet alle anderen Sitzungen; du bleibst angemeldet. Hast du den Zugang zu deinem alten Anbieter-Konto schon verloren und kommst deshalb nicht in die Konto-Einstellungen, hilft der Betreiber (er kann die Bindung lösen, deine Boards und Rechte bleiben).
+
+**Eigenes Passwort anlegen.** Meldest du dich bisher nur über einen Anbieter an und hat der Betreiber es eingeschaltet, steht im Dialog der Abschnitt **Passwort anlegen**. Klicke auf **Passwort mit zweitem Faktor anlegen** und melde dich, wie oben beschrieben, beim Anbieter neu an. Danach richtest du die Authenticator-App ein (QR-Code scannen oder Schlüssel eintippen), wählst dein Passwort (mindestens 12 Zeichen, zweimal) und gibst den ersten Code aus der App ein. Du bekommst **Wiederherstellungscodes**, die nur jetzt erscheinen: aufschreiben oder sicher ablegen. (Sagt der Dialog dabei „bitte neu anmelden“, gilt das Passwort trotzdem; schreibe die Codes auf und melde dich neu an.) Ab dann meldest du dich wahlweise mit E-Mail-Adresse, Passwort und Code an oder wie bisher beim Anbieter. Alle anderen Sitzungen enden; du bleibst angemeldet. Fehlt der Abschnitt, ist die Funktion auf deinem Server aus.
+
+**Passwort ändern.** Neues Passwort zweimal eingeben (mindestens 12 Zeichen) und **Passwort ändern**. Alle **anderen** Sitzungen enden; du selbst bleibst angemeldet.
+
+![Die Meldung „Passwort geändert. Alle anderen Sitzungen sind beendet; du bleibst hier angemeldet.“](bilder/konto/18-konto-passwort-geaendert.png)
+
+**Authenticator-App neu einrichten.** Auf **2FA neu einrichten** klicken: Du siehst einen neuen QR-Code und den Schlüssel zum Eintippen. Richte die neue App ein und gib den ersten Code daraus ein. **Erst dann** gilt die neue App; bis dahin funktioniert die bisherige weiter. Du bekommst **neue Wiederherstellungscodes**, die alten sind danach ungültig. Die Codes erscheinen **nur jetzt**: aufschreiben oder sicher ablegen. Auch hier enden alle anderen Sitzungen.
+
+![Der Abschnitt „Zweiter Faktor“ beim Neueinrichten: Hinweistext, QR-Code, „Schlüssel zum Eintippen“, der Link für Apps auf diesem Gerät, das Feld „Erster Code aus der neuen App“ und die Knöpfe „Neue App bestätigen“ und „Abbrechen“.](bilder/konto/20-konto-2fa-neu.png)
+
+**Neue Wiederherstellungscodes.** Brauchst du nur neue Codes (die alten sind aufgebraucht oder verloren), erzeugst du sie mit **Neue Wiederherstellungscodes erzeugen**. Die bisherigen verfallen.
+
+![„Deine neuen Wiederherstellungscodes“: der Hinweis, dass die Codes nur jetzt erscheinen und jeder einmal gilt, darunter zehn Codes in zwei Spalten.](bilder/konto/19-konto-codes-neu.png)
+
+**Wer kein eigenes Passwort hat** (Zugang nur über einen Anbieter, oder vom Betreiber vorab freigegeben), sieht die Anmeldewege nur und kann sie hier nicht ändern; Passwort und zweiten Faktor gibt es für diesen Zugang nicht. Beenden kannst du auch dann die anderen Sitzungen.
+
+### Abmelden, besonders auf fremden Rechnern
+
+Auf deinem eigenen Rechner musst du dich nicht abmelden. Auf einem **fremden oder geteilten Rechner** meldest du dich immer ab, wenn du fertig bist:
+
+1. Klicke oben links auf das **Logo**. Das Menü geht auf.
+2. Klicke auf **Abmelden**.
+
+![Das Menü mit den Einträgen „Server-Administration“, „Kalender“, „Benutzer-Einstellungen“, „Board-Einstellungen“ und ganz unten „Abmelden“.](bilder/konto/14-menue-abmelden.png)
+
+Du siehst die Seite „Abgemeldet“:
+
+![Die Seite „Abgemeldet“: „Du bist von aBoard abgemeldet. Beim Anmeldedienst (z. B. Google) bist du womöglich noch angemeldet — auf einem geteilten Rechner dort ebenfalls abmelden.“ Darunter der Link „Neu anmelden“.](bilder/konto/15-abgemeldet.png)
+
+Hast du dich über Google oder einen anderen Anbieter angemeldet, bist du dort **womöglich noch angemeldet**. Melde dich dort auch ab. Sonst kann die nächste Person am selben Rechner in deinem Namen weiterarbeiten.
+
+Auf fremden Rechnern außerdem:
+
+- Lass den Browser dein Passwort **nicht speichern**, wenn er fragt.
+- Schließe nach dem Abmelden das Browserfenster.
+- Schreib niemals Passwort oder Wiederherstellungscodes in eine Datei auf diesem Rechner.
+
+### Für Admins: ein Blick auf die Gegenseite
+
+Wer die Konten verwaltet, findet alles im Reiter „User-Verwaltung“ der Server-Administration (Menü, Eintrag „Server-Administration“). Einladen, Bestätigen, Sperren und Zurücksetzen erklärt [Server verwalten](server/administration.md#konten-und-einladungen-eingebaute-anmeldung). Zur Orientierung die Bilder, so wie die eingeladenen Personen sie im Abschnitt oben erleben:
+
+![Der Reiter „User-Verwaltung“, Teil „Konten und Einladungen“, mit der eingetragenen Adresse ben@example.org vor dem Knopf „Einladen“.](bilder/konto/10-admin-einladen-eingabe.png)
+
+![Nach dem Einladen: der Einladungslink für ben@example.org mit dem Knopf „Kopieren“ und dem Hinweis, dass der Mailversand nicht eingerichtet ist und du den Link selbst weitergibst. Der Link wird nur einmal angezeigt.](bilder/konto/11-admin-einladungslink.png)
+
+![Die Liste der Konten: ben@example.org mit dem Zustand „Wartet auf Bestätigung“ und den Knöpfen „Bestätigen“, „Ablehnen“, „Sperren“ und „Zurücksetzen“.](bilder/konto/12-admin-bestaetigen.png)
+
+![Die Konten-Liste nach dem Bestätigen: ben@example.org ist „Aktiv“; als Aktionen bleiben „Sperren“ und „Zurücksetzen“.](bilder/konto/13-admin-konten-liste.png)
+
 ## Board in einem Ordner (Projekt-Modus)
 
 Mit **Logo → Board-Einstellungen → „Ordner wählen…“** legt aBoard das Board als `aboard-sync.json` in einen Ordner und prüft regelmäßig, ob sich dort etwas geändert hat. Das braucht die **File System Access API** (Chrome, Edge und andere Chromium-Browser); nach einem Browser-Neustart fragt der Browser einmal nach der Erlaubnis. Bearbeite `aboard-sync.json` nie von Hand, sondern immer über die Board-Oberfläche.
@@ -232,4 +430,5 @@ Praktisch heißt das: Vor dem Öffnen eines neuen Tabs den alten wirklich schlie
 ## Weiterlesen
 
 - [Varianten](varianten.md) — welche Betriebsart was kann
+- [Server verwalten](server/administration.md#konten-und-einladungen-eingebaute-anmeldung) — für Admins: Einladungen, Bestätigen, Zurücksetzen
 - [Installation](installation.md) — einrichten und aktualisieren

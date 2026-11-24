@@ -25,6 +25,15 @@ are listed in [Configuration](configuration.md).
   board roles of this page then do not apply: the board paths are open to anyone who can reach the port.
   Paths that require a person or an admin (`/admin/*`, `/users/me/*`, `/clients`,
   `/projects`) answer `403` there. Details: [Login and roles](authentication.md).
+- **With login** (forward auth or built-in login) there is no open path for people any more. Without an
+  identity the server answers every path with `401`; the only exceptions are `GET` and `HEAD` on `/healthz`
+  and `/ical/calendar.ics` and, with the built-in login, the login paths themselves (`/anmeldung…`,
+  `/einladung/<token>`). **With the built-in login** the identity comes solely from the session cookie;
+  the server discards `Remote-*` headers and the proxy secret before any handler sees them. Without a
+  valid session (also an expired or ended one, or when the address is no longer admitted) it answers
+  `401` (`unauthorized: session required`); only a page request (`GET`/`HEAD` with `Accept: text/html`)
+  is redirected with `302` to `/anmeldung` instead. Roles, error codes and CSRF protection are the same
+  as with forward auth from there on.
 - **Bodies are JSON**, and so are responses (exceptions: file downloads, event streams, iCal feeds,
   the web interface).
 
@@ -71,7 +80,7 @@ sentences that a language model can pass on.
 | Code | Meaning |
 |---|---|
 | `400` | Invalid request: broken JSON, missing required field, unknown key in an op, ambiguous `/agent` path |
-| `401` | no identity (forward auth in strict mode), agent token missing, unknown, expired or revoked — or an agent token (`abt_…`) on a path for people |
+| `401` | no identity (forward auth in strict mode; with the built-in login no valid session), agent token missing, unknown, expired or revoked — or an agent token (`abt_…`) on a path for people |
 | `403` | logged in, but not authorized (no role or too low a role, not an admin, path not released for agents, cross-origin request from the browser) |
 | `404` | board, card or file does not exist; also functions that are switched off (such as the outbound gateway) |
 | `409` | conflict: `PUT /boards/{id}` with a stale `If-Match`, name already taken, last owner would be removed |
@@ -83,7 +92,8 @@ sentences that a language model can pass on.
 
 ## CSRF protection for browser requests
 
-The entry for people is protected against cross-site request forgery. A **writing**
+The entry for people is protected against cross-site request forgery, with forward auth and with the
+built-in login alike (the check sits in front of the login; it also applies to `POST /anmeldung/ende`). A **writing**
 request (anything except `GET`, `HEAD`, `OPTIONS`) is rejected with `403` ("cross-origin request rejected")
 if
 
@@ -266,7 +276,10 @@ responses are JSON. Agent access does not reach them.
 | `/wissen/seite?pfad=…` | GET | as above | One page as Markdown text (`inhalt`), possibly a link `bearbeiten` |
 | `/wissen/suche?q=…` | GET | as above | Hits with `pfad`, `titel`, `schnipsel`, `zeile`; `q` 2 to 200 characters |
 
-Errors: `401` without login (behind the login proxy; without a proxy `403`), `403` without an account on
+The visibility `gruppe:<name>` follows `Remote-Groups` and applies only with forward auth; with the built-in
+login (no groups) only admins then see the source.
+
+Errors: `401` without login (with forward auth or built-in login; with neither `403`), `403` without an account on
 this server or without visibility, `404` off or unknown page, `413` page over 1 MiB, `429`
 more than 120 calls or 30 searches per minute and person, `503` folder not readable.
 
@@ -300,6 +313,8 @@ the gateway's own conditions (block, keys, releases).
 All paths require a server admin; writing calls are additionally rate-limited. Without
 login (single-user operation without forward auth) there is no admin, and they answer with `403` —
 for agent tokens the command line remains there (`aboard-server agent-token`, see [Container](container.md)).
+With login (forward auth or built-in login) they answer `401` without an identity, and `403` for a
+logged-in person who is not an admin (`forbidden: not an admin`).
 
 | Path | Method | Meaning |
 |---|---|---|
@@ -529,7 +544,9 @@ A **delegating token** (Open WebUI) reaches only these tool paths, none of the
 board paths above, and likewise a **personal token for several boards** (the board from the path must be in
 its list and the person must have an entry of their own there). A **proposal token** reaches
 no tool path. For the token kinds see
-[Server administration](administration.md).
+the explanation above: a delegating token is the service token of Open WebUI that acts for the
+logged-in person on each request; a personal token for several boards belongs to one person and names
+several boards; a proposal token may only submit proposals.
 
 ### Blocked for agents
 

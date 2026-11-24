@@ -25,6 +25,15 @@ stehen in [Konfiguration](konfiguration.md).
   Board-Rollen dieser Seite nicht: Die Board-Pfade sind für jeden offen, der den Port erreicht.
   Pfade, die eine Person oder einen Admin voraussetzen (`/admin/*`, `/users/me/*`, `/clients`,
   `/projects`), antworten dort mit `403`. Einzelheiten: [Anmeldung und Rollen](anmeldung.md).
+- **Mit Anmeldung** (Forward-Auth oder eingebaute Anmeldung) gibt es für Menschen keinen offenen Weg
+  mehr. Ohne Identität antwortet der Server auf jeden Pfad mit `401`; ausgenommen sind nur `GET` und
+  `HEAD` auf `/healthz` und `/ical/calendar.ics`, bei der eingebauten Anmeldung zusätzlich die Wege der
+  Anmeldung selbst (`/anmeldung…`, `/einladung/<token>`). **Bei der eingebauten Anmeldung** kommt die
+  Identität allein aus dem Sitzungs-Cookie; `Remote-*`-Kopfzeilen und das Proxy-Secret verwirft der
+  Server, ehe ein Handler sie sieht. Ohne gültige Sitzung (auch bei abgelaufener oder beendeter, oder
+  wenn die Adresse nicht mehr zugelassen ist) antwortet er mit `401` (`unauthorized: session required`);
+  nur ein Seitenaufruf (`GET`/`HEAD` mit `Accept: text/html`) wird stattdessen mit `302` auf `/anmeldung`
+  geleitet. Rollen, Fehlercodes und CSRF-Schutz sind danach dieselben wie bei Forward-Auth.
 - **Bodies sind JSON**, Antworten ebenso (Ausnahmen: Datei-Downloads, Ereignisströme, iCal-Feeds,
   die Weboberfläche).
 
@@ -71,7 +80,7 @@ Sätzen, die ein Sprachmodell weitergeben kann.
 | Code | Bedeutung |
 |---|---|
 | `400` | Anfrage ungültig: kaputtes JSON, fehlendes Pflichtfeld, unbekannter Schlüssel in einer Op, mehrdeutiger `/agent`-Pfad |
-| `401` | keine Identität (Forward-Auth im strengen Modus), Agenten-Token fehlt, ist unbekannt, abgelaufen oder widerrufen — oder ein Agenten-Token (`abt_…`) an einem Pfad für Menschen |
+| `401` | keine Identität (Forward-Auth im strengen Modus; bei der eingebauten Anmeldung keine gültige Sitzung), Agenten-Token fehlt, ist unbekannt, abgelaufen oder widerrufen — oder ein Agenten-Token (`abt_…`) an einem Pfad für Menschen |
 | `403` | angemeldet, aber nicht berechtigt (keine oder zu niedrige Rolle, kein Admin, Pfad für Agenten nicht freigegeben, Cross-Origin-Anfrage aus dem Browser) |
 | `404` | Board, Karte oder Datei gibt es nicht; auch Funktionen, die abgeschaltet sind (etwa die Ausgangsschleuse) |
 | `409` | Konflikt: `PUT /boards/{id}` mit veraltetem `If-Match`, Name schon vergeben, letzter Owner würde entfernt |
@@ -83,7 +92,9 @@ Sätzen, die ein Sprachmodell weitergeben kann.
 
 ## CSRF-Schutz für Browser-Anfragen
 
-Der Eingang für Menschen ist gegen Cross-Site Request Forgery geschützt. Eine **schreibende**
+Der Eingang für Menschen ist gegen Cross-Site Request Forgery geschützt, bei Forward-Auth und bei der
+eingebauten Anmeldung gleichermaßen (die Prüfung sitzt vor der Anmeldung; sie gilt auch für
+`POST /anmeldung/ende`). Eine **schreibende**
 Anfrage (alles außer `GET`, `HEAD`, `OPTIONS`) wird mit `403` („cross-origin request rejected“)
 abgewiesen, wenn
 
@@ -265,7 +276,10 @@ Antworten sind JSON. Agenten-Zugänge erreichen sie nicht.
 | `/wissen/seite?pfad=…` | GET | wie oben | eine Seite als Markdown-Text (`inhalt`), ggf. Link `bearbeiten` |
 | `/wissen/suche?q=…` | GET | wie oben | Treffer mit `pfad`, `titel`, `schnipsel`, `zeile`; `q` 2 bis 200 Zeichen |
 
-Fehler: `401` ohne Anmeldung (hinter dem Anmelde-Proxy; ohne Proxy `403`), `403` ohne Konto auf
+Die Sichtbarkeit `gruppe:<name>` richtet sich nach `Remote-Groups` und gilt nur bei Forward-Auth; bei der
+eingebauten Anmeldung (keine Gruppen) sehen die Quelle dann nur Admins.
+
+Fehler: `401` ohne Anmeldung (mit Forward-Auth oder eingebauter Anmeldung; ohne beides `403`), `403` ohne Konto auf
 diesem Server oder ohne Sichtbarkeit, `404` aus oder unbekannte Seite, `413` Seite über 1 MiB, `429`
 mehr als 120 Abrufe bzw. 30 Suchen je Minute und Person, `503` Ordner nicht lesbar.
 
@@ -299,6 +313,8 @@ hinaus die Schleusen-eigenen Bedingungen (Sperre, Schlüssel, Freigaben).
 Alle Pfade verlangen einen Server-Admin; schreibende Aufrufe sind zusätzlich ratenbegrenzt. Ohne
 Anmeldung (Einzelbetrieb ohne Forward-Auth) gibt es keinen Admin, dann antworten sie mit `403` —
 für Agenten-Tokens bleibt dort die Kommandozeile (`aboard-server agent-token`, siehe [Container](container.md)).
+Mit Anmeldung (Forward-Auth oder eingebaute Anmeldung) antworten sie ohne Identität mit `401`, für eine
+angemeldete Person, die kein Admin ist, mit `403` (`forbidden: not an admin`).
 
 | Pfad | Methode | Bedeutung |
 |---|---|---|
@@ -528,7 +544,9 @@ Ein **delegierendes Token** (Open WebUI) erreicht ausschließlich diese Werkzeug
 Board-Pfade darüber, ebenso ein **Personen-Token für mehrere Boards** (das Board aus dem Pfad muss in
 seiner Liste stehen und die Person dort einen eigenen Eintrag haben). Ein **Vorschlags-Token** erreicht
 keinen Werkzeug-Pfad. Zu den Token-Arten siehe
-[Server verwalten](administration.md).
+die Erklärung oben: Ein delegierendes Token ist das Dienst-Token von Open WebUI, das je Anfrage für die
+angemeldete Person handelt; ein Personen-Token für mehrere Boards gehört einer Person und nennt
+mehrere Boards; ein Vorschlags-Token darf nur Vorschläge einreichen.
 
 ### Gesperrt für Agenten
 
