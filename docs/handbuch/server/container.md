@@ -27,7 +27,7 @@ aus dem Repository selbst bauen (siehe [Image selbst bauen](#image-selbst-bauen)
 bei Bedarf in die eigene Registry legen. Setz dann deren Adresse anstelle des
 Platzhalters ein.
 
-**Fertiges Image:** Zu jedem Release auf GitHub entsteht ein Image unter
+**Fertiges Image:** Ab v1.66.0-145 entsteht zu jedem Release auf GitHub ein Image unter
 `ghcr.io/andiministrator/aboard`, gebaut aus genau diesem Release-Stand. Ein Tag
 enthält beide Architekturen (`amd64` und `arm64`, z. B. Raspberry Pi); Docker wählt
 die passende selbst.
@@ -35,7 +35,7 @@ die passende selbst.
 | Tag | Inhalt |
 |---|---|
 | Release-Tag (z. B. `v1.66.0-140`) | Ein bestimmtes Release. **Empfohlen für den Betrieb.** |
-| `latest` | Das jüngste reguläre Release. Vorabversionen bekommen ihr Release-Tag, aber nie `latest`. Zum Ausprobieren, nicht für den Betrieb. |
+| `latest` | Das höchste reguläre Release. Vorabversionen bekommen ihr Release-Tag, aber nie `latest`. Zum Ausprobieren, nicht für den Betrieb. |
 
 Wer das fertige Image nutzt, setzt `ghcr.io/andiministrator/aboard` anstelle des
 Platzhalters ein. Wer selbst baut, nimmt die Version des eigenen Images; in den

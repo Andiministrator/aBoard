@@ -14,8 +14,10 @@ on:
         description: "Image tag (e.g. v1.66.0-140)"
         required: true
 
+# One queue per tag: a shared group keeps only one waiting run and would silently
+# drop the middle one of three quick releases.
 concurrency:
-  group: server-image
+  group: server-image-${{ github.event.release.tag_name || inputs.tag }}
   cancel-in-progress: false
 
 jobs:
@@ -31,6 +33,9 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name || inputs.tag }}
           persist-credentials: false
+          # all tags, to find the highest one for :latest
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Build and push
         env:
@@ -48,9 +53,14 @@ jobs:
           owner="${GITHUB_REPOSITORY_OWNER,,}"
           image="ghcr.io/${owner}/aboard"
           tags=(--tag "${image}:${RELEASE_TAG}")
-          # :latest only for a regular (non-pre-)release
-          if [ "$EVENT" = "release" ] && [ "$PRERELEASE" != "true" ]; then
+          # :latest only for a regular (non-pre-)release that is also the highest
+          # release tag; a release published later for an older line keeps :latest.
+          # only plain release tags (vX.Y.Z or vX.Y.Z-N); sort -V would rank vX.Y.Z-rc1 above vX.Y.Z-145
+          highest="$(git tag -l 'v[0-9]*' | grep -E '^v[0-9]+(\.[0-9]+)*(-[0-9]+)?$' | sort -V | tail -n 1 || true)"
+          if [ "$EVENT" = "release" ] && [ "$PRERELEASE" != "true" ] && [ "$RELEASE_TAG" = "$highest" ]; then
             tags+=(--tag "${image}:latest")
+          else
+            echo "No :latest (event=$EVENT, prerelease=$PRERELEASE, highest tag=$highest)"
           fi
           printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           docker buildx create --name aboard --use

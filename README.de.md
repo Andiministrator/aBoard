@@ -34,7 +34,7 @@ bun run build:template      # erzeugt aboard.template.html
 
 `bun run build` erzeugt zusätzlich `aboard.html` mit der Op-Inbox-Schicht für das gemeinsame Schreiben mit Werkzeugen außerhalb des Browsers. Welche Fassung wofür taugt, steht unter [Varianten](docs/handbuch/varianten.md).
 
-**Server (optional, für Teams):** Zu jedem Release entsteht außerdem ein Container-Image für `amd64` und `arm64` in der GitHub Container Registry. Für den Betrieb das Tag eines Releases nehmen (`latest` nur zum Ausprobieren):
+**Server (optional, für Teams):** Ab v1.66.0-145 entsteht zu jedem Release außerdem ein Container-Image für `amd64` und `arm64` in der GitHub Container Registry. Für den Betrieb das Tag eines Releases nehmen (`latest` nur zum Ausprobieren):
 
 ```bash
 docker pull ghcr.io/andiministrator/aboard:<release-tag>

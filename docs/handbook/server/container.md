@@ -25,7 +25,7 @@ image yourself from the repository (see [Building the image yourself](#building-
 and, if needed, put it into your own registry. Then use its address instead of the
 placeholder.
 
-**Ready-made image:** Every release on GitHub produces an image at
+**Ready-made image:** From v1.66.0-145 on, every release on GitHub produces an image at
 `ghcr.io/andiministrator/aboard`, built from exactly that release. One tag
 contains both architectures (`amd64` and `arm64`, e.g. Raspberry Pi); Docker picks
 the right one by itself.
@@ -33,7 +33,7 @@ the right one by itself.
 | Tag | Content |
 |---|---|
 | Release tag (e.g. `v1.66.0-140`) | One specific release. **Recommended for operation.** |
-| `latest` | The newest regular release. Pre-releases get their release tag but never `latest`. For trying out, not for operation. |
+| `latest` | The highest regular release. Pre-releases get their release tag but never `latest`. For trying out, not for operation. |
 
 If you use the ready-made image, put `ghcr.io/andiministrator/aboard` in place of the
 placeholder. If you build yourself, use the version of your own image; in the
